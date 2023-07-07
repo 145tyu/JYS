@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "796508718137",
+    "project_id": "sejongjys",
+    "storage_bucket": "sejongjys.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:796508718137:android:b92cd49b62755e449879e8",
+        "android_client_info": {
+          "package_name": "com.sejong.jys"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "796508718137-7mptkovcorvmlrm8f51d575v7cq8pr6p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQ8Bp6FeXXDcVE9PC50-a0D_-Bl4fHWZs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "796508718137-7mptkovcorvmlrm8f51d575v7cq8pr6p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
