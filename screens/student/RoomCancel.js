@@ -1,36 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal } from 'react-native';
+import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Image, Modal } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CommonActions } from "@react-navigation/native";
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-//import { PERMISSIONS, request, check } from 'react-native-permissions';
+import { PERMISSIONS, request, check } from 'react-native-permissions';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 
 import axiosInstance from '../../api/API_Server';
 
-// const CAMERA_PERMISSION = Platform.select({
-//     ios: PERMISSIONS.IOS.CAMERA,
-//     android: PERMISSIONS.ANDROID.CAMERA,
-// })
+const CAMERA_PERMISSION = Platform.select({
+    ios: PERMISSIONS.IOS.CAMERA,
+    android: PERMISSIONS.ANDROID.CAMERA,
+})
 
-// const requestCameraPermission = async () => {
-//     try {
-//         const result = await request(CAMERA_PERMISSION)
-//         return result === 'granted'
-//     } catch (error) {
-//         console.log('CameraPermission API | ', error)
-//         return false
-//     }
-// }
+const requestCameraPermission = async () => {
+    try {
+        const result = await request(CAMERA_PERMISSION)
+        return result === 'granted'
+    } catch (error) {
+        console.log('CameraPermission API | ', error)
+        return false
+    }
+}
 
-// const options = {
-//     title: 'Select an image',
-//     storageOptions: {
-//         skipBackup: true,
-//         path: 'images',
-//     },
-// }
+const options = {
+    title: 'Select an image',
+    storageOptions: {
+        skipBackup: true,
+        path: 'images',
+    },
+}
 
 export default function StudentRoomCancel({ navigation }) {
     const isDarkMode = useColorScheme() === 'dark'

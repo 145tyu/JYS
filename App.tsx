@@ -7,9 +7,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
 
-import firebase from '@react-native-firebase/app';
-import messaging from '@react-native-firebase/messaging';
-import GOOGLE_SERVICES_JSON from './android/app/google-services.json'; // env 파일에서 GOOGLE_SERVICES_JSON 값을 가져옵니다.
+//import firebase from '@react-native-firebase/app';
+//import messaging from '@react-native-firebase/messaging';
+//import GOOGLE_SERVICES_JSON from './android/app/google-services.json'; // env 파일에서 GOOGLE_SERVICES_JSON 값을 가져옵니다.
 
 import StartScreen from './screens/Start';
 import LoginScreen from './screens/Login';

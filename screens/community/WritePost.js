@@ -56,6 +56,8 @@ export default function WritePost({ navigation }) {
         <TouchableOpacity style={Platform.OS === 'ios' ? {position: 'absolute', top: 20, right: 16, marginTop: 50} : {position: 'absolute', top: 20, right: 16}} onPress={handleWrite}>
             <Text style={{textAlign: 'center', fontSize: 18, fontWeight: 'bold', color: 'blue'}}>글쓰기</Text>
         </TouchableOpacity>
+
+        {Platform.OS === 'ios' && <View style={{marginTop: 50,}}></View>}
         
         <ScrollView>
             <View style={[WritePostStyles.titleView, isDarkMode && WritePostStyles.titleViewDark]}>
