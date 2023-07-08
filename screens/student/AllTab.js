@@ -134,15 +134,15 @@ export default function StudentAllTab({ navigation }) {
                 </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.scrollContainer, isDarkMode && styles.scrollContainerDark]} onPress={() => navigation.navigate('Bus_main')}>
+            <TouchableOpacity style={[styles.scrollContainer, isDarkMode && styles.scrollContainerDark]}>
                 <View style={[allTabStyles.Info, isDarkMode && allTabStyles.InfoDark]}>
                     <Text style={[allTabStyles.profileTitle, isDarkMode && allTabStyles.profileTitleDark]}>ysit 바로가기</Text>
                 </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.scrollContainer, isDarkMode && styles.scrollContainerDark]} onPress={() => navigation.navigate('Bus_main')}>
+            <TouchableOpacity style={[styles.scrollContainer, isDarkMode && styles.scrollContainerDark]}>
                 <View style={[allTabStyles.Info, isDarkMode && allTabStyles.InfoDark]}>
-                    <Text style={[allTabStyles.profileTitle, isDarkMode && allTabStyles.profileTitleDark]}>학교 홈페이지</Text>
+                    <Text style={[allTabStyles.profileTitle, isDarkMode && allTabStyles.profileTitleDark]}>장영실고등학교 홈페이지</Text>
                 </View>
             </TouchableOpacity>
 

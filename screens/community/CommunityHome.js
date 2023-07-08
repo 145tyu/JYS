@@ -28,7 +28,6 @@ export default function CommunityHome({ navigation }) {
             page: page? page : state.currentPage,
             limit: 10,
         }
-        console.log(page, state.currentPage)
         await axiosInstance.get('/Community/postInquiry', { params })
             .then(async (res) => {
                 if (res.status === 200) {
@@ -41,7 +40,6 @@ export default function CommunityHome({ navigation }) {
                         refreshing: false
                     }))
                     setPostType(1)
-                    console.log(page, state.currentPage)
                 } else {
                     // 예외 발생
                     return Alert.alert('에러', '예외')

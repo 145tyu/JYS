@@ -14,6 +14,11 @@ export default function StudentRoomRental ({ navigation }) {
 
     const [isLoading, setIsLoading] = useState(false)
 
+    const [alert, setAlert] = useState(null)
+    const [alertDescription, setAlertDescription] = useState(null)
+    const [alertStatus, setAlertStatus] = useState(null)
+    const [isAlertModalVisible, setIsAlertModalVisible] = useState(false)
+
     const [studentID, setStudentID] = useState('')
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
@@ -28,19 +33,44 @@ export default function StudentRoomRental ({ navigation }) {
     const [roomUsingStartTime, setRoomUsingStartTime] = useState('')
     const [roomUsingEndTime, setRoomUsingEndTime] = useState('')
 
+    const [strRoomUsingStartTime, setStrRoomUsingStartTime] = useState('')
+    const [strRoomUsingEndTime, setStrRoomUsingEndTime] = useState('')
+
     const isButtonDisabled = studentID != '' && firstName != '' && lastName != '' && roomNumber === '1' || roomNumber === '2' || roomNumber === '3' || roomNumber === '4' && roomUsingStartTime != '' && roomUsingEndTime != '' && roomPurpose != ''? false:true
 
+    const resetAlert = () => {
+        setAlert(null) // 에러메시지 초기화
+        setAlertDescription(null) // 에러메시지 초기화
+        setAlertStatus(null) // 에러상태 초기화
+        setIsAlertModalVisible(false) // 에러 모달 닫기
+    }
+
+    const closeErrModal = () => {
+        setIsAlertModalVisible(false)
+    }
+    
     const handleRentalSumit = async() => {
+        resetAlert()
         if (studentID === '' || firstName === '' || lastName === '') {
-            return Alert.alert('경고', '프로필이 동기화되지 않았습니다.')
+            setAlert('프로필이 동기화되지 않았습니다.')
+            setAlertStatus(400)
+            setIsAlertModalVisible(true) // 에러 모달 표시
         } else if (roomNumber === '' || roomNumber === '?') {
-            return Alert.alert('경고', '부스가 선택되지 않았습니다.')
+            setAlert('부스가 선택되지 않았습니다.')
+            setAlertStatus(400)
+            setIsAlertModalVisible(true) // 에러 모달 표시
         } else if (roomUsingStartTime === '') {
-            return Alert.alert('경고', '대여 시작시간을 선택하지 않으셨습니다.')
+            setAlert('대여 시작시간을 선택하지 않으셨습니다.')
+            setAlertStatus(400)
+            setIsAlertModalVisible(true) // 에러 모달 표시
         } else if (roomUsingEndTime === '') {
-            return Alert.alert('경고', '대여 종료시간을 선택하지 않으셨습니다.')
+            setAlert('대여 종료시간을 선택하지 않으셨습니다.')
+            setAlertStatus(400)
+            setIsAlertModalVisible(true) // 에러 모달 표시
         } else if (roomPurpose === '') {
-            return Alert.alert('경고', '대여 사유 작성란이 비어있습니다.')
+            setAlert('대여 사유 작성란이 비어있습니다.')
+            setAlertStatus(400)
+            setIsAlertModalVisible(true) // 에러 모달 표시
         } else {
             setIsLoading(true)
             AsyncStorage.getItem('id')
@@ -57,37 +87,51 @@ export default function StudentRoomRental ({ navigation }) {
                     }).then((res) => {
                         setIsLoading(false)
                         if (res.status === 200) {
-                            Alert.alert('신청 성공', res.data.message)
+                            setAlert(res.data.message)
+                            setAlertStatus(400)
+                            setIsAlertModalVisible(true) // 에러 모달 표시
                             return navigation.dispatch(
                                 CommonActions.reset({
                                     index: 0,
                                     routes: [{ name: 'S_Home'}]
                                 })
                             )
+                        } else {
+                            // 에러 모달 설정
+                            setAlert('예외가 발생했습니다.')
+                            setAlertStatus(500)
+                            setIsAlertModalVisible(true) // 에러 모달 표시
                         }
                     }).catch((error) => {
                         setIsLoading(false)
-                        console.log('RentalForm API | ', error)
-                        return Alert.alert('에러', '요청을 실패했습니다.', [
-                            {
-                                text: '다시시도',
-                                onPress: () => {
-                                    handleRentalSumit()
-                                }
-                            }
-                        ])
+                        const res = error.response
+                        if (res.status === 400) {
+                            // 에러 모달 설정
+                            setAlert(res.data.error)
+                            if (res.data.errorDescription) setAlertDescription(res.data.errorDescription)
+                            setAlertStatus(400)
+                            setIsAlertModalVisible(true) // 에러 모달 표시
+                        } else if (res.status === 500) {
+                            console.log(res.data)
+                            // 에러 모달 설정
+                            setAlert('대여 요청을 실패했습니다.')
+                            if (res.data.errorDescription) setAlertDescription(res.data.errorDescription)
+                            setAlertStatus(500)
+                            setIsAlertModalVisible(true) // 에러 모달 표시
+                        } else {
+                            console.log('RentalForm API | ', error)
+                            // 에러 모달 설정
+                            setAlert('예외가 발생했습니다.')
+                            setAlertStatus(500)
+                            setIsAlertModalVisible(true) // 에러 모달 표시
+                        }
                     })
                 }).catch((error) => {
                     setIsLoading(false)
                     console.log('RentalForm API | ', error)
-                    return Alert.alert('에러', '요청을 실패했습니다.', [
-                        {
-                            text: '다시시도',
-                            onPress: () => {
-                                handleRentalSumit()
-                            }
-                        }
-                    ])
+                    setAlert('대여 요청을 실패했습니다.')
+                    setAlertStatus(500)
+                    setIsAlertModalVisible(true) // 에러 모달 표시
                 })
         }
     }
@@ -166,25 +210,25 @@ export default function StudentRoomRental ({ navigation }) {
     }
 
     const handleRoomUsingStartTime = (time) => {
-        hideStartTimePicker()
         const dateObj = new Date(String(time))
         const year = dateObj.getFullYear()
         const month = dateObj.getMonth() + 1 // 0부터 시작하므로 +1 처리 필요
         const date = dateObj.getDate()
-        const hours = dateObj.getHours()
-        const minutes = dateObj.getMinutes()
-        setRoomUsingStartTime(`${year}년${month}월${date}일 ${hours}시${minutes}분`)
+        const hours = String(dateObj.getHours()).length === 1? '0'+String(dateObj.getHours()) : String(dateObj.getHours())
+        const minutes = String(dateObj.getMinutes()).length === 1? '0'+String(dateObj.getMinutes()) : String(dateObj.getMinutes())
+        setRoomUsingStartTime(`${hours}시 ${minutes}분`)
+        setStrRoomUsingStartTime(`오늘 ${hours}시 ${minutes}분`)
     }
 
     const handleRoomUsingEndTime = (time) => {
-        hideEndTimePicker()
         const dateObj = new Date(String(time))
         const year = dateObj.getFullYear()
         const month = dateObj.getMonth() + 1 // 0부터 시작하므로 +1 처리 필요
         const date = dateObj.getDate()
-        const hours = dateObj.getHours()
-        const minutes = dateObj.getMinutes()
-        setRoomUsingEndTime(`${year}년${month}월${date}일 ${hours}시${minutes}분`)
+        const hours = String(dateObj.getHours()).length === 1? '0'+String(dateObj.getHours()) : String(dateObj.getHours())
+        const minutes = String(dateObj.getMinutes()).length === 1? '0'+String(dateObj.getMinutes()) : String(dateObj.getMinutes())
+        setRoomUsingEndTime(`${hours}시 ${minutes}분`)
+        setStrRoomUsingEndTime(`오늘 ${hours}시 ${minutes}분`)
     }
 
     const openRoomNumModal = () => {
@@ -209,6 +253,31 @@ export default function StudentRoomRental ({ navigation }) {
                 </TouchableOpacity>
                 <Text style={[styles.logoText, isDarkMode && styles.logoTextDark]}>대여 신청</Text>
             </View>
+
+            <Modal animationType="fade" transparent={true} visible={isAlertModalVisible} onRequestClose={closeErrModal}>
+                {alertStatus === 400 &&
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                        <View style={[{ backgroundColor: 'white', padding: 10, borderRadius: 20, width: '90%' }, isDarkMode && { backgroundColor: '#121212', padding: 10, borderRadius: 20, width: '90%' }]}>
+                            <Text style={[{ fontSize: 17, fontWeight: 'bold', color: 'black', textAlign: 'center', marginTop: 10 }, isDarkMode && { fontSize: 17, fontWeight: 'bold', color: 'white', textAlign: 'center', marginTop: 10 }]}>{alert}</Text>
+                            {alertDescription != null && <Text style={[{ fontSize: 13, fontWeight: 'bold', color: 'black', textAlign: 'center', marginTop: 15 }, isDarkMode && { fontSize: 13, fontWeight: 'bold', color: 'white', textAlign: 'center', marginTop: 15 }]}>{alertDescription}</Text>}
+                            <View style={{ width: '100%', height: 1, backgroundColor: 'gray', marginTop: 20, marginBottom: 10 }}></View>
+                            <TouchableOpacity onPress={closeErrModal}><Text style={{ color: '#4682b4', fontSize: 15, textAlign: 'center' }}>확인</Text></TouchableOpacity>
+                        </View>
+                    </View>
+                }
+                {alertStatus === 500 &&
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                        <View style={[{ backgroundColor: 'white', padding: 10, borderRadius: 20, width: '90%' }, isDarkMode && { backgroundColor: '#121212', padding: 10, borderRadius: 20, width: '90%' }]}>
+                            <Text style={[{ fontSize: 17, fontWeight: 'bold', color: 'black', textAlign: 'center', marginTop: 10 }, isDarkMode && { fontSize: 17, fontWeight: 'bold', color: 'white', textAlign: 'center', marginTop: 10 }]}>{alert}</Text>
+                            {alertDescription != null && <Text style={[{ fontSize: 13, fontWeight: 'bold', color: 'black', textAlign: 'center', marginTop: 15 }, isDarkMode && { fontSize: 13, fontWeight: 'bold', color: 'white', textAlign: 'center', marginTop: 15 }]}>{alertDescription}</Text>}
+                            <View style={{ width: '100%', height: 1, backgroundColor: 'gray', marginTop: 20, marginBottom: 10 }}></View>
+                            <TouchableOpacity onPress={handleRentalSumit}><Text style={{ color: '#4682b4', fontSize: 15, textAlign: 'center' }}>다시시도</Text></TouchableOpacity>
+                            <View style={{ width: '100%', height: 1, backgroundColor: 'gray', marginTop: 10, marginBottom: 10 }}></View>
+                            <TouchableOpacity onPress={closeErrModal}><Text style={{ color: '#4682b4', fontSize: 15, textAlign: 'center' }}>확인</Text></TouchableOpacity>
+                        </View>
+                    </View>
+                }
+            </Modal>
 
             <ScrollView contentContainerStyle={[styles.scrollContainer, isDarkMode && styles.scrollContainerDark]}>
                 <View style={[rentalStyles.Info, isDarkMode && rentalStyles.InfoDark]}>
@@ -246,21 +315,21 @@ export default function StudentRoomRental ({ navigation }) {
                                 <TextInput 
                                     pointerEvents="none"
                                     style={rentalStyles.Value}
-                                    placeholder="시작시간 HH:MM"
-                                    value={roomUsingStartTime}
+                                    placeholder="대여를 시작할 시간을 선택해주세요."
+                                    value={strRoomUsingStartTime}
                                     editable={false}
                                 />
-                                {/* <DateTimePicke
-                                    isVisible={isStartTimePickerVisible}
-                                    mode="time"
-                                    onConfirm={handleRoomUsingStartTime}
-                                    onCancel={hideStartTimePicker}
-                                /> */}
                                 <DatePicker
+                                    modal
+                                    open={isStartTimePickerVisible}
                                     date={new Date()}
                                     mode="time"
                                     onConfirm={(date) => {
-                                        console.log(date)
+                                        hideStartTimePicker()
+                                        handleRoomUsingStartTime(date)
+                                    }}
+                                    onCancel={() => {
+                                        hideStartTimePicker()
                                     }}
                                 />
                             </TouchableOpacity>
@@ -274,21 +343,21 @@ export default function StudentRoomRental ({ navigation }) {
                                 <TextInput 
                                     pointerEvents="none"
                                     style={rentalStyles.Value}
-                                    placeholder="종료시간 HH:MM"
-                                    value={roomUsingEndTime}
+                                    placeholder="대여를 종료할 시간을 선택해주세요."
+                                    value={strRoomUsingEndTime}
                                     editable={false}
                                 />
-                                {/* <DateTimePickerModal
-                                    isVisible={isEndTimePickerVisible}
-                                    mode="time"
-                                    onConfirm={handleRoomUsingEndTime}
-                                    onCancel={hideEndTimePicker}
-                                /> */}
                                 <DatePicker
+                                    modal
+                                    open={isEndTimePickerVisible}
                                     date={new Date()}
                                     mode="time"
                                     onConfirm={(date) => {
-                                        console.log(date)
+                                        hideEndTimePicker()
+                                        handleRoomUsingEndTime(date)
+                                    }}
+                                    onCancel={() => {
+                                        hideEndTimePicker()
                                     }}
                                 />
                             </TouchableOpacity>
@@ -300,7 +369,7 @@ export default function StudentRoomRental ({ navigation }) {
                             <Text style={[rentalStyles.Title, isDarkMode && rentalStyles.TitleDark]}>사용 목적</Text>
                             <TextInput 
                                 style={rentalStyles.Value}
-                                placeholder="사용목적"
+                                placeholder="사용목적을 자세히 적어주세요."
                                 onChangeText={setRoomPurpose}
                                 value={roomPurpose}
                             />

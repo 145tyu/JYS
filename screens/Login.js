@@ -31,11 +31,15 @@ export default function LoginScreen({ navigation }) {
         }
     }
 
-    const handleLogin = async () => {
+    const resetAlert = () => {
         setAlert(null) // 에러메시지 초기화
         setAlertDescription(null) // 에러메시지 초기화
         setAlertStatus(null) // 에러상태 초기화
         setIsAlertModalVisible(false) // 에러 모달 닫기
+    }
+
+    const handleLogin = async () => {
+        resetAlert()
         if (!accountID || !password) {
             // 에러 모달 설정
             setAlert('아이디 또는 비밀번호를 입력해주세요.')
@@ -125,7 +129,7 @@ export default function LoginScreen({ navigation }) {
         <SafeAreaView style={[styles.container, isDarkMode && styles.containerDark]}>
             <Text style={styles.logo}>JYS</Text>
 
-            <Modal animationType="fade" transparent={true}visible={isAlertModalVisible} onRequestClose={closeErrModal}>
+            <Modal animationType="fade" transparent={true} visible={isAlertModalVisible} onRequestClose={closeErrModal}>
                 {alertStatus === 400 &&
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
                         <View style={[{ backgroundColor: 'white', padding: 10, borderRadius: 20, width: '90%' }, isDarkMode && { backgroundColor: '#121212', padding: 10, borderRadius: 20, width: '90%' }]}>
