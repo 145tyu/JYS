@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal } from 'react-native';
+import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Image, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
 import DeviceInfo from 'react-native-device-info';
@@ -12,14 +12,14 @@ const buildVersion = DeviceInfo.getBuildNumber()
 export default function StartScreen({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
 
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const [alert, setAlert] = useState(null)
   const [alertDescription, setAlertDescription] = useState(null)
   const [alertStatus, setAlertStatus] = useState(null)
   const [isAlertModalVisible, setIsAlertModalVisible] = useState(false)
 
-  const [message, setMessage] = useState(null)
+  const [message, setMessage] = useState('시작 중...')
 
   const delData = async () => {
     setIsLoading(false)
@@ -110,7 +110,7 @@ export default function StartScreen({ navigation }) {
     try {
       await axiosInstance.post('/version')
         .then((res) => {
-          setIsLoading(false)
+          //setIsLoading(false)
           console.log(res.data)
           if (res.data.version === appVersion && res.data.build <= buildVersion) { // 앱 버전이 같으면
             checkIntegrity() // 데이터 무결성 검사 실행
@@ -187,8 +187,8 @@ export default function StartScreen({ navigation }) {
           </View>
         }
       </Modal>
-
-      <Text style={styles.logo}>JYS</Text>
+      <Image style={{ justifyContent: 'center', alignItems: 'center', width: 350, height: 350}} source={require('../resource/2.png')}/>
+      {/* <Text style={styles.logo}>JYS</Text> */}
       {isLoading === true ?
         <>
           <ActivityIndicator style={{ justifyContent: 'center', alignItems: 'center'}} size="small" color="green"/>

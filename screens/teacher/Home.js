@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal } from 'react-native';
+import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Image, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from "@react-navigation/native";
 // import messaging from '@react-native-firebase/messaging';
@@ -352,7 +352,8 @@ export default function HomeScreen ({ navigation }) {
                         </TouchableOpacity>
                       </View>
                     )
-                  } else if (Info.type === 4) {
+                  }
+                  if (Info.type === 4) {
                     return (
                       <View key={Info.id} style={[RoomRentalStyles.Info, isDarkMode && RoomRentalStyles.InfoDark]}>
                         <View style={RoomRentalStyles.Item}>

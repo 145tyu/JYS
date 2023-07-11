@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal } from 'react-native';
+import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Image, Modal } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CommonActions } from "@react-navigation/native";
 
@@ -127,7 +127,7 @@ export default function LoginScreen({ navigation }) {
 
     return (
         <SafeAreaView style={[styles.container, isDarkMode && styles.containerDark]}>
-            <Text style={styles.logo}>JYS</Text>
+            <Image style={{ justifyContent: 'center', alignItems: 'center', width: 300, height: 300}} source={require('../resource/2.png')}/>
 
             <Modal animationType="fade" transparent={true} visible={isAlertModalVisible} onRequestClose={closeErrModal}>
                 {alertStatus === 400 &&

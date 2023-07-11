@@ -53,48 +53,47 @@ export default function SignUpScreen({ navigation }) {
         }
          else {
             setIsLoading(true)
-            return Alert.alert('경고', '회원가입이 일시적으로 비활성화 되어있습니다.')
             try {
-                // await axiosInstance.post('/register', {
-                //     email: email,
-                //     accountID: accountID,
-                //     password: password,
-                //     phoneNumber: phoneNumber,
-                //     studentID: `${_grade}${_class}${_number}`,
-                //     firstName: firstName,
-                //     lastName: lastName,
-                // }).then((res) => {
-                //     setIsLoading(false)
-                //     if (res.status === 200) {
-                //         Alert.alert('정보', res.data.message)
-                //         return navigation.dispatch(
-                //             CommonActions.reset({
-                //                 index: 0,
-                //                 routes: [{ name: 'Login' }]
-                //             })
-                //         )
-                //     } else {
-                //         return Alert.alert('에러', '예외가 발생했습니다.')
-                //     }
-                // }).catch((error) => {
-                //     setIsLoading(false)
-                //     const res = error.response
-                //     if (res.status === 400) {
-                //         return Alert.alert(res.data.error, res.data.errorDescription)
-                //     } else if (res.status === 500) {
-                //         return Alert.alert('에러', '회원가입에 실패했습니다.', [
-                //             {
-                //                 text: '다시시도',
-                //                 onPress: () => {
-                //                     handleSignUp()
-                //                 }
-                //             }
-                //         ])
-                //     } else {
-                //         console.log('SignUp API | ', error)
-                //         return Alert.alert('에러', '예외가 발생했습니다.')
-                //     }
-                // })
+                await axiosInstance.post('/register', {
+                    email: email,
+                    accountID: accountID,
+                    password: password,
+                    phoneNumber: phoneNumber,
+                    studentID: `${_grade}${_class}${_number}`,
+                    firstName: firstName,
+                    lastName: lastName,
+                }).then((res) => {
+                    setIsLoading(false)
+                    if (res.status === 200) {
+                        Alert.alert('정보', res.data.message)
+                        return navigation.dispatch(
+                            CommonActions.reset({
+                                index: 0,
+                                routes: [{ name: 'Login' }]
+                            })
+                        )
+                    } else {
+                        return Alert.alert('에러', '예외가 발생했습니다.')
+                    }
+                }).catch((error) => {
+                    setIsLoading(false)
+                    const res = error.response
+                    if (res.status === 400) {
+                        return Alert.alert(res.data.error, res.data.errorDescription)
+                    } else if (res.status === 500) {
+                        return Alert.alert('에러', '회원가입에 실패했습니다.', [
+                            {
+                                text: '다시시도',
+                                onPress: () => {
+                                    handleSignUp()
+                                }
+                            }
+                        ])
+                    } else {
+                        console.log('SignUp API | ', error)
+                        return Alert.alert('에러', '예외가 발생했습니다.')
+                    }
+                })
             } catch (error) {
                 setIsLoading(false)
                 console.log('SignUp API | ', error)

@@ -35,6 +35,9 @@ export default function StudentHomeScreen ({ navigation }) {
   const [timetableData, setTimetableData] = useState(null)
   const [timetableMessage, setTimetableMessage] = useState(null)
 
+  const [busArrivalInformation, setBusArrivalInformation] = useState([])
+  const [busArrivalInformationType, setBusArrivalInformationType] = useState(null)
+
   const rentalRefresh = async() => {
     setRoomStateType(null) // 'Type'을 'null'로 설정하여 '로딩중...'을 표시
     AsyncStorage.getItem('id') // 'ID' 가져오기
@@ -204,11 +207,26 @@ export default function StudentHomeScreen ({ navigation }) {
       })
   }
 
+  const busArrivalInformationRefresh = async() => {
+    axiosInstance.post('/Bus/ArrivalInformation', {busStopID: 51097})
+      .then((res) => {
+        if (res.status === 200) { // 'status'가 200이면
+          const busData = res.data.data
+          //console.log(busData)
+          setBusArrivalInformation(busData)
+          setBusArrivalInformationType(1)
+        }
+      }).catch((error) => {
+        console.log('busArrivalInformation | ', error)
+      })
+  }
+
   useEffect(() => {
     rentalRefresh() // 스크린이 처음 시작될 때 한번 실행
     mealRefresh() // 스크린이 처음 시작될 때 한번 실행
     mealNowScreenTime() // 스크린이 처음 시작될 때 한번 실행
     timetableRefresh() // 스크린이 처음 시작될 때 한번 실행
+    busArrivalInformationRefresh()
 
     // messaging().onMessage(async (remoteMessage) => {
     //   console.log('Received foreground message', remoteMessage)
@@ -252,8 +270,8 @@ export default function StudentHomeScreen ({ navigation }) {
 
       <ScrollView contentContainerStyle={[styles.scrollContainer, isDarkMode && styles.scrollContainerDark]}>
         {/* 방음부스 */}
-        <View style={[rentalStyles.Info, isDarkMode && rentalStyles.InfoDark]}>
-          <Text style={[rentalStyles.Title, isDarkMode && rentalStyles.TitleDark]}>방음부스</Text>
+        <View style={[styles.Info, isDarkMode && styles.InfoDark]}>
+          <Text style={[styles.Title, isDarkMode && styles.TitleDark]}>방음부스</Text>
           {roomStateType === null &&
             <ActivityIndicator style={{marginTop: 15}} size="large" color="#0000ff"/>
           }
@@ -313,8 +331,8 @@ export default function StudentHomeScreen ({ navigation }) {
         </View>
 
         {/* 급식 */}
-        <View style={[mealStyles.Info, isDarkMode && mealStyles.InfoDark]}>
-          <Text style={[mealStyles.Title, isDarkMode && mealStyles.TitleDark]}>{mealTitle}</Text>
+        <View style={[styles.Info, isDarkMode && styles.InfoDark]}>
+          <Text style={[styles.Title, isDarkMode && styles.TitleDark]}>{mealTitle}</Text>
 
           {mealStateType === null ?
             <ActivityIndicator style={{marginTop: 15}} size="large" color="#0000ff" />:null
@@ -367,10 +385,45 @@ export default function StudentHomeScreen ({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* 시간표 */}
-        <View style={[timetableStyles.Info, isDarkMode && timetableStyles.InfoDark]}>
-          <Text style={[timetableStyles.Title, isDarkMode && timetableStyles.TitleDark]}>시간표</Text>
+        {/* 버스 */}
+        <View style={[styles.Info, isDarkMode && styles.InfoDark]}>
+          {busArrivalInformation.length === 0 && busArrivalInformationType === null ?
+            <>
+              <Text style={[styles.Title, isDarkMode && styles.TitleDark]}>버스</Text>
+              <ActivityIndicator style={{marginTop: 15}} size="large" color="#0000ff" />
+            </>
+            :
+            <>
+              <Text style={[styles.Title, isDarkMode && styles.TitleDark]}>세종우체국 (시청방면)</Text>
+              <View style={{ marginTop: 15}}></View>
 
+              {/* <Text style={{marginLeft: 10, marginBottom: 8, color: 'black', fontWeight: 'bold'}}>
+                곧 도착
+              </Text> */}
+
+              {busArrivalInformation.map((data) => {
+                const direction = (data.direction).substr(0, data.direction.length-2).length >= 5 ? `${(data.direction).substr(0, 5)}... 방향` : `${(data.direction).substr(0, data.direction.length-2)} 방향`
+                console.log(direction)
+                const currentLocation = (data.currentLocation).substring((data.currentLocation).lastIndexOf('(')+1, (data.currentLocation).lastIndexOf(')'))
+                return (
+                  <View key={data.busNumber} style={{marginBottom: 25}}>
+                    <Text style={{left: 10, marginBottom: 7, color: 'black', fontWeight: 'bold', position: 'absolute'}}>
+                      {data.busNumber}번 {'('}{direction}{')'}
+                    </Text>
+                    <Text style={{right: 10, marginBottom: 7, color: 'black', fontWeight: 'bold', position: 'absolute'}}>
+                      {data.arrivalTime} {'['}{currentLocation}{']'}
+                    </Text>
+                  </View>
+                )
+              })}
+            </>
+          }
+        </View>
+
+        {/* 시간표 */}
+        <View style={[styles.Info, isDarkMode && styles.InfoDark]}>
+          <Text style={[styles.Title, isDarkMode && styles.TitleDark]}>시간표</Text>
+          <View style={{marginBottom: 20,}}></View>
           {timetableStateType === null ?
             <ActivityIndicator style={{marginTop: -5}} size="large" color="#0000ff"/>
             :
@@ -465,22 +518,6 @@ const styles = StyleSheet.create({
     top: 20,
     left: 25,
   },
-  startMessageRectangle: {
-    width: 1000,
-    height: 100,
-    marginBottom: 7,
-    alignSelf: 'center',
-    justifyContent: 'center',
-  },
-  startMessageText: {
-    fontWeight: 'bold',
-    fontSize: 35,
-    color: '#fb5b5a',
-    textAlign: 'center',
-  }
-})
-
-const rentalStyles = StyleSheet.create({
   Info: {
     backgroundColor: '#fff',
     padding: 20,
@@ -515,6 +552,9 @@ const rentalStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF', // 다크모드에서의 글자색상
   },
+})
+
+const rentalStyles = StyleSheet.create({
   Text: {
     padding: 30,
     paddingBottom: 65,
