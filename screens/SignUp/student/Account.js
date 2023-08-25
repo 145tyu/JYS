@@ -19,8 +19,8 @@ export default function S_SignUp_Account({ navigation }) {
 
   const [message, setMessage] = useState('양식에 맞게 작성해주세요.')
 
-  //${email.substring(0, (email.indexOf('@')))}
   const [accountID, setAccountID] = useState('')
+  const [accountIDCheck, setAccountIDCheck] = useState(false)
   const [password, setPassword] = useState(null)
   const [confirmPassword, setConfirmPassword] = useState(null)
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -47,8 +47,40 @@ export default function S_SignUp_Account({ navigation }) {
     }
   }
 
-  const handleNextScreen = () => {
-    if (accountID === null) {
+  const handleCheckAccountID = async (accountID) => {
+    if (accountID != '') {
+      await axiosInstance.post('/register', {
+        accountID: accountID,
+      }).then((res) => {
+        setIsLoading(false)
+        if (res.status === 200) {
+          setAccountIDCheck(true)
+          setMessage('양식에 맞게 작성해주세요.')
+        } else {
+          setAccountIDCheck(false)
+          return Alert.alert('에러', '아이디 확인 도중 예외가 발생했습니다.')
+        }
+      }).catch((error) => {
+        setIsLoading(false)
+        const res = error.response
+        if (res.status === 400) {
+          setAccountIDCheck(false)
+          setMessage('중복된 아이디입니다.')
+        } else if (res.status === 500) {
+          setAccountIDCheck(false)
+          setMessage('다시 시도해 주세요.')
+        } else {
+          setAccountIDCheck(false)
+          console.log('SignUp API | ', error)
+          setMessage(error)
+          return Alert.alert('에러', '아이디 확인 도중 예외가 발생했습니다.')
+        }
+      })
+    }
+  }
+
+  const handleNextScreen = async () => {
+    if (accountID === '') {
       setMessage('아이디를 입력해주세요.')
       return Alert.alert('경고', '로그인에 사용될 아이디를 입력해주세요.')
     } else if (password === null) {
@@ -60,6 +92,9 @@ export default function S_SignUp_Account({ navigation }) {
     } else if (phoneNumber === '') {
       setMessage('전화번호를 입력해주세요.')
       return Alert.alert('경고', '전화번호를 입력해주세요.')
+    } else if (accountIDCheck === false) {
+      setMessage('아이디를 확인해 주세요.')
+      return Alert.alert('경고', '아이디가 중복됩니다.\n아이디를 확인해주세요.')
     } else if (!validatePhoneNumber(phoneNumber)) {
       setMessage('전화번호 형식이 맞지 않습니다.')
       return Alert.alert('경고', '전화번호 형식이 맞지 않습니다.')
@@ -94,7 +129,10 @@ export default function S_SignUp_Account({ navigation }) {
                 placeholder='아이디'
                 value={accountID}
                 placeholderTextColor={isDarkMode ? "#CCCCCC" : "#999999"}
-                onChangeText={(text) => setAccountID(text)}
+                onChangeText={(text) => {
+                  setAccountID(text)
+                  handleCheckAccountID(text)
+                }}
               />
             </View>
 

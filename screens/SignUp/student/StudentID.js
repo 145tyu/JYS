@@ -17,6 +17,7 @@ const SelectStudentIDModal = ({ type, _grade, _class, _number, setGrade, setClas
         <View style={SelectStudentIDModalStyles.container}>
           <View style={[{ ...SelectStudentIDModalStyles.boxContainer, backgroundColor: '#f2f4f6' }, isDarkMode && { ...SelectStudentIDModalStyles.boxContainer, backgroundColor: '#121212' }]}>
             <Picker
+              style={{ color: isDarkMode ? '#ffffff' : '#000000' }}
               selectedValue={_grade}
               onValueChange={(value) => { setGrade(value) }}
             >
@@ -40,6 +41,7 @@ const SelectStudentIDModal = ({ type, _grade, _class, _number, setGrade, setClas
         <View style={SelectStudentIDModalStyles.container}>
           <View style={[{ ...SelectStudentIDModalStyles.boxContainer, backgroundColor: '#f2f4f6' }, isDarkMode && { ...SelectStudentIDModalStyles.boxContainer, backgroundColor: '#121212' }]}>
             <Picker
+              style={{ color: isDarkMode ? '#ffffff' : '#000000' }}
               selectedValue={_class}
               onValueChange={(value) => { setClass(value) }}
             >
@@ -68,6 +70,7 @@ const SelectStudentIDModal = ({ type, _grade, _class, _number, setGrade, setClas
         <View style={SelectStudentIDModalStyles.container}>
           <View style={[{ ...SelectStudentIDModalStyles.boxContainer, backgroundColor: '#f2f4f6' }, isDarkMode && { ...SelectStudentIDModalStyles.boxContainer, backgroundColor: '#121212' }]}>
             <Picker
+              style={{ color: isDarkMode ? '#ffffff' : '#000000' }}
               selectedValue={_number}
               onValueChange={(value) => { setNumber(value) }}
             >

@@ -44,6 +44,172 @@ const UploadModal = ({ uploadCount, isDarkMode, visible }) => {
   )
 }
 
+const SeeMoreModal = ({ reporterUserID, contentData, openReportModal, handleBlockedUser, isDarkMode, visible, onClose }) => {
+  return (
+    <Modal animationType='slide' transparent={true} visible={visible} onRequestClose={() => onClose()}>
+      <View style={modalStyles.container}>
+        <View style={[{ ...modalStyles.boxContainer, backgroundColor: '#EBEBEB', }, isDarkMode && { ...modalStyles.boxContainer, backgroundColor: '#363638', }]}>
+          <TouchableOpacity style={{ padding: 3, }} onPress={openReportModal}>
+            <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>신고하기</Text>
+          </TouchableOpacity>
+
+          {contentData != null && reporterUserID != contentData.account_id &&
+            <>
+              <View style={{ width: '100%', height: 1, marginTop: 10, marginBottom: 10, backgroundColor: '#999999' }}></View>
+              <TouchableOpacity style={{ padding: 3, }} onPress={() => {
+                onClose()
+                return Alert.alert('차단', '해당 사용자를 차단하시겠습니까?', [
+                  {
+                    text: '차단',
+                    onPress: () => {
+                      handleBlockedUser()
+                    }
+                  },
+                  { text: '취소', }
+                ])
+              }}>
+                <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>차단하기</Text>
+              </TouchableOpacity>
+            </>
+          }
+
+          {contentData != null && reporterUserID === contentData.account_id &&
+            <>
+              <View style={{ width: '100%', height: 1, marginTop: 10, marginBottom: 10, backgroundColor: '#999999' }}></View>
+              <TouchableOpacity onPress={() => { Alert.alert('준비 중', '수정 기능을 준비하고 있어요.') }} style={{ padding: 3, }}>
+                <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>수정하기</Text>
+              </TouchableOpacity>
+
+              <View style={{ width: '100%', height: 1, marginTop: 10, marginBottom: 10, backgroundColor: '#999999' }}></View>
+              <TouchableOpacity onPress={() => { Alert.alert('준비 중', '삭제 기능을 준비하고 있어요.') }} style={{ padding: 3, }}>
+                <Text style={[{ ...modalStyles.boxText, color: '#E83F00', }, isDarkMode && { ...modalStyles.boxText, color: '#E83F00', }]}>삭제하기</Text>
+              </TouchableOpacity>
+            </>
+          }
+        </View>
+
+        <TouchableOpacity onPress={() => onClose()} style={[{ ...modalStyles.boxContainer, backgroundColor: '#EBEBEB', }, isDarkMode && { ...modalStyles.boxContainer, backgroundColor: '#363638', }]}>
+          <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>닫기</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
+  )
+}
+
+const ReportSelectModal = ({ setReportType, isDarkMode, visible, onClose }) => {
+  return (
+    <Modal animationType='slide' transparent={true} visible={visible} onRequestClose={() => onClose()}>
+      <View style={modalStyles.container}>
+        <View style={[{ ...modalStyles.boxContainer, backgroundColor: '#EBEBEB', }, isDarkMode && { ...modalStyles.boxContainer, backgroundColor: '#363638', }]}>
+          <Text style={[{ ...modalStyles.boxTitle, color: '#E83F00', }, isDarkMode && { ...modalStyles.boxTitle, color: '#E83F00', }]}>신고하기</Text>
+          <Text style={[{ ...modalStyles.boxText, fontSize: 13, fontWeight: '400', marginTop: 15, marginBottom: 15, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, fontSize: 13, fontWeight: '400', marginTop: 15, marginBottom: 15, color: '#ffffff', }]}>게시글을 신고하려는 이유를 선택해 주세요.</Text>
+
+          <ScrollView style={{ height: 300, borderRadius: 15, }}>
+            <TouchableOpacity onPress={() => {
+              setReportType('마음에 들지 않습니다.')
+              onClose('마음에 들지 않습니다.')
+            }} style={[{ ...modalStyles.boxSelectorContainer, backgroundColor: '#D8D8D8', }, isDarkMode && { ...modalStyles.boxSelectorContainer, backgroundColor: '#424242', }]}>
+              <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>마음에 들지 않습니다.</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {
+              setReportType('스팸')
+              onClose('스팸')
+            }} style={[{ ...modalStyles.boxSelectorContainer, backgroundColor: '#D8D8D8', }, isDarkMode && { ...modalStyles.boxSelectorContainer, backgroundColor: '#424242', }]}>
+              <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>스팸</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {
+              setReportType('나체 이미지 또는 성적 행위')
+              onClose('나체 이미지 또는 성적 행위')
+            }} style={[{ ...modalStyles.boxSelectorContainer, backgroundColor: '#D8D8D8', }, isDarkMode && { ...modalStyles.boxSelectorContainer, backgroundColor: '#424242', }]}>
+              <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>나체 이미지 또는 성적 행위</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {
+              setReportType('과도한 욕설')
+              onClose('과도한 욕설')
+            }} style={[{ ...modalStyles.boxSelectorContainer, backgroundColor: '#D8D8D8', }, isDarkMode && { ...modalStyles.boxSelectorContainer, backgroundColor: '#424242', }]}>
+              <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>과도한 욕설</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {
+              setReportType('따돌림 또는 괴롭힘')
+              onClose('따돌림 또는 괴롭힘')
+            }} style={[{ ...modalStyles.boxSelectorContainer, backgroundColor: '#D8D8D8', }, isDarkMode && { ...modalStyles.boxSelectorContainer, backgroundColor: '#424242', }]}>
+              <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>따돌림 또는 괴롭힘</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {
+              setReportType('거짓 정보')
+              onClose('거짓 정보')
+            }} style={[{ ...modalStyles.boxSelectorContainer, backgroundColor: '#D8D8D8', }, isDarkMode && { ...modalStyles.boxSelectorContainer, backgroundColor: '#424242', }]}>
+              <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>거짓 정보</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {
+              setReportType('광고성 게시글')
+              onClose('광고성 게시글')
+            }} style={[{ ...modalStyles.boxSelectorContainer, backgroundColor: '#D8D8D8', }, isDarkMode && { ...modalStyles.boxSelectorContainer, backgroundColor: '#424242', }]}>
+              <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>광고성 게시글</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {
+              setReportType('자살 또는 자해')
+              onClose('자살 또는 자해')
+            }} style={[{ ...modalStyles.boxSelectorContainer, backgroundColor: '#D8D8D8', }, isDarkMode && { ...modalStyles.boxSelectorContainer, backgroundColor: '#424242', }]}>
+              <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>자살 또는 자해</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {
+              setReportType('지식재산권 침해')
+              onClose('지식재산권 침해')
+            }} style={[{ ...modalStyles.boxSelectorContainer, backgroundColor: '#D8D8D8', }, isDarkMode && { ...modalStyles.boxSelectorContainer, backgroundColor: '#424242', }]}>
+              <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>지식재산권 침해</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {
+              setReportType('기타 문제')
+              onClose('기타 문제')
+            }} style={[{ ...modalStyles.boxSelectorContainer, backgroundColor: '#D8D8D8', }, isDarkMode && { ...modalStyles.boxSelectorContainer, backgroundColor: '#424242', }]}>
+              <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>기타 문제</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+
+        <TouchableOpacity onPress={() => onClose()} style={[{ ...modalStyles.boxContainer, backgroundColor: '#EBEBEB', }, isDarkMode && { ...modalStyles.boxContainer, backgroundColor: '#363638', }]}>
+          <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>닫기</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
+  )
+}
+
+const ReportCheckModal = ({ handelReport, reportType, isDarkMode, visible, onClose }) => {
+  return (
+    <Modal animationType='slide' transparent={true} visible={visible} onRequestClose={() => onClose()}>
+      <View style={modalStyles.container}>
+        <View style={[{ ...modalStyles.boxContainer, backgroundColor: '#EBEBEB', }, isDarkMode && { ...modalStyles.boxContainer, backgroundColor: '#363638', }]}>
+          <Text style={[{ ...modalStyles.boxTitle, color: '#000000', }, isDarkMode && { ...modalStyles.boxTitle, color: '#ffffff', }]}>게시글을 신고하시겠습니까?</Text>
+          <Text style={[{ ...modalStyles.boxText, fontSize: 13, fontWeight: '400', marginTop: 15, marginBottom: 15, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, fontSize: 13, fontWeight: '400', marginTop: 15, marginBottom: 15, color: '#ffffff', }]}>사유 : {reportType}</Text>
+
+          <View style={{ width: '100%', height: 1, marginTop: 10, marginBottom: 10, backgroundColor: '#999999' }}></View>
+          <TouchableOpacity onPress={() => {
+            handelReport()
+            onClose()
+          }} style={{ padding: 3, }}>
+            <Text style={[{ ...modalStyles.boxText, color: '#E83F00', }, isDarkMode && { ...modalStyles.boxText, color: '#E83F00', }]}>신고하기</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity onPress={() => onClose()} style={[{ ...modalStyles.boxContainer, backgroundColor: '#EBEBEB', }, isDarkMode && { ...modalStyles.boxContainer, backgroundColor: '#363638', }]}>
+          <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>취소하기</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
+  )
+}
+
 const uploadModalStyles = StyleSheet.create({
   container: {
     flex: 1,
@@ -70,6 +236,37 @@ const uploadModalStyles = StyleSheet.create({
   }
 })
 
+const modalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  boxContainer: {
+    width: '95%',
+    height: 'auto',
+    paddingTop: 15,
+    paddingBottom: 15,
+    borderRadius: 15,
+    marginBottom: 20,
+  },
+  boxTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  boxText: {
+    textAlign: 'center',
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  boxSelectorContainer: {
+    paddingTop: 10,
+    paddingBottom: 10,
+    marginBottom: 2,
+  },
+})
+
 export default function WriteComments({ navigation }) {
   const route = useRoute()
   const { postID } = route.params
@@ -78,6 +275,15 @@ export default function WriteComments({ navigation }) {
   const isFocused = useIsFocused()
 
   const [refreshing, setRefreshing] = useState(false)
+
+  const [seeMoreModalState, setSeeMoreModalState] = useState(false)
+  const [reportSelectModalState, setReportSelectModalState] = useState(false)
+  const [reportCheckModalState, setReportCheckModalState] = useState(false)
+
+  const [reportType, setReportType] = useState(null) // 신고 유형
+  const [contentData, setContentData] = useState(null) // 콘텐츠 데이터
+  const [contentType, setContentType] = useState(null) // 콘텐츠 유형
+  const [reporterUserID, setReporterUserID] = useState(',') // 모달 관리 ID 설정
 
   const [commentsData, setCommentsData] = useState([])
   const [commentsType, setCommentsType] = useState(null)
@@ -144,12 +350,17 @@ export default function WriteComments({ navigation }) {
 
   const commentsCheck = async () => {
     setCommentsType(null)
+    const blockUser = await AsyncStorage.getItem('community_blockedUser')
     try {
-      await axiosInstance.post('/Community/commentsCheck', { postID: postID })
+      await axiosInstance.post('/Community/commentsCheck', { postID: postID, blockUser: blockUser, })
         .then((res) => {
-          const data = res.data.data
-          setCommentsData(data)
-          setCommentsType(1)
+          if (res.status === 200) {
+            const data = res.data.data
+            setCommentsData(data)
+            setCommentsType(1)
+          } else {
+            setCommentsType(0)
+          }
         }).catch((error) => {
           setCommentsType(0)
           console.log(error)
@@ -182,12 +393,17 @@ export default function WriteComments({ navigation }) {
 
   const repliesCheck = async () => {
     setRepliesType(null)
+    const blockUser = await AsyncStorage.getItem('community_blockedUser')
     try {
-      await axiosInstance.post('/Community/repliesCheck', { postID: postID })
+      await axiosInstance.post('/Community/repliesCheck', { postID: postID, blockUser: blockUser, })
         .then((res) => {
-          const data = res.data.data
-          setRepliesData(data)
-          setRepliesType(1)
+          if (res.status === 200) {
+            const data = res.data.data
+            setRepliesData(data)
+            setRepliesType(1)
+          } else {
+            setRepliesType(0)
+          }
         }).catch((error) => {
           setRepliesType(0)
           console.log(error)
@@ -216,6 +432,89 @@ export default function WriteComments({ navigation }) {
       setRepliesType(0)
       console.log(error)
     }
+  }
+
+  const handelReport = async () => {
+    console.log(reporterUserID, reportType, contentData.account_id, contentData.id, contentType)
+    try {
+      await axiosInstance.post('/Community/Report/reportForm', { reporterUserID: reporterUserID, reportType: reportType, contentUserID: contentData.account_id, contentID: contentData.id, contentType: contentType, })
+        .then((res) => {
+          if (res.status === 200) {
+            Alert.alert('신고하기', res.data.message, [{ text: '확인', }])
+            if (contentType === 'Post') {
+              navigation.goBack()
+            }
+          } else {
+            return Alert.alert('신고하기', '신고를 접수하지 못했습니다.', [{ text: '확인', }])
+          }
+        }).catch((error) => {
+          console.log(error)
+          if (error.response) {
+            const res = error.response
+            if (res.status === 400) {
+              return Alert.alert(res.data.error, res.data.errorDescription, [
+                { text: '확인' },
+              ])
+            } else if (res.status === 500) {
+              return Alert.alert(res.data.error, res.data.errorDescription, [
+                { text: '확인' },
+              ])
+            } else {
+              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+                { text: '확인' },
+              ])
+            }
+          } else {
+            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+              { text: '확인' },
+            ])
+          }
+        })
+    } catch (error) {
+      console.log(error)
+      return Alert.alert('신고하기', '신고를 접수하지 못했습니다.')
+    }
+  }
+
+  const handleBlockedUser = async () => {
+    await AsyncStorage.getItem('community_blockedUser')
+      .then(async (user) => {
+        const blockUser = []
+        const blockUserObject = {
+          id: contentData.account_id,
+          studentID: contentData.studentID,
+          author: contentData.author,
+        }
+        if (user === null) {
+          blockUser.push(blockUserObject)
+          handleBlockUser(blockUser)
+        } else {
+          const existingBlockUser = JSON.parse(user)
+          const duplicationUser = existingBlockUser.some(data => data.id === blockUserObject.id)
+
+          if (duplicationUser) {
+            Alert.alert('차단', '이미 차단된 사용자입니다.')
+          } else {
+            existingBlockUser.push(blockUserObject)
+            handleBlockUser(existingBlockUser)
+          }
+        }
+
+        function handleBlockUser(updatedBlockUser) {
+          AsyncStorage.setItem('community_blockedUser', JSON.stringify(updatedBlockUser))
+            .then(() => {
+              Alert.alert('차단', '사용자를 차단했습니다.')
+              navigation.goBack()
+            })
+            .catch(error => {
+              console.log(error)
+              Alert.alert('차단', '사용자를 차단하지 못했습니다.')
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        Alert.alert('차단', '사용자를 차단하지 못했습니다.')
+      })
   }
 
   const handleCommentsForm = async (formData) => {
@@ -319,6 +618,37 @@ export default function WriteComments({ navigation }) {
     setRefreshing(false)
   }
 
+  const openSeeMoreModal = async (contentData, contentType) => {
+    const accountID = await AsyncStorage.getItem('id')
+    setReporterUserID(accountID)
+    setContentType(contentType)
+    setContentData(contentData)
+    setSeeMoreModalState(true)
+  }
+
+  const closeSeeMoreModal = () => {
+    setSeeMoreModalState(false)
+  }
+
+  const openReportSelectModal = () => {
+    closeSeeMoreModal()
+    setReportSelectModalState(true)
+  }
+
+  const closeReportSelectModal = (value) => {
+    closeSeeMoreModal()
+    setReportSelectModalState(false)
+    if (value) openReportCheckModal()
+  }
+
+  const openReportCheckModal = () => {
+    setReportCheckModalState(true)
+  }
+
+  const closeReportCheckModal = () => {
+    setReportCheckModalState(false)
+  }
+
   const openImageViewer = (imageData, imageInfo) => {
     setImageViewerData(imageData)
     setImageViewerInfo(imageInfo)
@@ -341,6 +671,12 @@ export default function WriteComments({ navigation }) {
       <ImageViewer imageData={imageViewerData} imageInfo={imageViewerInfo} visible={imageViewerState} onClose={() => closeImageViewer()} />
       {/* 업로드 모달 */}
       <UploadModal uploadCount={uploadCount} isDarkMode={isDarkMode} visible={uploadModalState} />
+      {/* 더보기 모달 */}
+      <SeeMoreModal reporterUserID={reporterUserID} contentData={contentData} openReportModal={openReportSelectModal} handleBlockedUser={handleBlockedUser} isDarkMode={isDarkMode} visible={seeMoreModalState} onClose={() => closeSeeMoreModal()} />
+      {/* 신고 모달 */}
+      <ReportSelectModal setReportType={setReportType} isDarkMode={isDarkMode} visible={reportSelectModalState} onClose={closeReportSelectModal} />
+      {/* 신고 확인 모달 */}
+      <ReportCheckModal handelReport={handelReport} reportType={reportType} isDarkMode={isDarkMode} visible={reportCheckModalState} onClose={closeReportCheckModal} />
 
       <KeyboardAvoidingView style={{ flex: 1, }} behavior={Platform.select({ ios: 'padding' })}>
         {/* 로고 */}
@@ -384,11 +720,12 @@ export default function WriteComments({ navigation }) {
                                   <Icon_Feather name='user' size={20} style={{ left: 17, top: 8, borderRadius: 25, color: 'black', position: 'absolute' }} />
                                 </View>
 
+                                {/* 댓글 모달 */}
+                                <TouchableOpacity onPress={() => openSeeMoreModal(data, 'Comment')} style={{ zIndex: 999, position: 'absolute', right: 10, }}>
+                                  <Icon_Feather color={isDarkMode ? '#ffffff' : '#000000'} name="more-vertical" size={20} />
+                                </TouchableOpacity>
+
                                 <View>
-                                  {/* 댓글 모달 */}
-                                  <TouchableOpacity style={{ position: 'absolute', right: 10 }}>
-                                    {/* <Icon_Ionicons name='ellipsis-horizontal-circle-outline' size={20} style={[{color: '#000000'}, isDarkMode && {color: '#ffffff'}]}/> */}
-                                  </TouchableOpacity>
                                   {/* 사용자ID */}
                                   <Text style={[{ ...styles.CommentsAuthorText, color: '#000000' }, isDarkMode && { ...styles.CommentsAuthorText, color: '#ffffff' }]}>{data.author}</Text>
 
@@ -452,6 +789,11 @@ export default function WriteComments({ navigation }) {
                                               <View style={{ width: 30, height: 30, left: 37, borderRadius: 25, backgroundColor: '#C0C0C0', position: 'absolute' }}></View>
                                               <Icon_Feather name='user' size={15} style={{ left: 45, top: 7, borderRadius: 25, color: 'black', position: 'absolute' }} />
                                             </View>
+
+                                            {/* 댓글 모달 */}
+                                            <TouchableOpacity onPress={() => openSeeMoreModal(_data, 'Reply')} style={{ zIndex: 999, position: 'absolute', right: 10, }}>
+                                              <Icon_Feather color={isDarkMode ? '#ffffff' : '#000000'} name="more-vertical" size={20} />
+                                            </TouchableOpacity>
 
                                             {/* 답글 */}
                                             <View key={data.id} style={{ marginBottom: 13, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>

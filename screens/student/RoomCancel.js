@@ -34,7 +34,7 @@ export default function StudentRoomCancel({ navigation }) {
   const [roomAcceptor, setRoomAcceptor] = useState(null)
   const [roomPurpose, setRoomPurpose] = useState(null)
 
-  const [imageURI, setImageURI] = useState(null)
+  const [imageData, setImageData] = useState(null)
   const [imageUploadCount, setImageUploadCount] = useState('')
 
   const handleTakePhoto = async () => {
@@ -113,7 +113,7 @@ export default function StudentRoomCancel({ navigation }) {
   }
 
   const handleUploadPhoto = async () => {
-    if (imageURI === null) {
+    if (imageData === null) {
       return Alert.alert('경고', '이미지가 선택되지 않았습니다.')
     } else {
       try {
@@ -122,7 +122,7 @@ export default function StudentRoomCancel({ navigation }) {
           .then(async (ID) => {
             const formData = new FormData()
             formData.append('image', {
-              uri: imageURI,
+              uri: imageData,
               type: 'image/jpeg',
               name: `${ID}.jpg`, // 파일 이름을 'userID'값으로 설정
             })
@@ -269,8 +269,8 @@ export default function StudentRoomCancel({ navigation }) {
           <View style={[roomStyles.Info, isDarkMode && roomStyles.InfoDark]}>
             {isLoading === false ?
               <View style={{ alignItems: 'center', }}>
-                {imageURI ?
-                  <Image source={{ uri: imageURI }} style={roomStyles.Image} />
+                {imageData ?
+                  <Image source={{ uri: imageData }} style={roomStyles.Image} />
                   :
                   <View>
                     <Text style={[roomStyles.Text, isDarkMode && roomStyles.TextDark]}>사진을 선택해야 반납신청을 할 수 있어요.</Text>

@@ -141,9 +141,9 @@ export default function StudentAllTab({ navigation }) {
       <View style={{ marginBottom: 50, marginTop: 10, }}>
         <Text style={[{ ...styles.logo, color: '#000000', }, isDarkMode && { ...styles.logo, color: '#ffffff', }]}>전체</Text>
 
-        <TouchableOpacity onPress={() => { navigation.navigate("Settings") }}>
+        {/* <TouchableOpacity onPress={() => { navigation.navigate("Settings") }}>
           <Icon_Feather name="settings" size={30} style={[{ color: 'black', top: -17, right: 30, position: 'absolute', }, isDarkMode && { color: 'white', top: -17, right: 30, position: 'absolute' }]} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <TouchableOpacity style={[{ ...styles.InfoContainer, }, isDarkMode && { ...styles.scrollContainer, }]} onPress={() => navigation.navigate('Profile_View')}>
@@ -170,7 +170,16 @@ export default function StudentAllTab({ navigation }) {
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[{ ...styles.InfoContainer, }, isDarkMode && { ...styles.scrollContainer, }]}>
+      <TouchableOpacity style={[{ ...styles.InfoContainer, }, isDarkMode && { ...styles.scrollContainer, }]} onPress={() => {
+        AsyncStorage.removeItem('community_blockedUser')
+        Alert.alert('정보', '모든 사용자 차단을 해제했습니다.')
+      }}>
+        <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+          <Text style={[{ ...styles.InfoTitle, color: '#000000', }, isDarkMode && { ...styles.InfoTitle, color: '#ffffff', }]}>게시판 차단 모두 해제</Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* <TouchableOpacity style={[{ ...styles.InfoContainer, }, isDarkMode && { ...styles.scrollContainer, }]}>
         <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
           <Text style={[{ ...styles.InfoTitle, color: '#000000', }, isDarkMode && { ...styles.InfoTitle, color: '#ffffff', }]}>ysit 바로가기</Text>
         </View>
@@ -180,7 +189,13 @@ export default function StudentAllTab({ navigation }) {
         <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
           <Text style={[{ ...styles.InfoTitle, color: '#000000', }, isDarkMode && { ...styles.InfoTitle, color: '#ffffff', }]}>세종장영실고등학교 홈페이지</Text>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
+
+      <View style={[{ ...styles.InfoContainer, }, isDarkMode && { ...styles.scrollContainer, }]}>
+        <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+          <Text style={[{ ...styles.InfoTitle, color: '#000000', }, isDarkMode && { ...styles.InfoTitle, color: '#ffffff', }]}>버전 : {appVersion} 빌드 : {buildNumber}</Text>
+        </View>
+      </View>
     </SafeAreaView>
   )
 }
