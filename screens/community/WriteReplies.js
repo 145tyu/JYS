@@ -44,8 +44,7 @@ const UploadModal = ({ uploadCount, isDarkMode, visible }) => {
   )
 }
 
-const SeeMoreModal = ({ accountID, openReportModal, handleBlockedUser, isDarkMode, visible, onClose }) => {
-  const tempID = accountID === null ? null : accountID.split(',')
+const SeeMoreModal = ({ reporterUserID, contentData, openReportModal, handleBlockedUser, isDarkMode, visible, onClose }) => {
   return (
     <Modal animationType='slide' transparent={true} visible={visible} onRequestClose={() => onClose()}>
       <View style={modalStyles.container}>
@@ -54,7 +53,7 @@ const SeeMoreModal = ({ accountID, openReportModal, handleBlockedUser, isDarkMod
             <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>신고하기</Text>
           </TouchableOpacity>
 
-          {tempID != null && tempID[0] != tempID[1] &&
+          {contentData != null && reporterUserID != contentData.account_id &&
             <>
               <View style={{ width: '100%', height: 1, marginTop: 10, marginBottom: 10, backgroundColor: '#999999' }}></View>
               <TouchableOpacity style={{ padding: 3, }} onPress={() => {
@@ -74,7 +73,7 @@ const SeeMoreModal = ({ accountID, openReportModal, handleBlockedUser, isDarkMod
             </>
           }
 
-          {tempID != null && tempID[0] === tempID[1] &&
+          {contentData != null && reporterUserID === contentData.account_id &&
             <>
               <View style={{ width: '100%', height: 1, marginTop: 10, marginBottom: 10, backgroundColor: '#999999' }}></View>
               <TouchableOpacity onPress={() => { Alert.alert('준비 중', '수정 기능을 준비하고 있어요.') }} style={{ padding: 3, }}>
@@ -282,8 +281,9 @@ export default function WriteReplies({ navigation }) {
   const [reportCheckModalState, setReportCheckModalState] = useState(false)
 
   const [reportType, setReportType] = useState(null) // 신고 유형
+  const [contentData, setContentData] = useState(null) // 콘텐츠 데이터
   const [contentType, setContentType] = useState(null) // 콘텐츠 유형
-  const [accountID, setAccountID] = useState(',') // 모달 관리 ID 설정
+  const [reporterUserID, setReporterUserID] = useState(null) // 모달 관리 ID 설정
 
   const [commentsData, setCommentsData] = useState([])
   const [commentsType, setCommentsType] = useState(null)
@@ -352,7 +352,7 @@ export default function WriteReplies({ navigation }) {
     setCommentsType(null)
     const blockUser = await AsyncStorage.getItem('community_blockedUser')
     try {
-      await axiosInstance.post('/Community/commentsCheck', { postID: postID, blockUser: blockUser, })
+      await axiosInstance.post('/Community/commentsCheck', { postID: postID, blockUser: JSON.parse(blockUser), })
         .then((res) => {
           if (res.status === 200) {
             const data = res.data.data
@@ -395,7 +395,7 @@ export default function WriteReplies({ navigation }) {
     setRepliesType(null)
     const blockUser = await AsyncStorage.getItem('community_blockedUser')
     try {
-      await axiosInstance.post('/Community/repliesCheck', { postID: postID, blockUser: blockUser, })
+      await axiosInstance.post('/Community/repliesCheck', { postID: postID, blockUser: JSON.parse(blockUser), })
         .then((res) => {
           if (res.status === 200) {
             const data = res.data.data
@@ -434,6 +434,93 @@ export default function WriteReplies({ navigation }) {
     }
   }
 
+  const handelReport = async () => {
+    try {
+      await axiosInstance.post('/Community/Report/reportForm', { reporterUserID: reporterUserID, reportType: reportType, contentUserID: contentData.account_id, contentID: contentData.id, contentType: contentType, })
+        .then((res) => {
+          if (res.status === 200) {
+            if (contentType === 'Post') {
+              navigation.goBack()
+              Alert.alert('신고하기', `${res.data.message}\n이 사용자를 차단할까요?`, [{ text: '차단하기', onPress: () => handleBlockedUser() }, { text: '아니요' }])
+            } else {
+              handleRefresh()
+              Alert.alert('신고하기', res.data.message, [{ text: '확인', }])
+            }
+          } else {
+            return Alert.alert('신고하기', '신고를 접수하지 못했습니다.', [{ text: '확인', }])
+          }
+        }).catch((error) => {
+          console.log(error)
+          if (error.response) {
+            const res = error.response
+            if (res.status === 400) {
+              return Alert.alert(res.data.error, res.data.errorDescription, [
+                { text: '확인' },
+              ])
+            } else if (res.status === 500) {
+              return Alert.alert(res.data.error, res.data.errorDescription, [
+                { text: '확인' },
+              ])
+            } else {
+              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+                { text: '확인' },
+              ])
+            }
+          } else {
+            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+              { text: '확인' },
+            ])
+          }
+        })
+    } catch (error) {
+      console.log(error)
+      return Alert.alert('신고하기', '신고를 접수하지 못했습니다.')
+    }
+  }
+
+  const handleBlockedUser = async () => {
+    await AsyncStorage.getItem('community_blockedUser')
+      .then(async (user) => {
+        const blockUser = []
+        const blockUserObject = {
+          id: contentData.account_id,
+          studentID: contentData.studentID,
+          author: contentData.author,
+        }
+        if (user === null) {
+          blockUser.push(blockUserObject)
+          BlockUser(blockUser)
+        } else {
+          const existingBlockUser = JSON.parse(user)
+          const duplicationUser = existingBlockUser.some(data => data.id === blockUserObject.id)
+
+          if (duplicationUser) {
+            Alert.alert('차단', '이 기기에서 이미 차단된 사용자입니다.')
+          } else {
+            existingBlockUser.push(blockUserObject)
+            BlockUser(existingBlockUser)
+          }
+        }
+
+        function BlockUser(updatedBlockUser) {
+          AsyncStorage.setItem('community_blockedUser', JSON.stringify(updatedBlockUser))
+            .then(() => {
+              Alert.alert('차단', '이 기기에서 사용자를 차단했습니다.')
+              handleRefresh()
+              if (type === 'Post') {
+                navigation.goBack()
+              }
+            }).catch(error => {
+              console.log(error)
+              Alert.alert('차단', '사용자를 차단하지 못했습니다.')
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        Alert.alert('차단', '사용자를 차단하지 못했습니다.')
+      })
+  }
+
   const handleRepliesForm = async (formData) => {
     setUploadModalState(true)
     try {
@@ -446,6 +533,11 @@ export default function WriteReplies({ navigation }) {
       }).then((res) => {
         setUploadModalState(false)
         if (res.status === 200) {
+          // 댓글 작성칸 초기화
+          setRepliesForm('')
+          setImageData([])
+          setUploadCount('')
+          // 데이터 새로고침
           commentsCheck()
           repliesCheck()
         } else {
@@ -525,93 +617,6 @@ export default function WriteReplies({ navigation }) {
       }).catch((error) => {
         console.log(error)
       })
-      .finally(() => {
-        setRepliesForm('')
-        setImageData([])
-        setUploadCount('')
-      })
-  }
-
-  const handelReport = async () => {
-    const accountID = await AsyncStorage.getItem('id')
-    console.log(contentType)
-    try {
-      await axiosInstance.post('/Community/Report/reportForm', { accountID: accountID, reportType: reportType, contentUserID: postsData[0].account_id, contentID: postID, contentType: contentType, })
-        .then((res) => {
-          if (res.status === 200) {
-            Alert.alert('신고하기', res.data.message, [{ text: '확인', }])
-            navigation.goBack()
-          } else {
-            return Alert.alert('신고하기', '신고를 접수하지 못했습니다.', [{ text: '확인', }])
-          }
-        }).catch((error) => {
-          console.log(error)
-          if (error.response) {
-            const res = error.response
-            if (res.status === 400) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
-            } else if (res.status === 500) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
-            } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                { text: '확인' },
-              ])
-            }
-          } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-              { text: '확인' },
-            ])
-          }
-        })
-    } catch (error) {
-      console.log(error)
-      return Alert.alert('신고하기', '신고를 접수하지 못했습니다.')
-    }
-  }
-
-  const handleBlockedUser = async () => {
-    await AsyncStorage.getItem('community_blockedUser')
-      .then(async (user) => {
-        const blockUser = []
-        const blockUserObject = {
-          id: postsData[0].account_id,
-          studentID: postsData[0].studentID,
-          author: postsData[0].author,
-        }
-        if (user === null) {
-          blockUser.push(blockUserObject)
-          handleBlockUser(blockUser)
-        } else {
-          const existingBlockUser = JSON.parse(user)
-          const duplicationUser = existingBlockUser.some(data => data.id === blockUserObject.id)
-
-          if (duplicationUser) {
-            Alert.alert('차단', '이미 차단된 사용자입니다.')
-          } else {
-            existingBlockUser.push(blockUserObject)
-            handleBlockUser(existingBlockUser)
-          }
-        }
-
-        function handleBlockUser(updatedBlockUser) {
-          AsyncStorage.setItem('community_blockedUser', JSON.stringify(updatedBlockUser))
-            .then(() => {
-              Alert.alert('차단', '사용자를 차단했습니다.')
-              navigation.goBack()
-            })
-            .catch(error => {
-              console.log(error)
-              Alert.alert('차단', '사용자를 차단하지 못했습니다.')
-            })
-        }
-      }).catch((error) => {
-        console.log(error)
-        Alert.alert('차단', '사용자를 차단하지 못했습니다.')
-      })
   }
 
   const handleRefresh = () => {
@@ -621,13 +626,15 @@ export default function WriteReplies({ navigation }) {
     setRefreshing(false)
   }
 
-  const openSeeMoreModal = async (accountID) => {
-    setAccountID(`${await AsyncStorage.getItem('id')},${accountID}`)
+  const openSeeMoreModal = async (contentData, contentType) => {
+    const accountID = await AsyncStorage.getItem('id')
+    setReporterUserID(accountID)
+    setContentType(contentType)
+    setContentData(contentData)
     setSeeMoreModalState(true)
   }
 
   const closeSeeMoreModal = () => {
-    setAccountID(null)
     setSeeMoreModalState(false)
   }
 
@@ -673,7 +680,7 @@ export default function WriteReplies({ navigation }) {
       {/* 업로드 모달 */}
       <UploadModal uploadCount={uploadCount} isDarkMode={isDarkMode} visible={uploadModalState} />
       {/* 더보기 모달 */}
-      <SeeMoreModal accountID={accountID} openReportModal={openReportSelectModal} handleBlockedUser={handleBlockedUser} isDarkMode={isDarkMode} visible={seeMoreModalState} onClose={() => closeSeeMoreModal()} />
+      <SeeMoreModal reporterUserID={reporterUserID} contentData={contentData} openReportModal={openReportSelectModal} handleBlockedUser={handleBlockedUser} isDarkMode={isDarkMode} visible={seeMoreModalState} onClose={() => closeSeeMoreModal()} />
       {/* 신고 모달 */}
       <ReportSelectModal setReportType={setReportType} isDarkMode={isDarkMode} visible={reportSelectModalState} onClose={closeReportSelectModal} />
       {/* 신고 확인 모달 */}
@@ -682,7 +689,7 @@ export default function WriteReplies({ navigation }) {
       <KeyboardAvoidingView style={{ flex: 1, }} behavior={Platform.select({ ios: 'padding' })}>
         {/* 로고 */}
         <View style={styles.logoView}>
-          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView }} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
             <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 답글쓰기</Text>
           </TouchableOpacity>
         </View>
@@ -723,14 +730,13 @@ export default function WriteReplies({ navigation }) {
                                   </View>
 
                                   {/* 댓글 모달 */}
-                                  <TouchableOpacity onPress={() => openSeeMoreModal(data.account_id, 'Comment')} style={{ zIndex: 999, position: 'absolute', right: 10, }}>
+                                  <TouchableOpacity onPress={() => openSeeMoreModal(data, 'Comment')} style={{ zIndex: 999, position: 'absolute', right: 10, }}>
                                     <Icon_Feather color={isDarkMode ? '#ffffff' : '#000000'} name="more-vertical" size={20} />
                                   </TouchableOpacity>
 
                                   <View>
                                     {/* 사용자ID */}
                                     <Text style={[{ ...styles.CommentsAuthorText, color: '#000000' }, isDarkMode && { ...styles.CommentsAuthorText, color: '#ffffff' }]}>{data.author}</Text>
-
                                     {/* 댓글만 존재 */}
                                     {data.content != null && !data.image &&
                                       <Text style={[{ ...styles.CommentsContentText, color: '#000000' }, isDarkMode && { ...styles.CommentsContentText, color: '#ffffff' }]}>{data.content}</Text>
@@ -788,14 +794,14 @@ export default function WriteReplies({ navigation }) {
                                               </View>
 
                                               {/* 댓글 모달 */}
-                                              <TouchableOpacity onPress={() => openSeeMoreModal(_data.account_id, 'Reply')} style={{ zIndex: 999, position: 'absolute', right: 10, }}>
+                                              <TouchableOpacity onPress={() => openSeeMoreModal(_data, 'Reply')} style={{ zIndex: 999, position: 'absolute', right: 10, }}>
                                                 <Icon_Feather color={isDarkMode ? '#ffffff' : '#000000'} name="more-vertical" size={20} />
                                               </TouchableOpacity>
 
+                                              {/* 답글 */}
                                               <View>
                                                 {/* 사용자ID */}
                                                 <Text style={[{ ...styles.RepliesAuthorText, color: '#000000' }, isDarkMode && { ...styles.RepliesAuthorText, color: '#ffffff' }]}>{_data.author}</Text>
-
                                                 {/* 댓글만 존재 */}
                                                 {_data.content != null && !_data.image &&
                                                   <Text style={[{ ...styles.RepliesContentText, color: '#000000' }, isDarkMode && { ...styles.RepliesContentText, color: '#ffffff' }]}>{_data.content}</Text>
@@ -921,7 +927,7 @@ const styles = StyleSheet.create({
   },
   backButtonView: {
     position: 'absolute',
-    marginLeft: 20,
+    left: 10,
   },
   MessageContainer: {
     justifyContent: 'center',

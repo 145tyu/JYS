@@ -85,7 +85,7 @@ export default function BusHome({ navigation }) {
     <SafeAreaView style={[styles.container, isDarkMode && styles.containerDark]}>
       {/* 로고 */}
       <View style={styles.logoView}>
-        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, left: 20, }} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
           <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' },]}>
             {<Icon_Ionicons name="chevron-back-outline" size={21} />} 버스 조회
           </Text>

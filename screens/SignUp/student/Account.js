@@ -89,13 +89,15 @@ export default function S_SignUp_Account({ navigation }) {
     } else if (confirmPassword === null) {
       setMessage('확인 비밀번호를 입력해주세요.')
       return Alert.alert('경고', '확인 비밀번호를 입력해주세요.')
-    } else if (phoneNumber === '') {
-      setMessage('전화번호를 입력해주세요.')
-      return Alert.alert('경고', '전화번호를 입력해주세요.')
-    } else if (accountIDCheck === false) {
+    }
+    // else if (phoneNumber === '') {
+    //   setMessage('전화번호를 입력해주세요.')
+    //   return Alert.alert('경고', '전화번호를 입력해주세요.')
+    // } 
+    else if (accountIDCheck === false) {
       setMessage('아이디를 확인해 주세요.')
       return Alert.alert('경고', '아이디가 중복됩니다.\n아이디를 확인해주세요.')
-    } else if (!validatePhoneNumber(phoneNumber)) {
+    } else if (phoneNumber != '' && !validatePhoneNumber(phoneNumber)) {
       setMessage('전화번호 형식이 맞지 않습니다.')
       return Alert.alert('경고', '전화번호 형식이 맞지 않습니다.')
     } else if (password !== confirmPassword) {
@@ -106,7 +108,7 @@ export default function S_SignUp_Account({ navigation }) {
       return Alert.alert('경고', '비밀번호는 8자 이상, 숫자, 특수문자가 포함되어야 합니다.')
     } else {
       setMessage('양식에 맞게 작성해주세요.')
-      return navigation.navigate('SignUp_StudentID', { email: email, accountID: accountID, password: password, phoneNumber: phoneNumber, })
+      return navigation.navigate('SignUp_StudentID', { email: email, accountID: accountID, password: password, phoneNumber: phoneNumber != '' ? phoneNumber : null, })
     }
   }
 

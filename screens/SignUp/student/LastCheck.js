@@ -100,7 +100,7 @@ export default function S_SignUp_LastCheck({ navigation }) {
           <Text style={[{ color: '#666666', marginLeft: 5, marginBottom: 7, }, isDarkMode && { color: '#999999', marginLeft: 5, marginBottom: 7, }]}>전화번호</Text>
           <View style={[{ ...styles.inputView, borderColor: '#E9E9E9', backgroundColor: '#E9E9E9', }, isDarkMode && { ...styles.inputView, borderColor: '#333333', backgroundColor: '#333333', }]}>
             <Text style={[{ color: '#000000' }, isDarkMode && { color: '#ffffff' }]}>
-              {phoneNumber.replace(/[^0-9]/g, '').replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3").replace(/(\-{1,2})$/g, "")}
+              {phoneNumber != null && phoneNumber.replace(/[^0-9]/g, '').replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3").replace(/(\-{1,2})$/g, "")}
             </Text>
           </View>
 

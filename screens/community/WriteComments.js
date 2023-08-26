@@ -283,7 +283,7 @@ export default function WriteComments({ navigation }) {
   const [reportType, setReportType] = useState(null) // 신고 유형
   const [contentData, setContentData] = useState(null) // 콘텐츠 데이터
   const [contentType, setContentType] = useState(null) // 콘텐츠 유형
-  const [reporterUserID, setReporterUserID] = useState(',') // 모달 관리 ID 설정
+  const [reporterUserID, setReporterUserID] = useState(null) // 모달 관리 ID 설정
 
   const [commentsData, setCommentsData] = useState([])
   const [commentsType, setCommentsType] = useState(null)
@@ -352,7 +352,7 @@ export default function WriteComments({ navigation }) {
     setCommentsType(null)
     const blockUser = await AsyncStorage.getItem('community_blockedUser')
     try {
-      await axiosInstance.post('/Community/commentsCheck', { postID: postID, blockUser: blockUser, })
+      await axiosInstance.post('/Community/commentsCheck', { postID: postID, blockUser: JSON.parse(blockUser), })
         .then((res) => {
           if (res.status === 200) {
             const data = res.data.data
@@ -395,7 +395,7 @@ export default function WriteComments({ navigation }) {
     setRepliesType(null)
     const blockUser = await AsyncStorage.getItem('community_blockedUser')
     try {
-      await axiosInstance.post('/Community/repliesCheck', { postID: postID, blockUser: blockUser, })
+      await axiosInstance.post('/Community/repliesCheck', { postID: postID, blockUser: JSON.parse(blockUser), })
         .then((res) => {
           if (res.status === 200) {
             const data = res.data.data
@@ -435,14 +435,16 @@ export default function WriteComments({ navigation }) {
   }
 
   const handelReport = async () => {
-    console.log(reporterUserID, reportType, contentData.account_id, contentData.id, contentType)
     try {
       await axiosInstance.post('/Community/Report/reportForm', { reporterUserID: reporterUserID, reportType: reportType, contentUserID: contentData.account_id, contentID: contentData.id, contentType: contentType, })
         .then((res) => {
           if (res.status === 200) {
-            Alert.alert('신고하기', res.data.message, [{ text: '확인', }])
             if (contentType === 'Post') {
               navigation.goBack()
+              Alert.alert('신고하기', `${res.data.message}\n이 사용자를 차단할까요?`, [{ text: '차단하기', onPress: () => handleBlockedUser() }, { text: '아니요' }])
+            } else {
+              handleRefresh()
+              Alert.alert('신고하기', res.data.message, [{ text: '확인', }])
             }
           } else {
             return Alert.alert('신고하기', '신고를 접수하지 못했습니다.', [{ text: '확인', }])
@@ -487,26 +489,28 @@ export default function WriteComments({ navigation }) {
         }
         if (user === null) {
           blockUser.push(blockUserObject)
-          handleBlockUser(blockUser)
+          BlockUser(blockUser)
         } else {
           const existingBlockUser = JSON.parse(user)
           const duplicationUser = existingBlockUser.some(data => data.id === blockUserObject.id)
 
           if (duplicationUser) {
-            Alert.alert('차단', '이미 차단된 사용자입니다.')
+            Alert.alert('차단', '이 기기에서 이미 차단된 사용자입니다.')
           } else {
             existingBlockUser.push(blockUserObject)
-            handleBlockUser(existingBlockUser)
+            BlockUser(existingBlockUser)
           }
         }
 
-        function handleBlockUser(updatedBlockUser) {
+        function BlockUser(updatedBlockUser) {
           AsyncStorage.setItem('community_blockedUser', JSON.stringify(updatedBlockUser))
             .then(() => {
-              Alert.alert('차단', '사용자를 차단했습니다.')
-              navigation.goBack()
-            })
-            .catch(error => {
+              handleRefresh()
+              Alert.alert('차단', '이 기기에서 사용자를 차단했습니다.')
+              if (contentType === 'Post') {
+                navigation.goBack()
+              }
+            }).catch(error => {
               console.log(error)
               Alert.alert('차단', '사용자를 차단하지 못했습니다.')
             })
@@ -529,6 +533,11 @@ export default function WriteComments({ navigation }) {
       }).then(async (res) => {
         setUploadModalState(false)
         if (res.status === 200) {
+          // 댓글 작성칸 초기화
+          setCommentsForm('')
+          setImageData([])
+          setUploadCount('')
+          // 데이터 새로고침
           commentsCheck()
           repliesCheck()
         } else {
@@ -604,10 +613,6 @@ export default function WriteComments({ navigation }) {
         handleCommentsForm(formData)
       }).catch((error) => {
         console.log(error)
-      }).finally(() => {
-        setCommentsForm('')
-        setImageData([])
-        setUploadCount('')
       })
   }
 
@@ -681,7 +686,7 @@ export default function WriteComments({ navigation }) {
       <KeyboardAvoidingView style={{ flex: 1, }} behavior={Platform.select({ ios: 'padding' })}>
         {/* 로고 */}
         <View style={styles.logoView}>
-          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView }} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
             <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 댓글 {commentsData === null ? '0' : commentsData.length}</Text>
           </TouchableOpacity>
         </View>
@@ -728,7 +733,6 @@ export default function WriteComments({ navigation }) {
                                 <View>
                                   {/* 사용자ID */}
                                   <Text style={[{ ...styles.CommentsAuthorText, color: '#000000' }, isDarkMode && { ...styles.CommentsAuthorText, color: '#ffffff' }]}>{data.author}</Text>
-
                                   {/* 댓글만 존재 */}
                                   {data.content != null && !data.image &&
                                     <Text style={[{ ...styles.CommentsContentText, color: '#000000' }, isDarkMode && { ...styles.CommentsContentText, color: '#ffffff' }]}>{data.content}</Text>
@@ -799,7 +803,6 @@ export default function WriteComments({ navigation }) {
                                             <View key={data.id} style={{ marginBottom: 13, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
                                               {/* 사용자ID */}
                                               <Text style={[{ ...styles.RepliesAuthorText, color: '#000000' }, isDarkMode && { ...styles.RepliesAuthorText, color: '#ffffff' }]}>{_data.author}</Text>
-
                                               {/* 댓글만 존재 */}
                                               {_data.content != null && !_data.image &&
                                                 <Text style={[{ ...styles.RepliesContentText, color: '#000000' }, isDarkMode && { ...styles.RepliesContentText, color: '#ffffff' }]}>{_data.content}</Text>
@@ -951,7 +954,7 @@ const styles = StyleSheet.create({
   },
   backButtonView: {
     position: 'absolute',
-    marginLeft: 20,
+    left: 10,
   },
   CommentsContainer: {
     width: 'auto',

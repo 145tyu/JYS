@@ -76,7 +76,7 @@ export default function AddBusStopID({ navigation }) {
 
       {/* 로고 */}
       <View style={styles.logoView}>
-        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView }} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
           <Text style={[{ ...styles.backButtonText, color: '#000000' }, isDarkMode && { ...styles.backButtonText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 정류장 추가</Text>
         </TouchableOpacity>
 
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   backButtonView: {
     position: 'absolute',
-    marginLeft: 20,
+    left: 10,
   },
   backButtonText: {
     fontSize: 20,

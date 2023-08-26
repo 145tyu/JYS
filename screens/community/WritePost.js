@@ -235,7 +235,7 @@ export default function WritePost({ navigation }) {
       <KeyboardAvoidingView style={{ flex: 1, }} behavior={Platform.select({ ios: 'padding' })}>
         {/* 로고 */}
         <View style={styles.logoView}>
-          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView }} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
             <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 게시글 작성</Text>
           </TouchableOpacity>
 
@@ -311,6 +311,33 @@ export default function WritePost({ navigation }) {
               {renderSelectedImages()}
             </ScrollView>
           </View>
+
+          <View style={{ marginTop: 100, }}>
+            <Text style={[{ color: '#999999', }, isDarkMode && { color: '#666666', }]}>
+              영실커넥트는 누구나 기분 좋게 참여할 수 있는 커뮤니티를 만들기 위해 커뮤니티 이용규칙을 제정하여 운영하고 있습니다.
+              {'\n'}{'\n'}
+              위반 게시물이 삭제되고 서비스 이용이 일정 기간 제한될 수 있습니다.
+              {'\n'}{'\n'}
+              게시물 작성 전 커뮤니티 이용규칙을 반드시 확인하시기 바랍니다.
+              {'\n'}{'\n'}
+              1. 불법촬영물 유통 금지
+              {'\n'}{'\n'}
+              불법촬영물등을 게재할 경우 전기통신사업법에 따라 삭제 조치 및 서비스 이용이 영구적으로 제한될 수 있으며 관련 법률에 따라 처벌받을 수 있습니다.
+              {'\n'}{'\n'}
+              2. 규칙 위반
+              {'\n'}{'\n'}
+              - 타인의 권리를 침해하거나 불쾌감을 주는 행위
+              {'\n'}
+              - 범죄, 불법 행위 등 법령을 위반하는 행위
+              {'\n'}
+              - 욕설, 비하, 차별, 혐오, 자살, 폭력, 관련 내용을 포함한 게시물 작성 행위
+              {'\n'}
+              - 음란물, 성적 수치심을 유발하는 행위
+              {'\n'}
+              - 스포일러, 공포, 속임, 놀라게 하는 행위
+              {'\n'}
+            </Text>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -337,7 +364,7 @@ const styles = StyleSheet.create({
   },
   backButtonView: {
     position: 'absolute',
-    left: 20,
+    left: 10,
   },
   sendPostButtonView: {
     position: 'absolute',

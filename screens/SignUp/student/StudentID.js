@@ -19,7 +19,10 @@ const SelectStudentIDModal = ({ type, _grade, _class, _number, setGrade, setClas
             <Picker
               style={{ color: isDarkMode ? '#ffffff' : '#000000' }}
               selectedValue={_grade}
-              onValueChange={(value) => { setGrade(value) }}
+              onValueChange={(value) => {
+                setGrade(value)
+                onClose()
+              }}
             >
               <Picker.Item label='학년 선택' enabled={false} />
               <Picker.Item label="1학년" value="1" />
@@ -43,7 +46,10 @@ const SelectStudentIDModal = ({ type, _grade, _class, _number, setGrade, setClas
             <Picker
               style={{ color: isDarkMode ? '#ffffff' : '#000000' }}
               selectedValue={_class}
-              onValueChange={(value) => { setClass(value) }}
+              onValueChange={(value) => {
+                setClass(value)
+                onClose()
+              }}
             >
               <Picker.Item label='반 선택' enabled={false} />
               <Picker.Item label="1반" value="01" />
@@ -72,7 +78,10 @@ const SelectStudentIDModal = ({ type, _grade, _class, _number, setGrade, setClas
             <Picker
               style={{ color: isDarkMode ? '#ffffff' : '#000000' }}
               selectedValue={_number}
-              onValueChange={(value) => { setNumber(value) }}
+              onValueChange={(value) => {
+                setNumber(value)
+                onClose()
+              }}
             >
               <Picker.Item label='번호 선택' enabled={false} />
               <Picker.Item label="1번" value="01" />

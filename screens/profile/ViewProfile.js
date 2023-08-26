@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal } from 'react-native';
-import { CommonActions, useFocusEffect } from "@react-navigation/native";
+import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal, Linking } from 'react-native';
+import { CommonActions, useFocusEffect, useIsFocused } from "@react-navigation/native";
 import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -10,282 +10,291 @@ import Icon_Feather from 'react-native-vector-icons/Feather';
 import axiosInstance from "../../api/API_Server";
 
 export default function ViewProfile({ navigation }) {
-    const isDarkMode = useColorScheme() === 'dark'
+  const isDarkMode = useColorScheme() === 'dark'
+  const isFocused = useIsFocused()
 
-    const [accountID, setAccountID] = useState('로딩 중...')
-    const [email, setEmail] = useState('로딩 중...')
-    const [phoneNumber, setPhoneNumber] = useState('로딩 중...')
-    const [studentID, setStudentID] = useState('로딩 중...')
-    const [firstName, setFirstName] = useState(null)
-    const [lastName, setLastName] = useState(null)
-    const [fullName,  setFullName] = useState('로딩 중...')
+  const [profileData, setProfileData] = useState([])
+  const [profileType, setProfileType] = useState(null)
 
-    const [profileStateType, setProfileStateType] = useState(null)
-
-    const handleProfile = async() => {
-        try {
-            const ID = await AsyncStorage.getItem('id')
-            const JOB = await AsyncStorage.getItem('job')
-            
-            await axiosInstance.post('/profile', { id: ID, job: JOB })
-                .then((res) => {
-                    setProfileStateType(1)
-                    setAccountID(res.data.accountID)
-                    setEmail(res.data.email)
-                    setPhoneNumber(res.data.phoneNumber)
-                    setStudentID(res.data.studentID)
-                    setFirstName(res.data.firstName)
-                    setLastName(res.data.lastName)
-                    setFullName(res.data.firstName + res.data.lastName)
-                }).catch((error) => {
-                    setProfileStateType(2)
-                    console.log('Profile API |', error)
-                    return Alert.alert('에러', '요청에 실패했습니다.', [
-                        {
-                            text: '다시시도',
-                            onPress: () => {
-                                handleProfile()
-                            }
-                        }
-                    ])
-                })
-        } catch (error) {
-            setProfileStateType(2)
-            console.log('Profile API |', error)
-            return Alert.alert('에러', '요청에 실패했습니다.', [
-                {
-                    text: '다시시도',
-                    onPress: () => {
-                        handleProfile()
-                    }
-                }
+  const handleProfile = async () => {
+    try {
+      const ID = await AsyncStorage.getItem('id')
+      const JOB = await AsyncStorage.getItem('job')
+      await axiosInstance.post('/profile', { id: ID, job: JOB })
+        .then((res) => {
+          if (res.status === 200) {
+            setProfileData(res.data)
+            setProfileType(1)
+          } else {
+            setProfileType(0)
+          }
+        }).catch((error) => {
+          setProfileType(0)
+          console.log('Profile API |', error)
+          if (error.response) {
+            const res = error.response
+            if (res.status === 400) {
+              return Alert.alert(res.data.error, res.data.errorDescription, [
+                { text: '확인' },
+              ])
+            } else if (res.status === 500) {
+              return Alert.alert(res.data.error, res.data.errorDescription, [
+                { text: '확인' },
+              ])
+            } else {
+              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+                { text: '확인' },
+              ])
+            }
+          } else {
+            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+              { text: '확인' },
             ])
-        }
+          }
+        })
+    } catch (error) {
+      setProfileType(0)
+      console.log('Profile API |', error)
     }
+  }
 
-    const handleLogout = async() => {
-        try {
-            const fcmToken = await messaging().getToken()
-            await axiosInstance.post('/Fcm/deleteToken', { fcmToken: fcmToken })
-                .then((res) => {
-                    console.log(res.data.message)
-                }).catch((error) => {
-                    console.log('logout API | ', error)
-                    return Alert.alert('에러', '요청을 실패했습니다.', [
-                        {
-                            text: '다시시도',
-                            onPress: () => {
-                                handleLogout()
-                            }
-                        }
-                    ])
-                })
-            AsyncStorage.removeItem('id')
-            AsyncStorage.removeItem('job')
-            AsyncStorage.removeItem('access_token')
-            AsyncStorage.removeItem('refresh_token')
-            //AsyncStorage.removeItem('fcm_token')
-            return navigation.dispatch(
-                CommonActions.reset({
-                    index: 0,
-                    routes: [{ name: 'Login'}]
-                })
-            )
-        } catch (error) {
-            console.log('logout API | ', error)
-            return Alert.alert('에러', '요청을 실패했습니다.', [
-                {
-                    text: '다시시도',
-                    onPress: () => {
-                        handleLogout()
-                    }
-                }
-            ])
-        }
+  const handleFcmDelete = async () => {
+    try {
+      const fcmToken = await messaging().getToken()
+      await axiosInstance.post('/Fcm/deleteToken', { fcmToken: fcmToken })
+        .then((res) => {
+          console.log(res.data.message)
+        }).catch((error) => {
+          console.log('Fcm API | ', error)
+        })
+    } catch (error) {
+      console.log('Fcm API | ', error)
     }
+  }
 
-    useEffect(() => {
-        handleProfile() // 스크린이 처음 시작될 때 한번 실행
-    }, [])
+  const handleLogout = async () => {
+    try {
+      handleFcmDelete()
+      AsyncStorage.removeItem('id')
+      AsyncStorage.removeItem('job')
+      AsyncStorage.removeItem('access_token')
+      AsyncStorage.removeItem('refresh_token')
+      AsyncStorage.removeItem('fcm_token')
+      return navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Login' }]
+        })
+      )
+    } catch (error) {
+      console.log('logout | ', error)
+      return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+        { text: '확인' },
+        { text: '다시시도', onPress:() => handleLogout()}
+      ])
+    }
+  }
 
-    useFocusEffect(() => {
-        handleProfile() // 스크린 다시 렌더
-    })
+  useEffect(() => {
+    handleProfile() // 스크린이 처음 시작될 때 한번 실행
+  }, [isFocused])
 
-    return(
-        <SafeAreaView style={[styles.container, isDarkMode && styles.containerDark]}>
-            {/* 로고 */}
-            <View style={styles.logoView} >
-                <TouchableOpacity style={styles.backButtonView} onPress={() => navigation.goBack()}>
-                    <Icon_Ionicons name='arrow-back-outline' size={30} style={[styles.backButtonIcon, isDarkMode && styles.backButtonIconDark]}/>
+  return (
+    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#f0f0f0' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' },]}>
+      {/* 로고 */}
+      <View style={styles.logoView}>
+        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
+          <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' },]}>
+            {<Icon_Ionicons name="chevron-back-outline" size={21} />} 프로필
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {profileType === null ?
+        <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
+          <ActivityIndicator size='large' color='green' />
+        </View>
+        :
+        <>
+          {profileType === 0 &&
+            <View style={{ ...StyleSheet.absoluteFillObject, ...styles.MessageContainer, }}>
+              <Text style={[{ ...styles.Message, color: '#666666', }, isDarkMode && { ...styles.Message, color: '#999999', },]}>프로필 정보를 불러올 수 없어요.</Text>
+
+              <View style={{ ...StyleSheet.absoluteFillObject, ...styles.refresBtnContainer, }}>
+                <TouchableOpacity onPress={() => { handleProfile() }} style={{ ...styles.refresBtn, }}>
+                  <Text style={{ textAlign: 'center', color: '#ffffff', }}>다시시도</Text>
                 </TouchableOpacity>
-                <Text style={[styles.logoText, isDarkMode && styles.logoTextDark]}>프로필</Text>
+              </View>
             </View>
-
-            {/* 스크롤 */}
-            <ScrollView style={[styles.scrollContainer, isDarkMode && styles.scrollContainerDark]}>
+          }
+          {profileType === 1 &&
+            <>
+              {/* 스크롤 */}
+              <ScrollView style={[{ ...styles.scrollContainer, backgroundColor: '#f0f0f0', }, isDarkMode && { ...styles.scrollContainer, backgroundColor: '#000000', }]}>
                 {/* 계정ID */}
                 <>
-                    <Text style={profileStyles.InfoTopText}>계정ID</Text>
-                    <View style={[profileStyles.Info, isDarkMode && profileStyles.InfoDark]}>
-                        <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit_Email', { methodName: 'email', email: email})}>
-                            <Text style={[profileStyles.Title, isDarkMode && profileStyles.TitleDark]}>이메일</Text>
-                            <Text style={profileStyles.Value}>{email}</Text>
-                        </TouchableOpacity>
-                    </View>
+                  <Text style={styles.InfoTopText}>계정ID</Text>
+                  <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit_Email', { methodName: 'email', email: profileData.email })}>
+                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>이메일</Text>
+                      <Text style={styles.Value}>{profileData.email}</Text>
+                    </TouchableOpacity>
+                  </View>
                 </>
                 {/* 개인정보 */}
                 <>
-                    <Text style={profileStyles.InfoTopText}>개인정보</Text>
-                    <View style={[profileStyles.Info, isDarkMode && profileStyles.InfoDark]}>
-                        <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'accountID', accountID: accountID })}>
-                            <Text style={[profileStyles.Title, isDarkMode && profileStyles.TitleDark]}>아이디</Text>
-                            <Text style= {profileStyles.Value}>{accountID}</Text>
-                        </TouchableOpacity>
+                  <Text style={styles.InfoTopText}>개인정보</Text>
+                  <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'accountID', accountID: profileData.accountID })}>
+                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>아이디</Text>
+                      <Text style={styles.Value}>{profileData.accountID}</Text>
+                    </TouchableOpacity>
 
-                        <View style={profileStyles.rankView}></View>
+                    <View style={styles.rankView}></View>
 
-                        <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit_Password')}>
-                            <Text style={[profileStyles.Title, isDarkMode && profileStyles.TitleDark]}>비밀번호</Text>
-                        </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit_Password')}>
+                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>비밀번호</Text>
+                    </TouchableOpacity>
 
-                        <View style={profileStyles.rankView}></View>
+                    <View style={styles.rankView}></View>
 
-                        <View>
-                            <Text style={[profileStyles.Title, isDarkMode && profileStyles.TitleDark]}>학번</Text>
-                            <Text style= {profileStyles.Value}>{studentID}</Text>
-                        </View>
-
-                        <View style={profileStyles.rankView}></View>
-
-                        <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'phoneNumber', phoneNumber: phoneNumber })}>
-                            <Text style={[profileStyles.Title, isDarkMode && profileStyles.TitleDark]}>전화번호</Text>
-                            <Text style= {profileStyles.Value}>{phoneNumber}</Text>
-                        </TouchableOpacity>
-
-                        <View style={profileStyles.rankView}></View>
-                        
-                        <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'name', firstName: firstName, lastName: lastName })}>
-                            <Text style={[profileStyles.Title, isDarkMode && profileStyles.TitleDark]}>이름</Text>
-                            <Text style= {profileStyles.Value}>{fullName}</Text>
-                        </TouchableOpacity>
+                    <View>
+                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>학번</Text>
+                      <Text style={styles.Value}>{profileData.studentID}</Text>
                     </View>
+
+                    <View style={styles.rankView}></View>
+
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'phoneNumber', phoneNumber: profileData.phoneNumber })}>
+                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>전화번호</Text>
+                      <Text style={styles.Value}>{profileData.phoneNumber}</Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.rankView}></View>
+
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'name', firstName: profileData.firstName, lastName: profileData.lastName })}>
+                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>이름</Text>
+                      <Text style={styles.Value}>{profileData.firstName}{profileData.lastName}</Text>
+                    </TouchableOpacity>
+                  </View>
                 </>
-            </ScrollView>
-            {/* 로그아웃 */}
-            <TouchableOpacity style={profileStyles.logoutBtn} onPress={handleLogout}>
-                <Text style={profileStyles.logoutBtnText}>{<Icon_Ionicons name="log-out-outline" size={17}></Icon_Ionicons>} 로그아웃</Text>
-            </TouchableOpacity>
-        </SafeAreaView>
-    )
+                {/* 회원탈퇴 */}
+                <>
+                  <Text style={styles.InfoTopText}>탈퇴하기</Text>
+                  <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+                    <TouchableOpacity onPress={() => { Linking.openURL('https://x8640.channel.io/home') }}>
+                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>
+                        탈퇴 문의하기
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+                <View style={{ marginBottom: 100, }}></View>
+              </ScrollView>
+
+              {/* 로그아웃 */}
+              <TouchableOpacity style={styles.logoutBtnContainer} onPress={handleLogout}>
+                <Text style={styles.logoutBtnText}>{<Icon_Ionicons name="log-out-outline" size={17}></Icon_Ionicons>} 로그아웃</Text>
+              </TouchableOpacity>
+            </>
+          }
+        </>
+      }
+    </SafeAreaView>
+  )
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F0F0F0',
-    },
-    containerDark: {
-        flex: 1,
-        backgroundColor: '#000000',
-    },
-    scrollContainer: {
-        backgroundColor: '#F0F0F0',
-    },
-    scrollContainerDark: {
-        backgroundColor: '#000000',
-    },
-    logoView: {
-        height: '7%',
-        marginTop: 20,
-        marginBottom: 20,
-        justifyContent: 'center',
-    },
-    logoText: {
-        fontSize: 21,
-        fontWeight: 'bold',
-        marginLeft: 60,
-        color: 'black',
-    },
-    logoTextDark: {
-        fontSize: 21,
-        fontWeight: 'bold',
-        marginLeft: 60,
-        color: 'white',
-    },
-    backButtonView: {
-        position: 'absolute',
-        marginLeft: 15,
-    },
-    backButtonIcon: {
-        color: 'black',
-    },
-    backButtonIconDark: {
-        color: 'white',
-    }
-})
-
-const profileStyles = StyleSheet.create({
-    Info: {
-        backgroundColor: '#fff',
-        padding: 20,
-        borderRadius: 25,
-        marginBottom: 20,
-        width: '100%',
-        maxWidth: 400,
-    },
-    InfoDark: {
-        backgroundColor: '#121212', // 다크모드에서의 배경색상
-        padding: 20,
-        borderRadius: 25,
-        marginBottom: 20,
-        width: '100%',
-        maxWidth: 400,
-    },
-    InfoTopText: {
-        color: 'gray',
-        fontWeight: 'bold',
-        marginLeft: 20,
-        marginBottom: 5,
-    },
-    Title: {
-        color: '#000000',
-        fontSize: 20,
-        fontWeight: '400',
-        marginLeft: 5,
-    },
-    TitleDark: {
-        color: '#FFFFFF',
-        fontSize: 20,
-        fontWeight: '400',
-        marginLeft: 5,
-    },
-    Value: {
-        color: '#4682b4',
-        fontSize: 14,
-        marginLeft: 5,
-    },
-    rankView: {
-        width: '100%',
-        height: 1,
-        marginTop: 15,
-        marginBottom: 15,
-        backgroundColor: 'gray',
-    },
-    logoutBtn: {
-        backgroundColor: '#1E00D3',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 20,
-        alignSelf: 'center',
-        position: 'absolute',
-        bottom: 0,
-        marginBottom: 20,
-    },
-    logoutBtnText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        textAlign: 'center',
-        fontSize: 15,
-    },
+  container: {
+    flex: 1,
+  },
+  scrollContainer: {
+    marginTop: 20,
+  },
+  logoView: {
+    height: 60,
+    justifyContent: 'center',
+  },
+  logoText: {
+    fontSize: 20,
+    fontWeight: '400',
+  },
+  backButtonView: {
+    position: 'absolute',
+    top: 20,
+    left: 10,
+  },
+  Info: {
+    padding: 20,
+    borderRadius: 25,
+    marginBottom: 20,
+    width: '100%',
+  },
+  InfoTopText: {
+    color: 'gray',
+    fontWeight: 'bold',
+    marginLeft: 20,
+    marginBottom: 5,
+  },
+  Title: {
+    color: '#000000',
+    fontSize: 20,
+    fontWeight: '400',
+    marginLeft: 5,
+  },
+  Value: {
+    color: '#4682b4',
+    fontSize: 14,
+    marginLeft: 5,
+  },
+  logoutBtnContainer: {
+    backgroundColor: '#1E00D3',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    alignSelf: 'center',
+    position: 'absolute',
+    bottom: 0,
+    marginBottom: 20,
+  },
+  logoutBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 15,
+  },
+  rankView: {
+    width: '100%',
+    height: 1,
+    marginTop: 15,
+    marginBottom: 15,
+    backgroundColor: 'gray',
+  },
+  MessageContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  Message: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: 'bold',
+    position: 'absolute',
+    width: '100%',
+    marginTop: 100,
+  },
+  refresBtnContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginBottom: 100,
+  },
+  refresBtn: {
+    width: '30%',
+    backgroundColor: '#EB4E45',
+    borderRadius: 10,
+    height: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 })
