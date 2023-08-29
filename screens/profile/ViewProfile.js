@@ -90,7 +90,7 @@ export default function ViewProfile({ navigation }) {
       console.log('logout | ', error)
       return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
         { text: '확인' },
-        { text: '다시시도', onPress:() => handleLogout()}
+        { text: '다시시도', onPress: () => handleLogout() }
       ])
     }
   }
@@ -178,13 +178,26 @@ export default function ViewProfile({ navigation }) {
                     </TouchableOpacity>
                   </View>
                 </>
-                {/* 회원탈퇴 */}
+                {/* 계정 */}
                 <>
-                  <Text style={styles.InfoTopText}>탈퇴하기</Text>
-                  <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                    <TouchableOpacity onPress={() => { Linking.openURL('https://x8640.channel.io/home') }}>
+                  <Text style={styles.InfoTopText}>계정</Text>
+                  <View style={[{ ...styles.Info, marginBottom: 0, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+                    <TouchableOpacity onPress={() => {
+                      Alert.alert('정보', '원활한 상담을 위해 학번, 이름과 용건을 말해주세요.', [
+                        { text: '이동', onPress: () => Linking.openURL('https://x8640.channel.io/home') },
+                        { text: '취소', }
+                      ])
+                    }}>
                       <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>
-                        탈퇴 문의하기
+                        계정 문의
+                      </Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.rankView}></View>
+
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Delete_Account')}>
+                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>
+                        탈퇴 신청
                       </Text>
                     </TouchableOpacity>
                   </View>

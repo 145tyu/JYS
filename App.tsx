@@ -36,6 +36,7 @@ import Profile_View from './screens/profile/ViewProfile';
 import Profile_Edit from './screens/profile/EditProfile';
 import Profile_Edit_Email from './screens/profile/EditEmail';
 import Profile_Edit_Password from './screens/profile/EditPassword';
+import Profile_DeleteAccount from './screens/profile/DeleteAccount';
 
 import Community_Home from './screens/community/CommunityHome';
 import Community_ViewPost from './screens/community/ViewPost';
@@ -206,6 +207,7 @@ const App = () => {
         <Stack.Screen name="Profile_Edit" component={Profile_Edit} options={{ headerShown: false, animation: 'fade' }}/>
         <Stack.Screen name="Profile_Edit_Email" component={Profile_Edit_Email} options={{ headerShown: false, animation: 'fade' }}/>
         <Stack.Screen name="Profile_Edit_Password" component={Profile_Edit_Password} options={{ headerShown: false, animation: 'fade' }}/>
+        <Stack.Screen name="Profile_Delete_Account" component={Profile_DeleteAccount} options={{ headerShown: false, animation: 'fade' }}/>
       
         <Stack.Screen name="Community_Home" component={S_Tab} options={{ headerShown: false, animation: 'fade' }}/>
         <Stack.Screen name="Community_ViewPost" component={Community_ViewPost} options={{ headerShown: false, animation: 'fade' }}/>
