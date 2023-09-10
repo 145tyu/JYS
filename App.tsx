@@ -3,6 +3,7 @@ import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAre
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { PERMISSIONS, RESULTS, check, request } from 'react-native-permissions';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -54,8 +55,8 @@ function S_Tab() {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <Tab.Navigator screenOptions={{
-      tabBarActiveTintColor: isDarkMode? '#FFFFFF' : '#000',
-      tabBarInactiveTintColor: isDarkMode? '#BEBEBE' : '#8e8e8e',
+      tabBarActiveTintColor: isDarkMode ? '#FFFFFF' : '#000',
+      tabBarInactiveTintColor: isDarkMode ? '#BEBEBE' : '#8e8e8e',
       tabBarStyle: {
         backgroundColor: isDarkMode ? '#222' : '#fff',
       },
@@ -76,7 +77,7 @@ function S_Tab() {
           ),
         }}
       />
-      <Tab.Screen 
+      <Tab.Screen
         name='Community_Tab_Home'
         component={Community_Home}
         options={{
@@ -88,7 +89,7 @@ function S_Tab() {
           ),
         }}
       />
-      <Tab.Screen 
+      <Tab.Screen
         name='S_Tab_AllTab'
         component={S_AllTab}
         options={{
@@ -109,8 +110,8 @@ function T_Tab() {
 
   return (
     <Tab.Navigator screenOptions={{
-      tabBarActiveTintColor: isDarkMode? '#FFFFFF' : '#000',
-      tabBarInactiveTintColor: isDarkMode? '#BEBEBE' : '#8e8e8e',
+      tabBarActiveTintColor: isDarkMode ? '#FFFFFF' : '#000',
+      tabBarInactiveTintColor: isDarkMode ? '#BEBEBE' : '#8e8e8e',
       tabBarStyle: {
         backgroundColor: isDarkMode ? '#222' : '#fff',
       },
@@ -131,7 +132,7 @@ function T_Tab() {
           ),
         }}
       />
-      <Tab.Screen 
+      <Tab.Screen
         name='T_Tab_RoomSituation'
         component={T_RoomSituation}
         options={{
@@ -143,7 +144,7 @@ function T_Tab() {
           ),
         }}
       />
-      <Tab.Screen 
+      <Tab.Screen
         name='T_Tab_Profile'
         component={T_Profile}
         options={{
@@ -160,18 +161,42 @@ function T_Tab() {
 }
 
 async function requestUserPermission() {
-  const authStatus = await messaging().requestPermission();
-  const enabled =
-    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  try {
+    if (Platform.OS === 'android') {
+      check(PERMISSIONS.ANDROID.POST_NOTIFICATIONS)
+        .then(async (res) => {
+          if (res === RESULTS.GRANTED) {
+            console.log('Permission has already been granted.')
+          } else {
+            console.log('Request permission.')
+            await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS)
+              .then((newRes) => {
+                if (newRes === RESULTS.GRANTED) {
+                  console.log('Permission granted.')
+                } else {
+                  console.log('Permission denied.')
+                }
+              })
+          }
+        })
+    } else if (Platform.OS === 'ios') {
+      const authStatus = await messaging().requestPermission()
+      const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED || authStatus === messaging.AuthorizationStatus.PROVISIONAL
 
-  if (enabled) {
-    console.log('Authorization status:', authStatus);
+      if (enabled) {
+        console.log('Authorization status:', authStatus)
+      }
+    } else {
+      console.log('This OS is not supported.')
+    }
+  } catch (error) {
+    console.log('권한을 확인하지 못했습니다.')
   }
 }
 
 const App = () => {
-  requestUserPermission()
+  requestUserPermission() // 알림 권한 요청
+
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage))
@@ -182,41 +207,41 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="Start" component={StartScreen} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false, animation: 'fade' }}/>
+        <Stack.Screen name="Start" component={StartScreen} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false, animation: 'fade' }} />
 
-        <Stack.Screen name="SignUp_Welcome" component={S_SignUp_Welcome} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="SignUp_ToS" component={S_SignUp_ToS} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="SignUp_Email" component={S_SignUp_Email} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="SignUp_Account" component={S_SignUp_Account} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="SignUp_StudentID" component={S_SignUp_StudentID} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="SignUp_CheckStudentID" component={S_SignUp_CheckStudentID} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="SignUp_LastCheck" component={S_SignUp_LastCheck} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="SignUp_Success" component={S_SignUp_Success} options={{ headerShown: false, animation: 'fade' }}/>
+        <Stack.Screen name="SignUp_Welcome" component={S_SignUp_Welcome} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="SignUp_ToS" component={S_SignUp_ToS} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="SignUp_Email" component={S_SignUp_Email} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="SignUp_Account" component={S_SignUp_Account} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="SignUp_StudentID" component={S_SignUp_StudentID} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="SignUp_CheckStudentID" component={S_SignUp_CheckStudentID} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="SignUp_LastCheck" component={S_SignUp_LastCheck} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="SignUp_Success" component={S_SignUp_Success} options={{ headerShown: false, animation: 'fade' }} />
 
-        <Stack.Screen name="S_Home" component={S_Tab} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="S_RoomRental" component={S_RoomRental} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="S_RoomCancel" component={S_RoomCancel} options={{ headerShown: false, animation: 'fade' }}/>
+        <Stack.Screen name="S_Home" component={S_Tab} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="S_RoomRental" component={S_RoomRental} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="S_RoomCancel" component={S_RoomCancel} options={{ headerShown: false, animation: 'fade' }} />
 
-        <Stack.Screen name="T_Home" component={T_Tab} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="T_Profile" component={T_Profile} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="T_Tab_RoomSituation" component={T_RoomSituation} options={{ headerShown: false, animation: 'fade' }}/>
+        <Stack.Screen name="T_Home" component={T_Tab} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="T_Profile" component={T_Profile} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="T_Tab_RoomSituation" component={T_RoomSituation} options={{ headerShown: false, animation: 'fade' }} />
 
-        <Stack.Screen name="Profile_View" component={Profile_View} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="Profile_Edit" component={Profile_Edit} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="Profile_Edit_Email" component={Profile_Edit_Email} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="Profile_Edit_Password" component={Profile_Edit_Password} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="Profile_Delete_Account" component={Profile_DeleteAccount} options={{ headerShown: false, animation: 'fade' }}/>
-      
-        <Stack.Screen name="Community_Home" component={S_Tab} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="Community_ViewPost" component={Community_ViewPost} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="Community_WritePost" component={Community_WritePost} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="Community_WriteComments" component={Community_WriteComments} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="Community_WriteReplies" component={Community_WriteReplies} options={{ headerShown: false, animation: 'fade' }}/>
+        <Stack.Screen name="Profile_View" component={Profile_View} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="Profile_Edit" component={Profile_Edit} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="Profile_Edit_Email" component={Profile_Edit_Email} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="Profile_Edit_Password" component={Profile_Edit_Password} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="Profile_Delete_Account" component={Profile_DeleteAccount} options={{ headerShown: false, animation: 'fade' }} />
 
-        <Stack.Screen name="Bus_main" component={Bus_Home} options={{ headerShown: false, animation: 'fade' }}/>
-        <Stack.Screen name="Bus_AddBusStopID" component={Bus_AddBusStopID} options={{ headerShown: false, animation: 'fade' }}/>
+        <Stack.Screen name="Community_Home" component={S_Tab} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="Community_ViewPost" component={Community_ViewPost} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="Community_WritePost" component={Community_WritePost} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="Community_WriteComments" component={Community_WriteComments} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="Community_WriteReplies" component={Community_WriteReplies} options={{ headerShown: false, animation: 'fade' }} />
+
+        <Stack.Screen name="Bus_main" component={Bus_Home} options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="Bus_AddBusStopID" component={Bus_AddBusStopID} options={{ headerShown: false, animation: 'fade' }} />
       </Stack.Navigator>
     </NavigationContainer>
   )

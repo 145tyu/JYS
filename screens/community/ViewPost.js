@@ -12,7 +12,7 @@ import Icon_Entypo from 'react-native-vector-icons/Entypo';
 import axiosInstance from '../../api/API_Server';
 import ImageViewer from '../../api/ImageViewer';
 
-const SeeMoreModal = ({ reporterUserID, contentData, openReportModal, handleBlockedUser, isDarkMode, visible, onClose }) => {
+const SeeMoreModal = ({ reporterUserID, contentData, contentType, openReportModal, handelDeletePost, handleDeleteComment, handleDeleteReplies, handleBlockedUser, isDarkMode, visible, onClose }) => {
   return (
     <Modal animationType='slide' transparent={true} visible={visible} onRequestClose={() => onClose()}>
       <View style={modalStyles.container}>
@@ -44,12 +44,22 @@ const SeeMoreModal = ({ reporterUserID, contentData, openReportModal, handleBloc
           {contentData != null && reporterUserID === contentData.account_id &&
             <>
               <View style={{ width: '100%', height: 1, marginTop: 10, marginBottom: 10, backgroundColor: '#999999' }}></View>
-              <TouchableOpacity onPress={() => { Alert.alert('준비 중', '수정 기능을 준비하고 있어요.') }} style={{ padding: 3, }}>
+              <TouchableOpacity onPress={() => {
+                Alert.alert('준비 중', '수정 기능을 준비하고 있어요.')
+              }} style={{ padding: 3, }}>
                 <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>수정하기</Text>
               </TouchableOpacity>
 
               <View style={{ width: '100%', height: 1, marginTop: 10, marginBottom: 10, backgroundColor: '#999999' }}></View>
-              <TouchableOpacity onPress={() => { Alert.alert('준비 중', '삭제 기능을 준비하고 있어요.') }} style={{ padding: 3, }}>
+              <TouchableOpacity onPress={() => {
+                if (contentType === 'Post') {
+                  handelDeletePost()
+                } else if (contentType === 'Comment') {
+                  handleDeleteComment()
+                } else if (contentType === 'Reply') {
+                  handleDeleteReplies()
+                }
+              }} style={{ padding: 3, }}>
                 <Text style={[{ ...modalStyles.boxText, color: '#E83F00', }, isDarkMode && { ...modalStyles.boxText, color: '#E83F00', }]}>삭제하기</Text>
               </TouchableOpacity>
             </>
@@ -373,6 +383,129 @@ export default function ViewPost({ navigation }) {
     }
   }
 
+  const handelDeletePost = async (contentData) => {
+    closeSeeMoreModal()
+    await AsyncStorage.getItem('id')
+      .then(async (accountID) => {
+        await axiosInstance.post('/Community/deletePost/', { postID: postID, accountID: accountID })
+          .then(async (res) => {
+            if (res.status === 200) {
+              navigation.goBack()
+              return Alert.alert('정보', res.data.message)
+            } else {
+              return Alert.alert('에러', '게시글을 삭제하지 못했습니다.')
+            }
+          }).catch((error) => {
+            console.log(error)
+            if (error.response) {
+              const res = error.response
+              if (res.status === 400) {
+                return Alert.alert(res.data.error, res.data.errorDescription, [
+                  { text: '확인' },
+                ])
+              } else if (res.status === 500) {
+                return Alert.alert(res.data.error, res.data.errorDescription, [
+                  { text: '확인' },
+                ])
+              } else {
+                return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+                  { text: '확인' },
+                ])
+              }
+            } else {
+              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+                { text: '확인' },
+              ])
+            }
+          })
+      }).catch((error) => {
+        console.log(error)
+        return Alert.alert('에러', '게시글을 삭제하지 못했습니다.')
+      })
+  }
+
+  const handleDeleteComment = async (contentData) => {
+    closeSeeMoreModal()
+    await AsyncStorage.getItem('id')
+      .then(async (accountID) => {
+        await axiosInstance.post('/Community/deleteComment', { postID: contentData.post_id, commentID: contentData.id, accountID: accountID })
+          .then(async (res) => {
+            if (res.status === 200) {
+              commentsCheck()
+              repliesCheck()
+            } else {
+              return Alert.alert('에러', '댓글을 삭제하지 못했습니다.')
+            }
+          }).catch((error) => {
+            console.log(error)
+            if (error.response) {
+              const res = error.response
+              if (res.status === 400) {
+                return Alert.alert(res.data.error, res.data.errorDescription, [
+                  { text: '확인' },
+                ])
+              } else if (res.status === 500) {
+                return Alert.alert(res.data.error, res.data.errorDescription, [
+                  { text: '확인' },
+                ])
+              } else {
+                return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+                  { text: '확인' },
+                ])
+              }
+            } else {
+              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+                { text: '확인' },
+              ])
+            }
+          })
+      }).catch((error) => {
+        console.log(error)
+        return Alert.alert('에러', '댓글을 삭제하지 못했습니다.')
+      })
+  }
+
+  const handleDeleteReplies = async (contentData) => {
+    closeSeeMoreModal()
+    await AsyncStorage.getItem('id')
+      .then(async (accountID) => {
+        await axiosInstance.post('/Community/deleteReplies', { repliesID: contentData.id, postID: contentData.post_id, commentID: contentData.comments_id, accountID: accountID })
+          .then(async (res) => {
+            if (res.status === 200) {
+              commentsCheck()
+              repliesCheck()
+            } else {
+              return Alert.alert('에러', '댓글을 삭제하지 못했습니다.')
+            }
+          }).catch((error) => {
+            console.log(error)
+            if (error.response) {
+              const res = error.response
+              if (res.status === 400) {
+                return Alert.alert(res.data.error, res.data.errorDescription, [
+                  { text: '확인' },
+                ])
+              } else if (res.status === 500) {
+                return Alert.alert(res.data.error, res.data.errorDescription, [
+                  { text: '확인' },
+                ])
+              } else {
+                return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+                  { text: '확인' },
+                ])
+              }
+            } else {
+              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
+                { text: '확인' },
+              ])
+            }
+          })
+      }).catch((error) => {
+        console.log(error)
+        return Alert.alert('에러', '댓글을 삭제하지 못했습니다.')
+      })
+  }
+
   const handelReport = async () => {
     try {
       await axiosInstance.post('/Community/Report/reportForm', { reporterUserID: reporterUserID, reportType: reportType, contentUserID: contentData.account_id, contentID: contentData.id, contentType: contentType, })
@@ -521,7 +654,7 @@ export default function ViewPost({ navigation }) {
       {/* 이미지뷰어 */}
       <ImageViewer imageData={imageViewerData} imageInfo={imageViewerInfo} visible={imageViewerState} onClose={() => closeImageViewer()} />
       {/* 더보기 모달 */}
-      <SeeMoreModal reporterUserID={reporterUserID} contentData={contentData} openReportModal={openReportSelectModal} handleBlockedUser={handleBlockedUser} isDarkMode={isDarkMode} visible={seeMoreModalState} onClose={() => closeSeeMoreModal()} />
+      <SeeMoreModal reporterUserID={reporterUserID} contentType={contentType} contentData={contentData} openReportModal={openReportSelectModal} handleBlockedUser={handleBlockedUser} handelDeletePost={() => handelDeletePost(contentData)} handleDeleteComment={() => handleDeleteComment(contentData)} handleDeleteReplies={() => handleDeleteReplies(contentData)} isDarkMode={isDarkMode} visible={seeMoreModalState} onClose={() => closeSeeMoreModal()} />
       {/* 신고 모달 */}
       <ReportSelectModal setReportType={setReportType} isDarkMode={isDarkMode} visible={reportSelectModalState} onClose={closeReportSelectModal} />
       {/* 신고 확인 모달 */}
