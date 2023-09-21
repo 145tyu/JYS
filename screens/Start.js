@@ -298,10 +298,26 @@ export default function StartScreen({ navigation }) {
     }
   }
 
+  const handelNotificationStatus = async () => {
+    await AsyncStorage.getItem('Notification_Allowed_Status')
+      .then((res) => {
+        if (res === null) {
+          fcmInsertToken()
+        } else {
+          if (res === 'true') {
+            fcmInsertToken()
+          }
+        }
+      }).catch((error) => {
+        console.log(error)
+      })
+  }
+
   const fcmInsertToken = async () => {
     await messaging()
       .getToken()
       .then(async (fcmToken) => {
+        console.log('Token | ', fcmToken)
         AsyncStorage.setItem('fcm_token', fcmToken)
         const data = [
           {
@@ -357,7 +373,7 @@ export default function StartScreen({ navigation }) {
   }
 
   useEffect(() => {
-    fcmInsertToken() // fcm토큰 등록
+    handelNotificationStatus() // fcm토큰 등록 확인
     checkVersion() // 버전 체크
   }, [])
 

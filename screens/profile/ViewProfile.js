@@ -13,6 +13,8 @@ export default function ViewProfile({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
   const isFocused = useIsFocused()
 
+  const [job, setJob] = useState(null)
+
   const [profileData, setProfileData] = useState([])
   const [profileType, setProfileType] = useState(null)
 
@@ -80,6 +82,7 @@ export default function ViewProfile({ navigation }) {
       AsyncStorage.removeItem('access_token')
       AsyncStorage.removeItem('refresh_token')
       AsyncStorage.removeItem('fcm_token')
+      AsyncStorage.removeItem('Notification_List')
       return navigation.dispatch(
         CommonActions.reset({
           index: 0,
@@ -95,7 +98,17 @@ export default function ViewProfile({ navigation }) {
     }
   }
 
+  const handleGetJob = async () => {
+    await AsyncStorage.getItem('job')
+      .then((res) => {
+        setJob(res)
+      }).catch((error) => {
+        setJob(null)
+      })
+  }
+
   useEffect(() => {
+    handleGetJob()
     handleProfile() // 스크린이 처음 시작될 때 한번 실행
   }, [isFocused])
 
@@ -110,7 +123,7 @@ export default function ViewProfile({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {profileType === null ?
+      {profileType === null || job === null ?
         <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
           <ActivityIndicator size='large' color='green' />
         </View>
@@ -145,12 +158,16 @@ export default function ViewProfile({ navigation }) {
                 <>
                   <Text style={styles.InfoTopText}>개인정보</Text>
                   <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'accountID', accountID: profileData.accountID })}>
-                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>아이디</Text>
-                      <Text style={styles.Value}>{profileData.accountID}</Text>
-                    </TouchableOpacity>
+                    {job === 'student' &&
+                      <>
+                        <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'accountID', accountID: profileData.accountID })}>
+                          <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>아이디</Text>
+                          <Text style={styles.Value}>{profileData.accountID}</Text>
+                        </TouchableOpacity>
 
-                    <View style={styles.rankView}></View>
+                        <View style={styles.rankView}></View>
+                      </>
+                    }
 
                     <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit_Password')}>
                       <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>비밀번호</Text>
@@ -158,12 +175,16 @@ export default function ViewProfile({ navigation }) {
 
                     <View style={styles.rankView}></View>
 
-                    <View>
-                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>학번</Text>
-                      <Text style={styles.Value}>{profileData.studentID}</Text>
-                    </View>
+                    {job === 'student' &&
+                      <>
+                        <View>
+                          <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>학번</Text>
+                          <Text style={styles.Value}>{profileData.studentID}</Text>
+                        </View>
 
-                    <View style={styles.rankView}></View>
+                        <View style={styles.rankView}></View>
+                      </>
+                    }
 
                     <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'phoneNumber', phoneNumber: profileData.phoneNumber })}>
                       <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>전화번호</Text>

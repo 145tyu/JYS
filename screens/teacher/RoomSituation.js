@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CommonActions } from "@react-navigation/native";
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
+import Icon_Feather from 'react-native-vector-icons/Feather';
 
 import axiosInstance from "../../api/API_Server";
 
@@ -38,7 +39,7 @@ export default function RoomSituation({ navigation }) {
         setRoomStatusStateType(null)
         try {
             await axiosInstance.post('/RoomRental/RoomStatus')
-                .then((res)=>{
+                .then((res) => {
                     if (res.status === 200) {
                         if (res.data.type === 1) {
                             setRoomStatusInfo(res.data.formdata)
@@ -71,14 +72,21 @@ export default function RoomSituation({ navigation }) {
         <SafeAreaView style={[styles.container, isDarkMode && styles.containerDark]}>
             {/* 로고 */}
             <Text style={styles.logo}>JYS</Text>
+            <View style={styles.logoView}>
+                <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 10 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
+                    <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' },]}>
+                        {<Icon_Ionicons name="chevron-back-outline" size={21} />}
+                    </Text>
+                </TouchableOpacity>
+            </View>
 
             <TouchableOpacity style={RoomSituationStyles.refreshBtn} onPress={roomStatusData}>
-                <Icon_Ionicons name='reload-outline' size={20} style={[{color: 'black'}, isDarkMode && {color: 'white'}]}/>
+                <Icon_Ionicons name='reload-outline' size={20} style={[{ color: 'black' }, isDarkMode && { color: 'white' }]} />
             </TouchableOpacity>
 
             {roomStatusStateType === null ?
-                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                    <ActivityIndicator style={{top: -40, bottom: 0, left: 0, right: 0}} size="large" color="#0000ff"/>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator style={{ top: -40, bottom: 0, left: 0, right: 0 }} size="large" color="#0000ff" />
                 </View>
                 :
                 <ScrollView contentContainerStyle={[styles.scrollContainer, isDarkMode && styles.scrollContainerDark]}>
@@ -93,8 +101,8 @@ export default function RoomSituation({ navigation }) {
                                             </View>
                                             <View style={RoomSituationStyles.Item}>
                                                 <Text style={[RoomSituationStyles.Value, isDarkMode && RoomSituationStyles.ValueDark]}>부스가 비어있어요.</Text>
-                                                <View style={RoomSituationStyles.greenCircle}/>
-                                            </View> 
+                                                <View style={RoomSituationStyles.greenCircle} />
+                                            </View>
                                         </View>
                                     )
                                 } else if (data.is_available === 1) {
@@ -172,8 +180,21 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
     },
+    logoView: {
+        height: 60,
+        justifyContent: 'center',
+    },
+    logoText: {
+        fontSize: 20,
+        fontWeight: '400',
+    },
+    backButtonView: {
+        position: 'absolute',
+        top: 20,
+        left: 10,
+    },
 })
-   
+
 const RoomSituationStyles = StyleSheet.create({
     Info: {
         backgroundColor: '#fff',

@@ -117,6 +117,7 @@ export default function Profile_DeleteAccount({ navigation }) {
       AsyncStorage.removeItem('access_token')
       AsyncStorage.removeItem('refresh_token')
       AsyncStorage.removeItem('fcm_token')
+      AsyncStorage.removeItem('Notification_List')
       return navigation.dispatch(
         CommonActions.reset({
           index: 0,

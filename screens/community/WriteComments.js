@@ -776,7 +776,7 @@ export default function WriteComments({ navigation }) {
       <KeyboardAvoidingView style={{ flex: 1, }} behavior={Platform.select({ ios: 'padding' })}>
         {/* 로고 */}
         <View style={styles.logoView}>
-          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.navigate('Community_ViewPost', { postID: postID })}>
             <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 댓글 {commentsData === null ? '0' : commentsData.length}</Text>
           </TouchableOpacity>
         </View>

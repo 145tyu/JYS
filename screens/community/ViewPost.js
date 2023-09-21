@@ -664,7 +664,7 @@ export default function ViewPost({ navigation }) {
       <View style={styles.logoView}>
         <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
           <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' },]}>
-            {<Icon_Ionicons name="chevron-back-outline" size={21} />} {Title}
+            {<Icon_Ionicons name="chevron-back-outline" size={21} />} {Title == null ? '게시글' : Title}
           </Text>
         </TouchableOpacity>
         {postsType === 1 &&

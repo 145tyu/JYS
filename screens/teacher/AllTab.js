@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal } from 'react-native';
-import { CommonActions, useFocusEffect, useIsFocused } from "@react-navigation/native";
+import { CommonActions, useIsFocused } from "@react-navigation/native";
 import DeviceInfo from 'react-native-device-info';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
@@ -9,7 +9,7 @@ import Icon_Feather from 'react-native-vector-icons/Feather';
 
 import axiosInstance from "../../api/API_Server";
 
-export default function StudentAllTab({ navigation }) {
+export default function TeacherAllTab({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
   const isFocused = useIsFocused()
 
@@ -64,8 +64,8 @@ export default function StudentAllTab({ navigation }) {
   }
 
   useEffect(() => {
-    handleProfile() // 스크린이 처음 시작될 때 한번 실행
-  }, [isFocused])
+    handleProfile()
+  }, [])
 
   return (
     <SafeAreaView style={[{ ...styles.container, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.container, backgroundColor: '#000000', }]}>
@@ -111,11 +111,17 @@ export default function StudentAllTab({ navigation }) {
 
         <View style={{ width: "100%", marginBottom: 30, }}></View>
 
-        {/* <TouchableOpacity style={[{ ...styles.InfoContainer, }, isDarkMode && { ...styles.scrollContainer, }]} onPress={() => navigation.navigate('Bus_main')}>
+        <TouchableOpacity style={[{ ...styles.InfoContainer, }, isDarkMode && { ...styles.scrollContainer, }]} onPress={() => navigation.navigate('Bus_main')}>
           <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
             <Text style={[{ ...styles.InfoTitle, color: '#000000', }, isDarkMode && { ...styles.InfoTitle, color: '#ffffff', }]}>버스 조회 (Alpha)</Text>
           </View>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[{ ...styles.InfoContainer, }, isDarkMode && { ...styles.scrollContainer, }]} onPress={() => navigation.navigate('T_RoomSituation')}>
+          <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+            <Text style={[{ ...styles.InfoTitle, color: '#000000', }, isDarkMode && { ...styles.InfoTitle, color: '#ffffff', }]}>방음부스 상태</Text>
+          </View>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   )

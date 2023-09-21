@@ -40,6 +40,21 @@ export default function LoginScreen({ navigation }) {
     setIsAlertModalVisible(false) // 에러 모달 닫기
   }
 
+  const handelNotificationStatus = async (accountID) => {
+    await AsyncStorage.getItem('Notification_Allowed_Status')
+      .then((res) => {
+        if (res === null) {
+          fcmInsertToken(accountID)
+        } else {
+          if (res === 'true') {
+            fcmInsertToken(accountID)
+          }
+        }
+      }).catch((error) => {
+        console.log(error)
+      })
+  }
+
   const fcmInsertToken = async (accountID) => {
     await messaging()
       .getToken()
@@ -99,7 +114,7 @@ export default function LoginScreen({ navigation }) {
           .then((res) => {
             setIsLoading(false)
             if (res.status === 200) {
-              fcmInsertToken(res.data.id)
+              handelNotificationStatus(res.data.id)
               AsyncStorage.setItem('id', res.data.id)
               AsyncStorage.setItem('job', res.data.job)
               AsyncStorage.setItem('access_token', res.data.accessToken)
