@@ -155,7 +155,7 @@ export default function Settings_setNotificationScreen({ navigation }) {
             <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>알림</Text>
             {/* <Text style={[{ ...styles.Title, position: 'absolute', top:20, right: 80, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>{isEnabled? '켜짐':'꺼짐'}</Text> */}
             <Switch
-              style={{ position: 'absolute', right: 20, top: 20, }}
+              style={Platform.OS === 'ios' ? { position: 'absolute', right: 20, top: 15, } : { position: 'absolute', right: 20, top: 20, }}
               trackColor={{ false: '#767577', true: '#81b0ff' }}
               thumbColor={isEnabled ? '#4682B4' : '#f4f3f4'}
               ios_backgroundColor="#3e3e3e"

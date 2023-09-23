@@ -309,21 +309,23 @@ const App = () => {
     const onNotificationOpenedAppListener = messaging().onNotificationOpenedApp((notificationOpen) => {
       SaveNotification(notificationOpen) // 알림 데이터를 저장
 
-      const data: any = notificationOpen.data
-      if (data.screenType === 'community_Post') { // 알림 유형 : 게시글
-        const ScreenData = (data.screenData).split(',')
-        navigationRef.current.navigate('Community_ViewPost', { postID: ScreenData[0] })
-      } else if (data.screenType === 'community_Comment') { // 알림 유형 : 댓글
-        const ScreenData = (data.screenData).split(',')
-        navigationRef.current.navigate('Community_WriteComments', { postID: ScreenData[0] })
-      } else if (data.screenType === 'community_Replie') { // 알림 유형 : 답글
-        const ScreenData = (data.screenData).split(',')
-        navigationRef.current.navigate('Community_WriteReplies', { commentsID: ScreenData[0], postID: ScreenData[1] })
-      } else if (data.screenType === 'Announcement_ViewPost') { // 알림 유형 : 공지
-        const ScreenData = (data.screenData).split(',')
-        navigationRef.current.navigate('Announcement_ViewPost', { postID: ScreenData[0] })
-      } else { // 알림 유형 : 없음
-        navigationRef.current.navigate('Notification_Tab_Home')
+      if (Platform.OS === 'android') {
+        const data: any = notificationOpen.data
+        if (data.screenType === 'community_Post') { // 알림 유형 : 게시글
+          const ScreenData = (data.screenData).split(',')
+          navigationRef.current.navigate('Community_ViewPost', { postID: ScreenData[0] })
+        } else if (data.screenType === 'community_Comment') { // 알림 유형 : 댓글
+          const ScreenData = (data.screenData).split(',')
+          navigationRef.current.navigate('Community_WriteComments', { postID: ScreenData[0] })
+        } else if (data.screenType === 'community_Replie') { // 알림 유형 : 답글
+          const ScreenData = (data.screenData).split(',')
+          navigationRef.current.navigate('Community_WriteReplies', { commentsID: ScreenData[0], postID: ScreenData[1] })
+        } else if (data.screenType === 'Announcement_ViewPost') { // 알림 유형 : 공지
+          const ScreenData = (data.screenData).split(',')
+          navigationRef.current.navigate('Announcement_ViewPost', { postID: ScreenData[0] })
+        } else { // 알림 유형 : 없음
+          navigationRef.current.navigate('Notification_Tab_Home')
+        }
       }
     }) // 알림 열기 이벤트 핸들링
 
@@ -360,7 +362,7 @@ const App = () => {
   return (
     <>
       {isModalVisible === true &&
-        <View style={{ flex: 1, position: 'absolute', zIndex: 999, top: 10, left: 10, right: 10 }}>
+        <SafeAreaView style={{ flex: 1, position: 'absolute', zIndex: 999, top: 10, left: 10, right: 10 }}>
           <TouchableOpacity onPress={() => {
             navigationRef.current.navigate('Notification_Tab_Home')
             setModalVisible(false)
@@ -374,7 +376,7 @@ const App = () => {
               <Text style={[{ marginLeft: 75, fontWeight: '500', fontSize: 15, color: '#000000' }, isDarkMode && { marginLeft: 75, fontWeight: '500', fontSize: 15, color: '#ffffff' }]}>{notificationContent}</Text>
             </View>
           </TouchableOpacity>
-        </View>
+        </SafeAreaView>
       }
 
       <NavigationContainer ref={navigationRef}>
