@@ -87,7 +87,7 @@ export default function BusSearch({ navigation }) {
       })
   }
 
-  useEffect(() => { 
+  useEffect(() => {
     if (route.params) {
       if (route.params.setType === 'Route') {
         setOption('Route')
@@ -152,7 +152,7 @@ export default function BusSearch({ navigation }) {
         <>
           {RouteSearchLoadingState === true ?
             <>
-              <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
+              <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
                 <ActivityIndicator size="large" color="green" />
               </View>
             </>
@@ -160,7 +160,7 @@ export default function BusSearch({ navigation }) {
             <>
               {RouteSearchData.length === 0 ?
                 <>
-                  <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
+                  <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
                     <Text style={[{ marginTop: 20, color: '#333333' }, isDarkMode && { marginTop: 20, color: '#999999' }]}>검색 결과가 없습니다.</Text>
                   </View>
                 </>
@@ -190,7 +190,7 @@ export default function BusSearch({ navigation }) {
         <>
           {BusStopSearchLoadingState === true ?
             <>
-              <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
+              <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
                 <ActivityIndicator size="large" color="green" />
               </View>
             </>
@@ -198,7 +198,7 @@ export default function BusSearch({ navigation }) {
             <>
               {BusStopSearchData.length === 0 ?
                 <>
-                  <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
+                  <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
                     <Text style={[{ marginTop: 20, color: '#333333' }, isDarkMode && { marginTop: 20, color: '#999999' }]}>검색 결과가 없습니다.</Text>
                   </View>
                 </>

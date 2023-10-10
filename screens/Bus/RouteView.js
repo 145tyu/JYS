@@ -152,7 +152,7 @@ export default function RouteView({ navigation }) {
 
       {RouteType === null ?
         <>
-          <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
+          <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
             <ActivityIndicator size="large" color="green" />
           </View>
         </>
@@ -160,7 +160,7 @@ export default function RouteView({ navigation }) {
         <>
           {RouteType === 0 &&
             <>
-              <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
+              <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
                 <ActivityIndicator size="large" color="green" />
                 <Text>데이터를 불러오지 못했어요.{'\n'}20초 뒤 다시시도합니다.</Text>
               </View>

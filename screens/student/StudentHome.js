@@ -329,7 +329,7 @@ export default function StudentHomeScreen({ navigation }) {
         </View>
 
         {/* 급식 */}
-        <TouchableOpacity onPress={(() => { navigation.navigate('Meal_Home') })} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+        <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
           <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>{mealTitle}</Text>
 
           {mealStateType === null ?
@@ -377,7 +377,7 @@ export default function StudentHomeScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           }
-        </TouchableOpacity>
+        </View>
 
         {/* 버스 */}
         <TouchableOpacity onPress={() => navigation.navigate('Bus_Home')} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>

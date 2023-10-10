@@ -782,7 +782,7 @@ export default function WriteComments({ navigation }) {
         </View>
 
         {commentsType === null || repliesType === null ?
-          <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
+          <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
             <ActivityIndicator size="large" color="green" />
           </View>
           :

@@ -779,13 +779,13 @@ export default function WriteReplies({ navigation }) {
       <KeyboardAvoidingView style={{ flex: 1, }} behavior={Platform.select({ ios: 'padding' })}>
         {/* 로고 */}
         <View style={styles.logoView}>
-          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.navigate('Community_WriteComments', { postID: postID})}>
+          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.navigate('Community_WriteComments', { postID: postID })}>
             <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 답글쓰기</Text>
           </TouchableOpacity>
         </View>
 
         {commentsType === null || repliesType === null ?
-          <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
+          <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
             <ActivityIndicator size="large" color="green" />
           </View>
           :

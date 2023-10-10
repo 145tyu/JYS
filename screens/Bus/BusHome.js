@@ -38,26 +38,21 @@ export default function BusHome({ navigation }) {
   return (
     <SafeAreaView style={[{ ...styles.container, backgroundColor: '#ffffff' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' }]}>
       {/* 로고 */}
-      <View style={styles.logoView}>
-        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
+      <View style={{ ...styles.logoView, }}>
+        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50, } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
           <Text style={[{ ...styles.backButtonText, color: '#000000' }, isDarkMode && { ...styles.backButtonText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 버스</Text>
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Bus_Search')} style={styles.inputContainer}>
+      <TouchableOpacity onPress={() => navigation.navigate('Bus_Search')} style={{ ...styles.inputContainer, }}>
         <View style={[{ ...styles.inputView, backgroundColor: '#E9E9E9', borderColor: '#E9E9E9' }, isDarkMode && { ...styles.inputView, backgroundColor: '#333333', borderColor: '#333333' }]}>
-          <TextInput
-            style={[{ ...styles.inputText, color: '#000000', }, isDarkMode && { ...styles.inputText, color: '#ffffff' }]}
-            placeholder='버스, 정류장 검색'
-            placeholderTextColor={isDarkMode ? "#CCCCCC" : "#999999"}
-            editable={false}
-          />
+          <Text style={{ color: isDarkMode ? '#CCCCCC' : '#999999' }}>버스, 정류장 검색</Text>
         </View>
       </TouchableOpacity>
 
       {BusFavoritesData.length === 0 ?
         <>
-          <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
+          <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
             <Text style={[{ fontSize: 15, textAlign: 'center', color: '#000000' }, isDarkMode && { fontSize: 15, textAlign: 'center', color: '#ffffff' }]}>검색을 사용하여 버스, 정류장을 검색하여{'\n'}즐겨찾기에 추가해보세요.</Text>
           </View>
         </>
@@ -92,7 +87,6 @@ export default function BusHome({ navigation }) {
           </ScrollView>
         </>
       }
-
     </SafeAreaView>
   )
 }

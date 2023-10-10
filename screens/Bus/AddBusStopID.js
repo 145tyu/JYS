@@ -79,19 +79,14 @@ export default function AddBusStopID({ navigation }) {
           <Text style={{ ...styles.deleteBusStopText, color: '#ffffff' }}>삭제하기</Text>
         </TouchableOpacity>
       </View>
-
-      <TouchableOpacity onPress={() => navigation.navigate('Bus_Search', { setType: 'BusStop' })} style={styles.inputContainer}>
+      
+      <TouchableOpacity onPress={() => navigation.navigate('Bus_Search', { setType: 'BusStop', })} style={{ ...styles.inputContainer, }}>
         <View style={[{ ...styles.inputView, backgroundColor: '#E9E9E9', borderColor: '#E9E9E9' }, isDarkMode && { ...styles.inputView, backgroundColor: '#333333', borderColor: '#333333' }]}>
-          <TextInput
-            style={[{ ...styles.inputText, color: '#000000', }, isDarkMode && { ...styles.inputText, color: '#ffffff' }]}
-            placeholder='정류장 검색'
-            placeholderTextColor={isDarkMode ? "#CCCCCC" : "#999999"}
-            editable={false}
-          />
+          <Text style={{ color: isDarkMode ? '#CCCCCC' : '#999999' }}>버스, 정류장 검색</Text>
         </View>
       </TouchableOpacity>
 
-      <View style={{ width: '100%', height: 80, borderRadius: 20, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode? '#121212':'#f2f4f6' }}>
+      <View style={{ width: '100%', height: 80, borderRadius: 20, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#121212' : '#f2f4f6' }}>
         <Text style={[{ fontSize: 17, color: '#333333', textAlign: 'center', }, isDarkMode && { color: '#999999', fontSize: 17, textAlign: 'center', }]}>검색을 사용하여 정류장을 검색하거나{'\n'}미리 설정된 프리셋을 사용하여 추가해보세요.</Text>
       </View>
 

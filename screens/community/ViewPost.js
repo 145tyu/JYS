@@ -675,7 +675,7 @@ export default function ViewPost({ navigation }) {
       </View>
 
       {postsType === null ?
-        <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
+        <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
           <ActivityIndicator size="large" color="green" />
         </View>
         :
