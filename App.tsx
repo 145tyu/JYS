@@ -49,16 +49,21 @@ import Community_WritePost from './screens/Community/WritePost';
 import Community_WriteComments from './screens/Community/WriteComments';
 import Community_WriteReplies from './screens/Community/WriteReplies';
 
-import Bus_Home from './screens/Bus/Home';
+import Bus_Home from './screens/Bus/BusHome';
 import Bus_AddBusStopID from './screens/Bus/AddBusStopID';
+import Bus_Search from './screens/Bus/BusSearch';
+import Bus_RouteView from './screens/Bus/RouteView';
+import Bus_BusStopView from './screens/Bus/BusStopView';
 
 import Announcement_Home from './screens/Announcement/AnnouncementHome';
 import Announcement_WritePost from './screens/Announcement/WriteAnnouncement';
 import Announcement_ViewPost from './screens/Announcement/AnnouncementViewPost';
 
-import Timetable_Home from './screens/Timetable/home';
+import Timetable_Home from './screens/Timetable/TimetableHome';
 
 import Notification_Home from './screens/Notification/home';
+
+import Meal_Home from './screens/Meal/MealHome';
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -420,8 +425,13 @@ const App = () => {
           <Stack.Screen name="Announcement_WritePost" component={Announcement_WritePost} options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="Announcement_ViewPost" component={Announcement_ViewPost} options={{ headerShown: false, animation: 'fade' }} />
 
-          <Stack.Screen name="Bus_main" component={Bus_Home} options={{ headerShown: false, animation: 'fade' }} />
+          <Stack.Screen name="Bus_Home" component={Bus_Home} options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="Bus_AddBusStopID" component={Bus_AddBusStopID} options={{ headerShown: false, animation: 'fade' }} />
+          <Stack.Screen name="Bus_Search" component={Bus_Search} options={{ headerShown: false, animation: 'fade' }} />
+          <Stack.Screen name="Bus_RouteView" component={Bus_RouteView} options={{ headerShown: false, animation: 'fade' }} />
+          <Stack.Screen name="Bus_BusStopView" component={Bus_BusStopView} options={{ headerShown: false, animation: 'fade' }} />
+
+          <Stack.Screen name="Meal_Home" component={Meal_Home} options={{ headerShown: false, animation: 'fade' }} />
         </Stack.Navigator>
       </NavigationContainer>
     </>

@@ -69,56 +69,52 @@ export default function AddBusStopID({ navigation }) {
 
   return (
     <SafeAreaView style={[{ ...styles.container, backgroundColor: '#ffffff' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' }]}>
-      <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
-        <ActivityIndicator size="large" color="green" />
-        <Text style={[{ marginTop: 20, color: '#333333' }, isDarkMode && { marginTop: 20, color: '#999999' }]}>검색 기능을 준비 중입니다...</Text>
-      </View>
-
       {/* 로고 */}
       <View style={styles.logoView}>
         <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
           <Text style={[{ ...styles.backButtonText, color: '#000000' }, isDarkMode && { ...styles.backButtonText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 정류장 추가</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.deleteBusStopView, marginTop: 50 } : { ...styles.deleteBusStopView }} onPress={() => {handelDeleteBusStop()}}>
+        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.deleteBusStopView, marginTop: 50 } : { ...styles.deleteBusStopView }} onPress={() => { handelDeleteBusStop() }}>
           <Text style={{ ...styles.deleteBusStopText, color: '#ffffff' }}>삭제하기</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.inputContainer}>
+      <TouchableOpacity onPress={() => navigation.navigate('Bus_Search', { setType: 'BusStop' })} style={styles.inputContainer}>
         <View style={[{ ...styles.inputView, backgroundColor: '#E9E9E9', borderColor: '#E9E9E9' }, isDarkMode && { ...styles.inputView, backgroundColor: '#333333', borderColor: '#333333' }]}>
           <TextInput
             style={[{ ...styles.inputText, color: '#000000', }, isDarkMode && { ...styles.inputText, color: '#ffffff' }]}
-            placeholder='정류장명을 입력해주세요.'
+            placeholder='정류장 검색'
             placeholderTextColor={isDarkMode ? "#CCCCCC" : "#999999"}
-            value={busStopName}
-            onChangeText={(text) => setBusStopName(text)}
+            editable={false}
           />
-          <TouchableOpacity style={styles.searchBtnContainer}>
-            <Icon_Feather name='search' style={isDarkMode ? { color: '#ffffff' } : { color: '#000000' }} size={21} />
-          </TouchableOpacity>
         </View>
+      </TouchableOpacity>
+
+      <View style={{ width: '100%', height: 80, borderRadius: 20, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode? '#121212':'#f2f4f6' }}>
+        <Text style={[{ fontSize: 17, color: '#333333', textAlign: 'center', }, isDarkMode && { color: '#999999', fontSize: 17, textAlign: 'center', }]}>검색을 사용하여 정류장을 검색하거나{'\n'}미리 설정된 프리셋을 사용하여 추가해보세요.</Text>
       </View>
 
-      <View>
-        <Button title='세종우체국 | 시청,시의회,교육청,세무서 방면' onPress={() => { handelAddBusStop(51101) }} />
-        <View style={{ marginBottom: 10 }}></View>
-        <Button title='세종우체국 | 소담동(새샘마을) 방면' onPress={() => { handelAddBusStop(51100) }} />
-        <View style={{ marginBottom: 10 }}></View>
-        <Button title='호려울마을8,9단지 | 세종우체국 방면' onPress={() => { handelAddBusStop(51102) }} />
-        <View style={{ marginBottom: 10 }}></View>
-        <Button title='호려울마을8,9단지 | 새샘마을1,2단지 방면' onPress={() => { handelAddBusStop(51103) }} />
-        <View style={{ marginBottom: 150 }}></View>
-
-        <Button title='장영실고등학교,호탄리(안터) | 호탄리 방면' onPress={() => { handelAddBusStop(51004) }} />
-        <View style={{ marginBottom: 10 }}></View>
-        <Button title='장영실고등학교,호탄리(안터) | 장재리 방면' onPress={() => { handelAddBusStop(34019) }} />
-        <View style={{ marginBottom: 10 }}></View>
-        <Button title='세종고속시외버스터미널 | 한솔동(첫마을) 방면' onPress={() => { handelAddBusStop(51052) }} />
-        <View style={{ marginBottom: 10 }}></View>
-        <Button title='세종고속시외버스터미널 | 용포리 방면' onPress={() => { handelAddBusStop(51053) }} />
-        <View style={{ marginBottom: 10 }}></View>
-      </View>
+      <ScrollView>
+        <View style={{ marginTop: 20, }}>
+          <Button title='세종우체국 | 시청,시의회,교육청,세무서 방면' onPress={() => { handelAddBusStop(51101) }} />
+          <View style={{ marginBottom: 10 }}></View>
+          <Button title='세종우체국 | 소담동(새샘마을) 방면' onPress={() => { handelAddBusStop(51100) }} />
+          <View style={{ marginBottom: 10 }}></View>
+          <Button title='호려울마을8,9단지 | 세종우체국 방면' onPress={() => { handelAddBusStop(51102) }} />
+          <View style={{ marginBottom: 10 }}></View>
+          <Button title='호려울마을8,9단지 | 새샘마을1,2단지 방면' onPress={() => { handelAddBusStop(51103) }} />
+          <View style={{ marginBottom: 10 }}></View>
+          <Button title='장영실고등학교,호탄리(안터) | 호탄리 방면' onPress={() => { handelAddBusStop(51004) }} />
+          <View style={{ marginBottom: 10 }}></View>
+          <Button title='장영실고등학교,호탄리(안터) | 장재리 방면' onPress={() => { handelAddBusStop(34019) }} />
+          <View style={{ marginBottom: 10 }}></View>
+          <Button title='세종고속시외버스터미널 | 한솔동(첫마을) 방면' onPress={() => { handelAddBusStop(51052) }} />
+          <View style={{ marginBottom: 10 }}></View>
+          <Button title='세종고속시외버스터미널 | 용포리 방면' onPress={() => { handelAddBusStop(51053) }} />
+          <View style={{ marginBottom: 10 }}></View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   )
 }

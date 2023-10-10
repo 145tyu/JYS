@@ -1,6 +1,6 @@
 {
   "name": "JYS",
-  "version": "1.6.16",
+  "version": "1.6.17",
   "private": true,
   "scripts": {
     "android": "react-native run-android",

@@ -266,11 +266,10 @@ export default function StudentHomeScreen({ navigation }) {
 
       <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />} contentContainerStyle={[{ ...styles.scrollContainer, backgroundColor: '#FFFFFF', }, isDarkMode && { ...styles.scrollContainer, backgroundColor: '#000000', }]}>
         {/* 공지사항 */}
-        <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-          <TouchableOpacity onPress={() => { navigation.navigate('Announcement_Home') }}>
-            <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>공지사항{<Icon_Ionicons name="chevron-forward-outline" size={25} />}</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => { navigation.navigate('Announcement_Home') }} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+          <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>공지사항</Text>
+        </TouchableOpacity>
+
         {/* 방음부스 */}
         <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
           <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>방음부스</Text>
@@ -330,7 +329,7 @@ export default function StudentHomeScreen({ navigation }) {
         </View>
 
         {/* 급식 */}
-        <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+        <TouchableOpacity onPress={(() => { navigation.navigate('Meal_Home') })} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
           <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>{mealTitle}</Text>
 
           {mealStateType === null ?
@@ -378,11 +377,12 @@ export default function StudentHomeScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           }
-        </View>
+        </TouchableOpacity>
 
         {/* 버스 */}
-        <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+        <TouchableOpacity onPress={() => navigation.navigate('Bus_Home')} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
           <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>{busArrivalInformationTitle}</Text>
+
           {busArrivalInformationIsRefreshing === true ?
             <>
               <ActivityIndicator size="large" color="#0000ff" />
@@ -403,7 +403,7 @@ export default function StudentHomeScreen({ navigation }) {
                   {busArrivalInformationType === 1 &&
                     <View>
                       <Text style={[{ ...busArrivalInformationStyles.Text, color: '#000000', }, isDarkMode && { ...busArrivalInformationStyles.Text, color: '#ffffff', }]}>{busArrivalInformationMessage}</Text>
-                      <TouchableOpacity style={busArrivalInformationStyles.addBusStopBtn} onPress={() => navigation.navigate('Bus_AddBusStopID')}>
+                      <TouchableOpacity style={busArrivalInformationStyles.addBusStopBtn} onPress={() => navigation.navigate('Bus_Search')}>
                         <Text style={busArrivalInformationStyles.addBusStopBtnText}>추가하기</Text>
                       </TouchableOpacity>
                     </View>
@@ -440,7 +440,7 @@ export default function StudentHomeScreen({ navigation }) {
               }
             </>
           }
-        </View>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   )
