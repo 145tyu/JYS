@@ -65,6 +65,11 @@ import Notification_Home from './screens/Notification/home';
 
 import Meal_Home from './screens/Meal/MealHome';
 
+import Credits_Home from './screens/Credits/Credits'
+
+import WebView_ysit from './screens/WebView/ysit'
+import WebView_SejongJangYeongsilHighSchool from './screens/WebView/SejongJangYeongsilHighSchool'
+
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
 
@@ -432,6 +437,11 @@ const App = () => {
           <Stack.Screen name="Bus_BusStopView" component={Bus_BusStopView} options={{ headerShown: false, animation: 'fade' }} />
 
           <Stack.Screen name="Meal_Home" component={Meal_Home} options={{ headerShown: false, animation: 'fade' }} />
+
+          <Stack.Screen name="Credits_Home" component={Credits_Home} options={{ headerShown: false, animation: 'fade' }} />
+
+          <Stack.Screen name="WebView_ysit" component={WebView_ysit} options={{ headerShown: true, title: 'ysit', animation: 'fade' }} />
+          <Stack.Screen name="WebView_SejongJangYeongsilHighSchool" component={WebView_SejongJangYeongsilHighSchool} options={{ headerShown: true, title: '세종장영실고등학교', animation: 'fade' }} />
         </Stack.Navigator>
       </NavigationContainer>
     </>

@@ -23,14 +23,14 @@ export default function BusStopView({ navigation }) {
   const [favoriteState, setFavoriteState] = useState(false)
 
   const handleAddBusStop = async (ID) => {
-    Alert.alert('알림', '선택하신 정류장을 추가하시겠습니까?', [
+    Alert.alert('알림', `선택하신 정류장(${ID})을 홈 즐겨찾기에 추가하시겠습니까?`, [
       {
         text: '추가', onPress: () => {
           AsyncStorage.setItem('set_busStopID_1', `${ID}`)
             .then(() => {
-              return Alert.alert('성공', '정류장을 등록했습니다.\n홈에서 쓸어내려 새로고침 해주세요.')
+              return Alert.alert('등록 성공', `정류장(${ID})을 등록했습니다.\n홈에서 쓸어내려 새로고침 해주세요.`)
             }).catch((error) => {
-              return Alert.alert('에러', '정류장을 추가하지 못했습니다.')
+              return Alert.alert('에러', `정류장(${ID})을 추가하지 못했습니다.`)
             })
         }
       },
@@ -38,29 +38,13 @@ export default function BusStopView({ navigation }) {
     ])
   }
 
-  const handleDeleteBusStop = async (ID) => {
-    Alert.alert('알림', '현재 등록된 정류장을 삭제하시겠습니까?', [
-      {
-        text: '삭제', onPress: () => {
-          AsyncStorage.removeItem('set_busStopID_1')
-            .then(() => {
-              return Alert.alert('성공', '정류장을 삭제했습니다.')
-            }).catch((error) => {
-              return Alert.alert('에러', '정류장을 삭제하지 못했습니다.')
-            })
-        }
-      },
-      { text: '취소' }
-    ])
-  }
-
-  async function handleGetBusFavorites() { // 즐겨찾기 활성화 여부
+  async function handleGetBusStopFavorites() { // 즐겨찾기 활성화 여부
     const _data = await AsyncStorage.getItem('Bus_FavoritesList')
 
     if (_data) { // 데이터가 있을 경우
       const favorites = JSON.parse(_data)
       for (const [index, favoriteData] of favorites.entries()) {
-        if (favoriteData.data.btnID === data.btnID) {
+        if (favoriteData.data.busStopID === data.busStopID) {
           setFavoriteState(true)
           return index
         }
@@ -73,12 +57,12 @@ export default function BusStopView({ navigation }) {
     }
   }
 
-  const handleBusFavorites = async () => {
+  const handleBusStopFavorites = async () => {
     await AsyncStorage.getItem('Bus_FavoritesList')
       .then(async (_data) => {
         if (_data) {
           const tempData = JSON.parse(_data)
-          handleGetBusFavorites()
+          handleGetBusStopFavorites()
             .then((result) => {
               if (result === false) { // 데이터가 존재하지 않으면 추가
                 const DATA = {
@@ -87,7 +71,7 @@ export default function BusStopView({ navigation }) {
                 }
                 tempData.push(DATA)
                 AsyncStorage.setItem('Bus_FavoritesList', JSON.stringify(tempData)) // 데이터 저장
-                handleGetBusFavorites() // 즐겨찾기 데이터 다시 조회
+                handleGetBusStopFavorites() // 즐겨찾기 데이터 다시 조회
               } else {
                 const newData = []
                 for (const [index, favoriteData] of tempData.entries()) {
@@ -97,7 +81,7 @@ export default function BusStopView({ navigation }) {
                   }
                 }
                 AsyncStorage.setItem('Bus_FavoritesList', JSON.stringify(newData)) // 데이터 저장
-                handleGetBusFavorites() // 즐겨찾기 데이터 다시 조회
+                handleGetBusStopFavorites() // 즐겨찾기 데이터 다시 조회
                 // handleDeleteBusStop(data.busStopID)
               }
             }).catch((error) => {
@@ -113,7 +97,7 @@ export default function BusStopView({ navigation }) {
           }
           tempData.push(DATA)
           AsyncStorage.setItem('Bus_FavoritesList', JSON.stringify(tempData))
-          handleGetBusFavorites() // 즐겨찾기 데이터 조회
+          handleGetBusStopFavorites() // 즐겨찾기 데이터 조회
         }
       }).catch((error) => {
         Alert.alert('에러', '데이터를 추가하지 못했습니다.')
@@ -125,7 +109,7 @@ export default function BusStopView({ navigation }) {
       .then((res) => {
         setNowLoading(false)
         if (res.status === 200) {
-          setBusStopDate(res.data.data)
+          setBusStopDate(res.data)
           setBusStopType(1)
         } else {
           setBusStopType(0)
@@ -151,7 +135,7 @@ export default function BusStopView({ navigation }) {
 
   useEffect(() => {
     handleBusArrivalInformation()
-    handleGetBusFavorites()
+    handleGetBusStopFavorites()
 
     const intervalId = setInterval(() => {
       setNowLoading(true)
@@ -172,74 +156,84 @@ export default function BusStopView({ navigation }) {
           <Text style={[{ ...styles.backButtonText, color: '#000000' }, isDarkMode && { ...styles.backButtonText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} {data.busStopName ? data.busStopName : '정류장'}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => handleBusFavorites()} style={Platform.OS === 'ios' ? { position: 'absolute', marginTop: 50, right: 20, } : { position: 'absolute', right: 20, }}>
+        <TouchableOpacity onPress={() => handleBusStopFavorites()} style={Platform.OS === 'ios' ? { position: 'absolute', marginTop: 50, right: 20, } : { position: 'absolute', right: 20, }}>
           <Icon_Feather style={{ color: favoriteState ? 'yellow' : `${isDarkMode ? '#ffffff' : '#000000'}` }} color={isDarkMode ? '#ffffff' : '#000000'} name="star" size={20} />
         </TouchableOpacity>
       </View>
 
-      {NowLoading === true &&
+      {/* 현재 로딩 중 */}
+      {NowLoading === true || BusStopType === null || BusStopType === 0 ?
         <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', zIndex: 999, pointerEvents: 'none', }}>
           <ActivityIndicator size={15} color="green" />
-        </View>
+        </View> : null
       }
 
-      {BusStopType === null ?
+      <>
+        {/* 버튼 */}
+        <TouchableOpacity onPress={() => {
+          handleAddBusStop(data.data.busStopID) // 홈 화면 버스정류장 즐겨찾기 추가
+        }} style={{ zIndex: 999, position: 'absolute', width: 50, height: 50, right: 10, bottom: 73, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: '#999999' }}>
+          <Text style={{ textAlign: 'center', color: '#ffffff', }}>홈에{'\n'}추가</Text>
+        </TouchableOpacity>
+
+        {/* 버튼 */}
+        <TouchableOpacity onPress={() => {
+          setNowLoading(true)
+          handleBusArrivalInformation()
+        }} style={{ zIndex: 999, position: 'absolute', width: 50, height: 50, right: 10, bottom: 13, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: '#999999' }}>
+          <Icon_Feather color={'#333333'} name="refresh-cw" size={25} />
+        </TouchableOpacity>
+      </>
+
+      {/* 정류장 정보 */}
+      <>
+        <View style={{ width: '100%', height: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
+          <Text style={{ marginBottom: 3, fontSize: 23, color: isDarkMode ? '#ffffff' : '#000000', }}>{data.busStopName}</Text>
+          <Text style={{ marginBottom: 10, fontSize: 13, color: isDarkMode ? '#ffffff' : '#000000', }}>{data.busStopID}</Text>
+        </View>
+        {/* 줄 */}
+        <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
+      </>
+
+      {/* 곧 도착 */}
+      <>
+        {BusStopType === 1 && BusStopData.ArrivingSoon.length != 0 &&
+          <>
+            <View style={{ padding: 7, marginLeft: 13, }}>
+              <Text style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>곧 도착 {(BusStopData.ArrivingSoon).map((text, index) => { return <Text key={index} style={{ color: 'red', }}>{text}{BusStopData.ArrivingSoon.length - 1 != index ? ', ' : ''}</Text> })}</Text>
+            </View>
+            {/* 줄 */}
+            <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
+          </>
+        }
+      </>
+
+      {/* 버스 도착 정보 */}
+      {BusStopData.data &&
         <>
-          <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
-            <ActivityIndicator size="large" color="green" />
-          </View>
-        </>
-        :
-        <>
-          {BusStopType === 0 &&
-            <>
-              <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
-                <ActivityIndicator size="large" color="green" />
-                <Text>데이터를 불러오지 못했어요.{'\n'}20초 뒤 다시시도합니다.</Text>
-              </View>
-            </>
-          }
-
-          {BusStopType === 1 &&
-            <>
-              <TouchableOpacity onPress={() => {
-                handleAddBusStop(data.busStopID) // 홈 화면 버스정류장 즐겨찾기 추가
-              }} style={{ zIndex: 999, position: 'absolute', width: 50, height: 50, right: 10, bottom: 73, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: '#999999' }}>
-                <Text style={{ textAlign: 'center', color: '#ffffff', }}>홈에{'\n'}추가</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => {
-                setNowLoading(true)
-                handleBusArrivalInformation()
-              }} style={{ zIndex: 999, position: 'absolute', width: 50, height: 50, right: 10, bottom: 13, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: '#999999' }}>
-                <Icon_Feather color={'#333333'} name="refresh-cw" size={25} />
-              </TouchableOpacity>
-
-              <ScrollView>
-                <View style={{ width: '100%', height: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
-                  <Text style={{ marginBottom: 10, fontSize: 20, color: '#000000' }}>{data.busStopName}</Text>
+          <ScrollView style={{ flex: 1, }}>
+            {(BusStopData.data).map((data, index) => {
+              const direction = (data.direction).substr(0, data.direction.length - 2).length >= 10 ? `${(data.direction).substr(0, 9)}...` : `${(data.direction).substr(0, data.direction.length - 2)} 방향`
+              const currentLocation = (data.currentLocation).substring((data.currentLocation).lastIndexOf('(') + 1, (data.currentLocation).lastIndexOf(')'))
+              return (
+                <View key={index}>
+                  <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
+                  <View style={{ flexDirection: 'row', width: '100%', height: 70, paddingLeft: 10, alignItems: 'center', backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
+                    <Text style={[{ left: 10, marginBottom: 7, color: '#000000', fontWeight: 'bold', position: 'absolute' }, isDarkMode && { left: 10, marginBottom: 7, color: '#ffffff', fontWeight: 'bold', position: 'absolute' }]}>
+                      {data.busNumber}번 {'('}{direction}{')'}
+                    </Text>
+                    <Text style={[{ right: 10, marginBottom: 7, color: '#000000', fontWeight: 'bold', position: 'absolute' }, isDarkMode && { right: 10, marginBottom: 7, color: '#ffffff', fontWeight: 'bold', position: 'absolute' }]}>
+                      {data.arrivalTime} {currentLocation ? `[${currentLocation}]` : null}
+                    </Text>
+                  </View>
+                  {/* 마지막에 선 추가 */}
+                  {BusStopData.data.length - 1 === index &&
+                    <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
+                  }
                 </View>
-
-                {BusStopData.map((data, index) => {
-                  const direction = (data.direction).substr(0, data.direction.length - 2).length >= 10 ? `${(data.direction).substr(0, 9)}...` : `${(data.direction).substr(0, data.direction.length - 2)} 방향`
-                  const currentLocation = (data.currentLocation).substring((data.currentLocation).lastIndexOf('(') + 1, (data.currentLocation).lastIndexOf(')'))
-                  return (
-                    <View key={index}>
-                      <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
-                      <View style={{ flexDirection: 'row', width: '100%', height: 70, paddingLeft: 10, alignItems: 'center', backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
-                        <Text style={[{ left: 10, marginBottom: 7, color: '#000000', fontWeight: 'bold', position: 'absolute' }, isDarkMode && { left: 10, marginBottom: 7, color: '#ffffff', fontWeight: 'bold', position: 'absolute' }]}>
-                          {data.busNumber}번 {'('}{direction}{')'}
-                        </Text>
-                        <Text style={[{ right: 10, marginBottom: 7, color: '#000000', fontWeight: 'bold', position: 'absolute' }, isDarkMode && { right: 10, marginBottom: 7, color: '#ffffff', fontWeight: 'bold', position: 'absolute' }]}>
-                          {data.arrivalTime} {currentLocation ? `[${currentLocation}]` : null}
-                        </Text>
-                      </View>
-                    </View>
-                  )
-                })}
-              </ScrollView>
-            </>
-          }
+              )
+            })}
+          </ScrollView>
         </>
       }
     </SafeAreaView>

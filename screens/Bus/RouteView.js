@@ -104,7 +104,7 @@ export default function RouteView({ navigation }) {
         if (error.response) {
           const res = error.response
           if (res.status === 400) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+            // return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
           } else if (res.status === 500) {
             return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
           } else {
@@ -144,69 +144,80 @@ export default function RouteView({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {NowLoading === true &&
+      {/* 현재 로딩 중 */}
+      {NowLoading === true || RouteType === null || RouteType === 0 ?
         <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', zIndex: 999, pointerEvents: "none", }}>
           <ActivityIndicator size={15} color="green" />
-        </View>
+        </View> : null
       }
 
-      {RouteType === null ?
+      <>
+        {/*  버튼 */}
+        <TouchableOpacity onPress={() => {
+          setNowLoading(true)
+          handleBusLocationInquiry()
+        }} style={{ zIndex: 999, position: 'absolute', width: 50, height: 50, right: 10, bottom: 13, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: '#999999' }}>
+          <Icon_Feather color={'#333333'} name="refresh-cw" size={25} />
+        </TouchableOpacity>
+      </>
+
+      {/* 노선 정보 */}
+      <>
+        <View style={{ width: '100%', height: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
+          <Text style={{ marginBottom: 10, fontSize: 20, color: isDarkMode ? '#ffffff' : '#000000' }}>{data.busID}번</Text>
+          <Text style={{ fontSize: 15, color: isDarkMode ? '#999999' : '#333333' }}>{data.StartingPoint} -{'>'} {data.EndingPoint}</Text>
+        </View>
+        {/* 줄 */}
+        <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
+      </>
+
+      {/* 운행 정보 */}
+      <>
+        {RouteType === 1 && RouteData.RouteRunningCount != 0 &&
+          <>
+            <View style={{ padding: 7, marginLeft: 13, backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
+              <Text style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>현재 {RouteData.RouteRunningCount}대 운행중</Text>
+            </View>
+            {/* 줄 */}
+            <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
+          </>
+        }
+      </>
+
+      {RouteData['Location'] &&
         <>
-          <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
-            <ActivityIndicator size="large" color="green" />
-          </View>
-        </>
-        :
-        <>
-          {RouteType === 0 &&
-            <>
-              <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
-                <ActivityIndicator size="large" color="green" />
-                <Text>데이터를 불러오지 못했어요.{'\n'}20초 뒤 다시시도합니다.</Text>
-              </View>
-            </>
-          }
+          <ScrollView style={{ flex: 1, }}>
+            {RouteData['Location'].map((data, index) => {
+              return (
+                <TouchableOpacity key={index} onPress={() => navigation.navigate('Bus_BusStopView', { data })}>
+                  {/* 세로 선 */}
+                  <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
+                  {/* 정보 박스 */}
+                  <View style={{ flexDirection: 'row', width: '100%', height: 70, paddingLeft: 10, alignItems: 'center', borderTopColor: '#000000', borderBottomColor: '#000000', backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
+                    {/* 번호판 정보 */}
+                    {data.uniqueNum != '' &&
+                      <>
+                        <Text style={{ position: 'absolute', left: 10, top: 7, width: 'auto', borderWidth: 1, borderColor: '#000000', paddingLeft: 1, paddingRight: 1, fontSize: 10, color: '#000000', backgroundColor: '#ffffff', }}>{data.uniqueNum}</Text>
+                        <FastImage style={{ zIndex: 999, position: 'absolute', left: 43, top: 5, width: 20, height: 20, }} source={require('../../resource/bus/bus_Icon.png')} />
+                      </>
+                    }
 
-          {RouteType === 1 &&
-            <>
-              <TouchableOpacity onPress={() => {
-                setNowLoading(true)
-                handleBusLocationInquiry()
-              }} style={{ zIndex: 999, position: 'absolute', width: 50, height: 50, right: 10, bottom: 13, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: '#999999' }}>
-                <Icon_Feather color={'#333333'} name="refresh-cw" size={25} />
-              </TouchableOpacity>
+                    {/* 방향 아이콘 */}
+                    <FastImage style={{ zIndex: 999, position: 'absolute', left: 43, width: 20, height: 20, }} source={require('../../resource/bus/bus_Direction.png')} />
+                    
+                    {/* 줄 */}
+                    <View style={{ position: 'absolute', left: 50, width: 5, height: 72, backgroundColor: '#999999' }}></View>
 
-              <ScrollView>
-                <View style={{ width: '100%', height: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
-                  <Text style={{ marginBottom: 10, fontSize: 20, color: '#000000' }}>{data.busID}번</Text>
-                  <Text style={{ fontSize: 15, color: '#333333' }}>{data.StartingPoint} -{'>'} {data.EndingPoint}</Text>
-                </View>
-
-                {RouteData['Location'].map((data, index) => {
-                  return (
-                    <TouchableOpacity key={index} onPress={() => navigation.navigate('Bus_BusStopView', { data })}>
-                      <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
-                      <View style={{ flexDirection: 'row', width: '100%', height: 70, paddingLeft: 10, alignItems: 'center', borderTopColor: '#000000', borderBottomColor: '#000000', backgroundColor: '#ffffff' }}>
-                        <Text style={{ position: 'absolute', left: 10, top: 7, width: 'auto', borderWidth: data.uniqueNum === '' ? 0 : 1, borderColor: '#000000', paddingLeft: 1, paddingRight: 1, fontSize: 10, color: '#000000' }}>{data.uniqueNum}</Text>
-                        {data.uniqueNum != '' &&
-                          // <Icon_Feather style={{ zIndex: 999, position: 'absolute', left: 43, top: 5, width: 30, height: 72, }} color={'#000000'} name="square" size={19} />
-                          <FastImage style={{ zIndex: 999, position: 'absolute', left: 43, top: 5, width: 20, height: 20, }} source={require('../../resource/버스_아이콘.png')} />
-                        }
-                        {/* <Icon_Feather style={{ zIndex: 999, position: 'absolute', left: 43, top: 25, width: 30, height: 72, }} color={'#000000'} name="arrow-down-circle" size={19} /> */}
-                        <FastImage style={{ zIndex: 999, position: 'absolute', left: 43, width: 20, height: 20, }} source={require('../../resource/버스_방향.png')} />
-                        <View style={{ position: 'absolute', left: 50, width: 5, height: 72, backgroundColor: '#999999' }}></View>
-
-                        <View style={{ paddingLeft: 70, alignContent: 'center', }}>
-                          <Text style={{ fontSize: 15, color: '#000000' }}>{data.busStopName}</Text>
-                          <Text style={{ fontSize: 11, color: '#666666' }}>{data.busStopID}</Text>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  )
-                })}
-              </ScrollView>
-            </>
-          }
+                    {/* 정류장 정보 */}
+                    <View style={{ paddingLeft: 70, alignContent: 'center', }}>
+                      <Text style={{ fontSize: 15, color: isDarkMode ? '#ffffff' : '#000000' }}>{data.busStopName}</Text>
+                      <Text style={{ fontSize: 11, color: '#666666' }}>{data.busStopID}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              )
+            })}
+          </ScrollView>
         </>
       }
     </SafeAreaView>

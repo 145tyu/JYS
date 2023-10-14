@@ -38,6 +38,7 @@ export default function SettingsHomeScreen({ navigation }) {
           </TouchableOpacity>
         </>
 
+        {/* 커뮤니티 */}
         <>
           <Text style={styles.InfoTopText}>커뮤니티</Text>
           <TouchableOpacity style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]} onPress={() => {
@@ -52,6 +53,7 @@ export default function SettingsHomeScreen({ navigation }) {
           </TouchableOpacity>
         </>
 
+        {/* 버스 */}
         <>
           <Text style={styles.InfoTopText}>버스</Text>
           <TouchableOpacity style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]} onPress={() => navigation.navigate('Bus_AddBusStopID')}>
@@ -59,6 +61,15 @@ export default function SettingsHomeScreen({ navigation }) {
           </TouchableOpacity>
         </>
 
+        {/* 크레딧 */}
+        <>
+          <Text style={styles.InfoTopText}>크레딧</Text>
+          <TouchableOpacity style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]} onPress={() => navigation.navigate('Credits_Home')}>
+            <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>크레딧</Text>
+          </TouchableOpacity>
+        </>
+
+        {/* 앱 정보 */}
         <>
           <Text style={styles.InfoTopText}>정보</Text>
           <TouchableOpacity style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]} onPress={() => {
