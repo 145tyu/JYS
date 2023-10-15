@@ -65,9 +65,9 @@ export default function BusHome({ navigation }) {
                   <TouchableOpacity key={index} onPress={() => {
                     navigation.navigate('Bus_RouteView', { data: data.data, index, RouteSearchValue: data.data.busID })
                   }}>
-                    <View style={{ width: '100%', height: 85, marginBottom: 5, backgroundColor: '#E9E9E9' }}>
-                      <Text style={{ marginTop: 13, marginLeft: 13, fontSize: 20, fontWeight: '700', color: '#000000', }}>{data.data.type ? data.data.type : '구분'} {data.data.busID}번</Text>
-                      <Text style={{ marginTop: 10, marginLeft: 13, fontSize: 13, fontWeight: '400', color: '#000000', }}>{data.data.EndingPoint} 방면</Text>
+                    <View style={{ width: '100%', height: 85, marginBottom: 5, backgroundColor: isDarkMode ? '#121212' : '#E9E9E9', }}>
+                      <Text style={{ marginTop: 13, marginLeft: 13, fontSize: 20, fontWeight: '700', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.data.type ? data.data.type : '구분'} {data.data.busID}번</Text>
+                      <Text style={{ marginTop: 10, marginLeft: 13, fontSize: 13, fontWeight: '400', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.data.EndingPoint} 방면</Text>
                     </View>
                   </TouchableOpacity>
                 )
@@ -76,9 +76,9 @@ export default function BusHome({ navigation }) {
                   <TouchableOpacity key={index} onPress={() => {
                     navigation.navigate('Bus_BusStopView', { data: data.data })
                   }}>
-                    <View style={{ width: '100%', height: 85, marginBottom: 5, backgroundColor: '#E9E9E9' }}>
-                      <Text style={{ marginTop: 13, marginLeft: 13, fontSize: 20, fontWeight: '700', color: '#000000', }}>{data.data.busStopName}</Text>
-                      <Text style={{ marginTop: 10, marginLeft: 13, fontSize: 13, fontWeight: '400', color: '#000000', }}>{data.data.busStopID}</Text>
+                    <View style={{ width: '100%', height: 85, marginBottom: 5, backgroundColor: isDarkMode ? '#121212' : '#E9E9E9', }}>
+                      <Text style={{ marginTop: 13, marginLeft: 13, fontSize: 20, fontWeight: '700', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.data.busStopName}</Text>
+                      <Text style={{ marginTop: 10, marginLeft: 13, fontSize: 13, fontWeight: '400', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.data.busStopID}</Text>
                     </View>
                   </TouchableOpacity>
                 )
