@@ -3,6 +3,7 @@ import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAre
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
 import DeviceInfo from 'react-native-device-info';
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -13,41 +14,27 @@ import axiosInstance from '../../api/API_Server';
 export default function AddBusStopID({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
 
-  const [isLoading, setIsLoading] = useState(false)
-
-  const [businfo, setBusInfo] = useState(null)
-  const [busType, setBusType] = useState(0)
-
-  const [busStopName, setBusStopName] = useState(null)
-  const [busStopID, setBusStopID] = useState(null)
-
-  const getBusInfo = async () => {
-    setIsLoading(true)
-    try {
-      await axiosInstance.post('/Bus/getBusStopID', { busStopName: busStopName })
-        .then((res) => {
-          console.log(res.data)
-        }).catch((error) => {
-          console.log(error)
-        })
-    } catch (error) {
-      console.log('AddBusStopID | ', error)
-    }
-  }
-
   const handelAddBusStop = async (ID) => {
-    Alert.alert('알림', '선택하신 정류장을 추가하시겠습니까?', [
+    Alert.alert('알림', `선택하신 정류장(${ID})을 추가하시겠습니까?`, [
       {
         text: '추가', onPress: () => {
           AsyncStorage.setItem('set_busStopID_1', `${ID}`)
             .then(() => {
-              return Alert.alert('성공', '정류장을 등록했습니다.\n홈에서 쓸어내려 새로고침 해주세요.')
+              Toast.show({
+                type: 'success',
+                text1: `정류장(${ID})을 홈에 추가했어요.`,
+                text2: '홈을 쓸어내려 새로고침 해주세요.',
+              })
             }).catch((error) => {
-              return Alert.alert('에러', '정류장을 추가하지 못했습니다.')
+              Toast.show({
+                type: 'error',
+                text1: '정류장을 추가하지 못했어요.',
+                text2: `${error}`,
+              })
             })
         }
       },
-      { text: '취소' }
+      { text: '취소', }
     ])
   }
 
@@ -57,37 +44,44 @@ export default function AddBusStopID({ navigation }) {
         text: '삭제', onPress: () => {
           AsyncStorage.removeItem('set_busStopID_1')
             .then(() => {
-              return Alert.alert('성공', '정류장을 삭제했습니다.')
+              Toast.show({
+                type: 'success',
+                text1: '등록된 정류장을 홈에서 삭제했어요.',
+              })
             }).catch((error) => {
-              return Alert.alert('에러', '정류장을 삭제하지 못했습니다.')
+              Toast.show({
+                type: 'error',
+                text1: '등록된 정류장을 삭제하지 못했어요.',
+                text2: `${error}`,
+              })
             })
         }
       },
-      { text: '취소' }
+      { text: '취소', }
     ])
   }
 
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#ffffff' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' }]}>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
       {/* 로고 */}
       <View style={styles.logoView}>
         <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
-          <Text style={[{ ...styles.backButtonText, color: '#000000' }, isDarkMode && { ...styles.backButtonText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 정류장 추가</Text>
+          <Text style={{ ...styles.backButtonText, color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 정류장 추가</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.deleteBusStopView, marginTop: 50 } : { ...styles.deleteBusStopView }} onPress={() => { handelDeleteBusStop() }}>
           <Text style={{ ...styles.deleteBusStopText, color: '#ffffff' }}>삭제하기</Text>
         </TouchableOpacity>
       </View>
-      
+
       <TouchableOpacity onPress={() => navigation.navigate('Bus_Search', { setType: 'BusStop', })} style={{ ...styles.inputContainer, }}>
-        <View style={[{ ...styles.inputView, backgroundColor: '#E9E9E9', borderColor: '#E9E9E9' }, isDarkMode && { ...styles.inputView, backgroundColor: '#333333', borderColor: '#333333' }]}>
+        <View style={{ ...styles.inputView, backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', borderColor: isDarkMode ? '#333333' : '#E9E9E9' }}>
           <Text style={{ color: isDarkMode ? '#CCCCCC' : '#999999' }}>버스, 정류장 검색</Text>
         </View>
       </TouchableOpacity>
 
       <View style={{ width: '100%', height: 80, borderRadius: 20, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#121212' : '#f2f4f6' }}>
-        <Text style={[{ fontSize: 17, color: '#333333', textAlign: 'center', }, isDarkMode && { color: '#999999', fontSize: 17, textAlign: 'center', }]}>검색을 사용하여 정류장을 검색하거나{'\n'}미리 설정된 프리셋을 사용하여 추가해보세요.</Text>
+        <Text style={{ fontSize: 17, textAlign: 'center', color: isDarkMode ? '#333333' : '#999999', }}>검색을 사용하여 정류장을 검색하거나{'\n'}미리 설정된 프리셋을 사용하여 추가해보세요.</Text>
       </View>
 
       <ScrollView>

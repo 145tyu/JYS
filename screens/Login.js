@@ -5,21 +5,16 @@ import messaging from '@react-native-firebase/messaging';
 import { CommonActions } from "@react-navigation/native";
 import DeviceInfo from 'react-native-device-info';
 import FastImage from 'react-native-fast-image';
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 
 import axiosInstance from "../api/API_Server";
-import ErrorAlert from '../api/ErrorModal';
 
 export default function LoginScreen({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
 
   const [isLoading, setIsLoading] = useState(false)
-
-  const [alert, setAlert] = useState(null)
-  const [alertDescription, setAlertDescription] = useState(null)
-  const [alertStatus, setAlertStatus] = useState(null)
-  const [isAlertModalVisible, setIsAlertModalVisible] = useState(false)
 
   const [accountID, setAccountID] = useState('')
   const [password, setPassword] = useState('')
@@ -33,33 +28,20 @@ export default function LoginScreen({ navigation }) {
     }
   }
 
-  const resetAlert = () => {
-    setAlert(null) // 에러메시지 초기화
-    setAlertDescription(null) // 에러메시지 초기화
-    setAlertStatus(null) // 에러상태 초기화
-    setIsAlertModalVisible(false) // 에러 모달 닫기
-  }
-
   const handelNotificationStatus = async (accountID) => {
-    await AsyncStorage.getItem('Notification_Allowed_Status')
-      .then((res) => {
-        if (res === null) {
-          fcmInsertToken(accountID)
-        } else {
-          if (res === 'true') {
-            fcmInsertToken(accountID)
-          }
-        }
-      }).catch((error) => {
-        console.log(error)
-      })
+    const NotificationAllowedStatus = await AsyncStorage.getItem('Notification_Allowed_Status')
+
+    if (NotificationAllowedStatus === null || NotificationAllowedStatus === 'true') {
+      fcmInsertToken(accountID)
+    }
   }
 
   const fcmInsertToken = async (accountID) => {
     await messaging()
       .getToken()
       .then(async (fcmToken) => {
-        AsyncStorage.setItem('fcm_token', fcmToken)
+        await AsyncStorage.setItem('fcm_token', fcmToken)
+
         const data = [
           {
             "fcmToken": fcmToken,
@@ -80,33 +62,26 @@ export default function LoginScreen({ navigation }) {
             if (res.status === 200) {
               console.log(res.data.message)
             } else {
-              console.log('FCM을 등록하지 못했습니다.')
+              Toast.show({
+                type: 'error',
+                text1: '알림 서비스를 등록하지 못했습니다.',
+              })
             }
           }).catch((error) => {
-            console.log('FcmInsertToken |', error)
-            if (error.response) {
-              const res = error.response
-              if (res.status === 400) {
-                console.log(error.data.errorDescription)
-              } else if (res.status === 500) {
-                console.log(error.data.errorDescription)
-              } else {
-                console.log('FCM을 등록하지 못했습니다.')
-              }
-            } else {
-              console.log('FCM을 등록하지 못했습니다.')
-            }
+            Toast.show({
+              type: 'error',
+              text1: '알림 서비스를 등록하지 못했습니다.',
+            })
           })
       })
   }
 
   const handleLogin = async () => {
-    resetAlert()
     if (!accountID || !password) {
-      // 에러 모달 설정
-      setAlert('아이디 또는 비밀번호를 입력해주세요.')
-      setAlertStatus(400)
-      setIsAlertModalVisible(true) // 에러 모달 표시
+      Toast.show({
+        type: 'error',
+        text1: '아이디 또는 비밀번호를 입력해주세요.',
+      })
     } else {
       setIsLoading(true)
       try {
@@ -136,169 +111,177 @@ export default function LoginScreen({ navigation }) {
                 )
               }
             } else {
-              // 에러 모달 설정
-              setAlert('로그인 시도 중 예외가 발생했습니다.')
-              setAlertDescription('다시 시도해 주세요.')
-              setAlertStatus(400)
-              setIsAlertModalVisible(true) // 에러 모달 표시
+              Toast.show({
+                type: 'error',
+                text1: '로그인을 실패했어요.',
+                text2: '다시 시도해 주세요.',
+              })
             }
           }).catch((error) => {
             setIsLoading(false)
             if (error.response) {
               const res = error.response
               if (res.status === 400) {
-                // 에러 모달 설정
-                setAlert(res.data.error)
-                if (res.data.errorDescription) setAlertDescription(res.data.errorDescription)
-                setAlertStatus(400)
-                setIsAlertModalVisible(true) // 에러 모달 표시
+                if (res.data.errorDescription) {
+                  Toast.show({
+                    type: 'error',
+                    text1: `${res.data.errorDescription}`,
+                    text2: `${res.data.error}`,
+                  })
+                } else {
+                  Toast.show({
+                    type: 'error',
+                    text1: `${res.data.error}`,
+                  })
+                }
               } else if (res.status === 500) {
-                console.log(res.data)
-                // 에러 모달 설정
-                setAlert('로그인에 실패했습니다.')
-                if (res.data.errorDescription) setAlertDescription(res.data.errorDescription)
-                setAlertStatus(500)
-                setIsAlertModalVisible(true) // 에러 모달 표시
+                if (res.data.errorDescription) {
+                  Toast.show({
+                    type: 'error',
+                    text1: `${res.data.errorDescription}`,
+                    text2: `${res.data.error}`,
+                  })
+                } else {
+                  Toast.show({
+                    type: 'error',
+                    text1: `${res.data.error}`,
+                  })
+                }
               } else {
-                console.log('LoginAPI | ', error)
-                // 에러 모달 설정
-                setAlert('서버와 연결할 수 없습니다.')
-                setAlertDescription('다시 시도해 주세요.')
-                setAlertStatus(500)
-                setIsAlertModalVisible(true) // 에러 모달 표시
+                Toast.show({
+                  type: 'error',
+                  text1: '서버와 연결할 수 없습니다.',
+                  text2: '다시 시도해 주세요.',
+                })
               }
             } else {
-              // 에러 모달 설정
-              setAlert('서버와 연결할 수 없습니다.')
-              setAlertDescription('다시 시도해 주세요.')
-              setAlertStatus(500)
-              setIsAlertModalVisible(true) // 에러 모달 표시
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: '다시 시도해 주세요.',
+              })
             }
           })
       } catch (error) {
         setIsLoading(false)
-        console.log('LoginAPI | ', error)
-        // 에러 모달 설정
-        setAlert('로그인에 실패했습니다.')
-        setAlertDescription('다시 시도해 주세요.')
-        setAlertStatus(500)
-        setIsAlertModalVisible(true) // 에러 모달 표시
+        Toast.show({
+          type: 'error',
+          text1: '서버와 연결할 수 없습니다.',
+          text2: '다시 시도해 주세요.',
+        })
       }
     }
   }
 
-  const closeErrModal = () => {
-    setIsAlertModalVisible(false)
+  const handleGuestLogin = async () => {
+    const ID = await DeviceInfo.getUniqueId()
+
+    handelNotificationStatus()
+
+    AsyncStorage.setItem('id', ID)
+    AsyncStorage.setItem('job', 'guest')
+    AsyncStorage.setItem('access_token', 'guestLoginAccessToken1234')
+    AsyncStorage.setItem('refresh_token', 'guestLoginRefreshToken1234')
+
+    return navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'S_Home' }]
+      })
+    )
   }
 
   return (
-    <SafeAreaView style={[styles.container, isDarkMode && styles.containerDark]}>
-      <ErrorAlert error={alert} errorDescription={alertDescription} status={alertStatus} isDarkMode={isDarkMode} visible={isAlertModalVisible} onComponent={handleLogin} onClose={closeErrModal} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
+      <KeyboardAvoidingView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', }} behavior={Platform.select({ ios: 'padding' })}>
+        <FastImage style={{ justifyContent: 'center', alignItems: 'center', width: 150, height: 150, marginBottom: 40 }} source={require('../resource/logo_v1.png')} />
 
-      <FastImage style={{ justifyContent: 'center', alignItems: 'center', width: 150, height: 150, marginBottom: 40 }} source={require('../resource/logo_v1.png')} />
+        <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+          <TextInput
+            style={{ height: 50, color: isDarkMode ? '#ffffff' : '#000000' }}
+            placeholder='아이디'
+            placeholderTextColor={isDarkMode ? "#CCCCCC" : "#999999"}
+            onChangeText={(text) => setAccountID(text)}
+          />
+        </View>
 
-      <View style={[styles.inputView, isDarkMode && styles.inputViewDark]}>
-        <TextInput
-          style={[styles.inputText, isDarkMode && styles.inputTextDark]}
-          placeholder="아이디"
-          placeholderTextColor={isDarkMode ? "#CCCCCC" : "#999999"}
-          onChangeText={(text) => setAccountID(text)}
-        />
-      </View>
-      <View style={[styles.inputView, isDarkMode && styles.inputViewDark]}>
-        <TextInput
-          style={[styles.inputText, isDarkMode && styles.inputTextDark]}
-          placeholder="비밀번호"
-          placeholderTextColor={isDarkMode ? "#CCCCCC" : "#999999"}
-          secureTextEntry={true}
-          onChangeText={(text) => setPassword(text)}
-        />
-      </View>
+        <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+          <TextInput
+            style={{ height: 50, color: isDarkMode ? '#ffffff' : '#000000' }}
+            placeholder='비밀번호'
+            placeholderTextColor={isDarkMode ? "#CCCCCC" : "#999999"}
+            secureTextEntry={true}
+            onChangeText={(text) => setPassword(text)}
+          />
+        </View>
 
-      <TouchableOpacity style={styles.jobBtn} onPress={handleJob}>
-        <Text style={styles.jobBtnText}>
-          {job === 'student' ?
-            <>
-              {<Icon_Ionicons name='school-outline' size={14} />} 학생
-            </>
+        <TouchableOpacity style={styles.jobBtn} onPress={handleJob}>
+          <Text style={styles.jobBtnText}>
+            {job === 'student' ?
+              <>
+                {<Icon_Ionicons name='school-outline' size={14} />} 학생
+              </>
+              :
+              <>
+                {<Icon_Ionicons name='options-outline' size={14} />} 교사
+              </>
+            }
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
+          {isLoading === false ?
+            <Text style={styles.loginBtnText}>로그인</Text>
             :
-            <>
-              {<Icon_Ionicons name='options-outline' size={14} />} 교사
-            </>
+            <ActivityIndicator size="small" color="white" />
           }
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
-        {isLoading === false ?
-          <Text style={styles.loginBtnText}>로그인</Text>
-          :
-          <ActivityIndicator size="small" color="white" />
-        }
-      </TouchableOpacity>
-
-      <View style={{ justifyContent: 'center', marginTop: 10, }}>
-        <TouchableOpacity style={{ position: 'absolute', left: -95 }} onPress={() => { navigation.navigate('SignUp_Welcome') }}>
-          <Text style={{ color: '#666666', textAlign: 'center', fontSize: 12 }}>회원가입</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={{ position: 'absolute', left: -33 }} onPress={() => { Alert.alert('준비 중', '아이디찾기를 사용할 수 없습니다.') }}>
-          <Text style={{ color: '#666666', textAlign: 'center', fontSize: 12 }}>아아디찾기</Text>
-        </TouchableOpacity>
+        <View style={{ justifyContent: 'center', marginTop: 10, }}>
+          <TouchableOpacity style={{ position: 'absolute', left: -95 }} onPress={() => { navigation.navigate('SignUp_Welcome') }}>
+            <Text style={{ color: '#666666', textAlign: 'center', fontSize: 12 }}>회원가입</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={{ position: 'absolute', left: 40 }} onPress={() => { Alert.alert('준비 중', '비밀번호찾기를 사용할 수 없습니다.') }}>
-          <Text style={{ color: '#666666', textAlign: 'center', fontSize: 12 }}>비밀번호찾기</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={{ position: 'absolute', left: -33 }} onPress={() => {
+            Toast.show({
+              type: 'error',
+              text1: '아이디 찾기를 사용할 수 없습니다.',
+              text2: '준비 중',
+            })
+          }}>
+            <Text style={{ color: '#666666', textAlign: 'center', fontSize: 12 }}>아아디찾기</Text>
+          </TouchableOpacity>
 
-        {/* <TouchableOpacity style={{ position: 'absolute', top: 30,}} onPress={() => { navigation.navigate('SignUp_Welcome')}}>
-                    <Text style={{color: '#666666', textAlign: 'center', fontSize: 12}}>새로운회원가입</Text>
-                </TouchableOpacity> */}
-      </View>
-    </SafeAreaView>
+          <TouchableOpacity style={{ position: 'absolute', left: 40 }} onPress={() => {
+            Toast.show({
+              type: 'error',
+              text1: '비밀번호 찾기를 사용할 수 없습니다.',
+              text2: '준비 중',
+            })
+          }}>
+            <Text style={{ color: '#666666', textAlign: 'center', fontSize: 12 }}>비밀번호찾기</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity style={{ position: 'absolute', bottom: 10, }} onPress={() => {
+          Alert.alert('정보', '게스트로 로그인을 하시겠습니까?\n로그인 필요 서비스는 이용할 수 없습니다.', [{ text: '게스트로 로그인', onPress: () => handleGuestLogin() }, { text: '취소', }])
+        }}>
+          <Text style={{ color: '#666666', textAlign: 'center', fontSize: 12 }}>게스트로 로그인</Text>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
+    </SafeAreaView >
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  containerDark: {
-    flex: 1,
-    backgroundColor: '#000000',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   inputView: {
     width: '85%',
-    backgroundColor: '#E9E9E9',
-    borderRadius: 10,
     height: 50,
-    marginBottom: 20,
-    justifyContent: 'center',
     padding: 13,
-    borderColor: '#E9E9E9',
-    borderWidth: 2,
-  },
-  inputViewDark: {
-    width: '85%',
-    backgroundColor: '#333333',
+    marginBottom: 10,
     borderRadius: 10,
-    height: 50,
-    marginBottom: 20,
-    justifyContent: 'center',
-    padding: 13,
-    borderColor: '#333333',
     borderWidth: 2,
-  },
-  inputText: {
-    height: 50,
-    color: '#000',
-  },
-  inputTextDark: {
-    height: 50,
-    color: '#fff',
+    justifyContent: 'center',
   },
   loginBtn: {
     width: '85%',

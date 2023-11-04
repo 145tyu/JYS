@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { PERMISSIONS, request, check } from 'react-native-permissions';
 import FastImage from 'react-native-fast-image';
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -28,20 +29,6 @@ const requestCameraPermission = async () => {
     Alert.alert('CameraPermission API', `${error}`)
     return false
   }
-}
-
-const UploadModal = ({ uploadCount, isDarkMode, visible }) => {
-  return (
-    <Modal animationType='none' transparent={true} visible={visible}>
-      <View style={uploadModalStyles.container}>
-        <View style={[{ ...uploadModalStyles.boxContainer, borderBlockColor: '#f2f4f6' }, isDarkMode && { ...uploadModalStyles.boxContainer, backgroundColor: '#121212' }]}>
-          <Text style={[{ ...uploadModalStyles.boxText, color: '#000000' }, isDarkMode && { ...uploadModalStyles.boxText, color: '#ffffff' }]}>댓글 생성 중... {uploadCount}</Text>
-          <Text style={[{ ...uploadModalStyles.boxFooter, color: '#666666' }, isDarkMode && { ...uploadModalStyles.boxFooter, color: '#999999' }]}>앱을 종료하지 마세요.</Text>
-          <ActivityIndicator style={{ marginTop: 10, }} size="large" color="blue" />
-        </View>
-      </View>
-    </Modal>
-  )
 }
 
 const SeeMoreModal = ({ reporterUserID, contentData, contentType, openReportModal, handleDeleteComment, handleDeleteReplies, handleBlockedUser, isDarkMode, visible, onClose }) => {
@@ -77,7 +64,10 @@ const SeeMoreModal = ({ reporterUserID, contentData, contentType, openReportModa
             <>
               <View style={{ width: '100%', height: 1, marginTop: 10, marginBottom: 10, backgroundColor: '#999999' }}></View>
               <TouchableOpacity onPress={() => {
-                Alert.alert('준비 중', '수정 기능을 준비하고 있어요.')
+                Toast.show({
+                  type: 'error',
+                  text1: `수정 기능을 준비하고 있어요.`,
+                })
               }} style={{ padding: 3, }}>
                 <Text style={[{ ...modalStyles.boxText, color: '#000000', }, isDarkMode && { ...modalStyles.boxText, color: '#ffffff', }]}>수정하기</Text>
               </TouchableOpacity>
@@ -218,32 +208,6 @@ const ReportCheckModal = ({ handelReport, reportType, isDarkMode, visible, onClo
   )
 }
 
-const uploadModalStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  boxContainer: {
-    width: 300,
-    height: 130,
-    padding: 25,
-    borderRadius: 15,
-    backgroundColor: '#f2f4f6',
-  },
-  boxText: {
-    textAlign: 'center',
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  boxFooter: {
-    marginTop: 5,
-    textAlign: 'center',
-    fontSize: 10,
-    fontWeight: '400',
-  }
-})
-
 const modalStyles = StyleSheet.create({
   container: {
     flex: 1,
@@ -277,7 +241,7 @@ const modalStyles = StyleSheet.create({
 
 export default function WriteComments({ navigation }) {
   const route = useRoute()
-  const { postID } = route.params
+  const { postID, category } = route.params
 
   const isDarkMode = useColorScheme() === 'dark'
   const isFocused = useIsFocused()
@@ -308,8 +272,6 @@ export default function WriteComments({ navigation }) {
   const [imageViewerData, setImageViewerData] = useState('')
   const [imageViewerInfo, setImageViewerInfo] = useState([])
 
-  const [uploadModalState, setUploadModalState] = useState(false)
-
   const handleTakePhoto = async () => {
     const hasPermission = await requestCameraPermission()
     if (hasPermission) {
@@ -322,13 +284,21 @@ export default function WriteComments({ navigation }) {
         if (res.didCancel) {
           return null
         } else if (res.errorCode) {
-          return Alert.alert(res.errorCode, res.errorMessage)
+          Toast.show({
+            type: 'error',
+            text1: `${res.errorMessage}`,
+            text2: `${res.errorCode}`,
+          })
         } else {
           setImageData(res.assets)
         }
       })
     } else {
-      return Alert.alert('권한 확인', '카메라 권한을 확인해주세요.')
+      Toast.show({
+        type: 'error',
+        text1: '카메라 권한을 확인해주세요.',
+        text2: '권한 확인 필요!',
+      })
     }
   }
 
@@ -346,13 +316,21 @@ export default function WriteComments({ navigation }) {
         if (res.didCancel) {
           return null
         } else if (res.errorCode) {
-          return Alert.alert(res.errorCode, res.errorMessage)
+          Toast.show({
+            type: 'error',
+            text1: `${res.errorMessage}`,
+            text2: `${res.errorCode}`,
+          })
         } else {
           setImageData(res.assets)
         }
       })
     } catch (error) {
-      return Alert.alert('권한 확인', '저장공간 접근 권한이 없습니다.')
+      Toast.show({
+        type: 'error',
+        text1: '저장공간 접근 권한이 없습니다.',
+        text2: `${error}`,
+      })
     }
   }
 
@@ -371,31 +349,42 @@ export default function WriteComments({ navigation }) {
           }
         }).catch((error) => {
           setCommentsType(0)
-          console.log(error)
           if (error.response) {
             const res = error.response
             if (res.status === 400) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else if (res.status === 500) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: '다시 시도해 주세요.',
+              })
             }
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-              { text: '확인' },
-            ])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: `${error}`,
+            })
           }
         })
     } catch (error) {
       setCommentsType(0)
-      console.log(error)
+      Toast.show({
+        type: 'error',
+        text1: '댓글을 불러오지 못했어요.',
+        text2: `${error}`,
+      })
     }
   }
 
@@ -414,31 +403,42 @@ export default function WriteComments({ navigation }) {
           }
         }).catch((error) => {
           setRepliesType(0)
-          console.log(error)
           if (error.response) {
             const res = error.response
             if (res.status === 400) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else if (res.status === 500) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: '다시 시도해 주세요.',
+              })
             }
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-              { text: '확인' },
-            ])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: `${error}`,
+            })
           }
         })
     } catch (error) {
       setRepliesType(0)
-      console.log(error)
+      Toast.show({
+        type: 'error',
+        text1: '답글을 불러오지 못했어요.',
+        text2: `${error}`,
+      })
     }
   }
 
@@ -452,34 +452,47 @@ export default function WriteComments({ navigation }) {
               commentsCheck()
               repliesCheck()
             } else {
-              return Alert.alert('에러', '댓글을 삭제하지 못했습니다.')
+              Toast.show({
+                type: 'error',
+                text1: '댓글을 삭제하지 못했습니다.',
+              })
             }
           }).catch((error) => {
-            console.log(error)
             if (error.response) {
               const res = error.response
               if (res.status === 400) {
-                return Alert.alert(res.data.error, res.data.errorDescription, [
-                  { text: '확인' },
-                ])
+                Toast.show({
+                  type: 'error',
+                  text1: `${res.data.errorDescription}`,
+                  text2: `${res.data.error}`,
+                })
               } else if (res.status === 500) {
-                return Alert.alert(res.data.error, res.data.errorDescription, [
-                  { text: '확인' },
-                ])
+                Toast.show({
+                  type: 'error',
+                  text1: `${res.data.errorDescription}`,
+                  text2: `${res.data.error}`,
+                })
               } else {
-                return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                  { text: '확인' },
-                ])
+                Toast.show({
+                  type: 'error',
+                  text1: '서버와 연결할 수 없습니다.',
+                  text2: '다시 시도해 주세요.',
+                })
               }
             } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: `${error}`,
+              })
             }
           })
       }).catch((error) => {
-        console.log(error)
-        return Alert.alert('에러', '댓글을 삭제하지 못했습니다.')
+        Toast.show({
+          type: 'error',
+          text1: '댓글을 삭제하지 못했어요.',
+          text2: `${error}`
+        })
       })
   }
 
@@ -493,34 +506,47 @@ export default function WriteComments({ navigation }) {
               commentsCheck()
               repliesCheck()
             } else {
-              return Alert.alert('에러', '댓글을 삭제하지 못했습니다.')
+              Toast.show({
+                type: 'error',
+                text1: '답글을 삭제하지 못했어요.',
+              })
             }
           }).catch((error) => {
-            console.log(error)
             if (error.response) {
               const res = error.response
               if (res.status === 400) {
-                return Alert.alert(res.data.error, res.data.errorDescription, [
-                  { text: '확인' },
-                ])
+                Toast.show({
+                  type: 'error',
+                  text1: `${res.data.errorDescription}`,
+                  text2: `${res.data.error}`,
+                })
               } else if (res.status === 500) {
-                return Alert.alert(res.data.error, res.data.errorDescription, [
-                  { text: '확인' },
-                ])
+                Toast.show({
+                  type: 'error',
+                  text1: `${res.data.errorDescription}`,
+                  text2: `${res.data.error}`,
+                })
               } else {
-                return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                  { text: '확인' },
-                ])
+                Toast.show({
+                  type: 'error',
+                  text1: '서버와 연결할 수 없습니다.',
+                  text2: '다시 시도해 주세요.',
+                })
               }
             } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: `${error}`,
+              })
             }
           })
       }).catch((error) => {
-        console.log(error)
-        return Alert.alert('에러', '댓글을 삭제하지 못했습니다.')
+        Toast.show({
+          type: 'error',
+          text1: '답글을 삭제하지 못했어요.',
+          text2: `${error}`
+        })
       })
   }
 
@@ -534,37 +560,53 @@ export default function WriteComments({ navigation }) {
               Alert.alert('신고하기', `${res.data.message}\n이 사용자를 차단할까요?`, [{ text: '차단하기', onPress: () => handleBlockedUser() }, { text: '아니요' }])
             } else {
               handleRefresh()
-              Alert.alert('신고하기', res.data.message, [{ text: '확인', }])
+              Toast.show({
+                type: 'success',
+                text1: `${res.data.message}`,
+              })
             }
           } else {
-            return Alert.alert('신고하기', '신고를 접수하지 못했습니다.', [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: '신고를 접수하지 못했어요.',
+            })
           }
         }).catch((error) => {
-          console.log(error)
           if (error.response) {
             const res = error.response
             if (res.status === 400) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else if (res.status === 500) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: '다시 시도해 주세요.',
+              })
             }
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-              { text: '확인' },
-            ])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: `${error}`,
+            })
           }
         })
     } catch (error) {
-      console.log(error)
-      return Alert.alert('신고하기', '신고를 접수하지 못했습니다.')
+      Toast.show({
+        type: 'error',
+        text1: '신고를 접수하지 못했어요.',
+        text2: `${error}`
+      })
     }
   }
 
@@ -585,7 +627,10 @@ export default function WriteComments({ navigation }) {
           const duplicationUser = existingBlockUser.some(data => data.id === blockUserObject.id)
 
           if (duplicationUser) {
-            Alert.alert('차단', '이 기기에서 이미 차단된 사용자입니다.')
+            Toast.show({
+              type: 'error',
+              text1: '이 기기에서 이미 차단된 사용자입니다.',
+            })
           } else {
             existingBlockUser.push(blockUserObject)
             BlockUser(existingBlockUser)
@@ -596,23 +641,38 @@ export default function WriteComments({ navigation }) {
           AsyncStorage.setItem('community_blockedUser', JSON.stringify(updatedBlockUser))
             .then(() => {
               handleRefresh()
-              Alert.alert('차단', '이 기기에서 사용자를 차단했습니다.')
+              Toast.show({
+                type: 'success',
+                text1: '이 기기에서 사용자를 차단했습니다.',
+              })
               if (contentType === 'Post') {
                 navigation.goBack()
               }
-            }).catch(error => {
-              console.log(error)
-              Alert.alert('차단', '사용자를 차단하지 못했습니다.')
+            }).catch((error) => {
+              Toast.show({
+                type: 'error',
+                text1: '사용자를 차단하지 못했습니다.',
+                text2: `${error}`
+              })
             })
         }
       }).catch((error) => {
-        console.log(error)
-        Alert.alert('차단', '사용자를 차단하지 못했습니다.')
+        Toast.show({
+          type: 'error',
+          text1: '사용자를 차단하지 못했습니다.',
+          text2: `${error}`
+        })
       })
   }
 
   const handleCommentsForm = async (formData) => {
-    setUploadModalState(true)
+    Toast.show({
+      type: 'info',
+      text1: '전송 중...',
+      text2: '앱을 종료하지 마세요.',
+      autoHide: false,
+    })
+
     try {
       await axiosInstance.post('/Community/commentsForm', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -621,7 +681,6 @@ export default function WriteComments({ navigation }) {
           setUploadCount(percentCompleted)
         },
       }).then(async (res) => {
-        setUploadModalState(false)
         if (res.status === 200) {
           // 댓글 작성칸 초기화
           setCommentsForm('')
@@ -630,86 +689,102 @@ export default function WriteComments({ navigation }) {
           // 데이터 새로고침
           commentsCheck()
           repliesCheck()
+
+          Toast.show({
+            type: 'success',
+            text1: '댓글을 작성했어요.',
+          })
         } else {
-          return Alert.alert('에러', '댓글을 작성하지 못했어요.')
+          Toast.show({
+            type: 'error',
+            text1: '댓글을 작성하지 못했어요.',
+          })
         }
       }).catch((error) => {
-        setUploadModalState(false)
-        console.log(error)
         if (error.response) {
           const res = error.response
           if (res.status === 400) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [
-              { text: '확인' },
-            ])
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else if (res.status === 500) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [
-              { text: '확인' },
-            ])
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-              { text: '확인' },
-            ])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: '다시 시도해 주세요.',
+            })
           }
         } else {
-          return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-            { text: '확인' },
-          ])
+          Toast.show({
+            type: 'error',
+            text1: '서버와 연결할 수 없습니다.',
+            text2: `${error}`,
+          })
         }
       })
     } catch (error) {
-      console.log(error)
-      setUploadModalState(false)
-      return Alert.alert('에러', '댓글을 작성하지 못했어요.', [
-        {
-          text: '확인',
-        }
-      ])
+      Toast.show({
+        type: 'error',
+        text1: '댓글을 작성하지 못했어요.',
+        text2: `${error}`
+      })
     }
   }
 
   const handleSumit = async () => {
-    await AsyncStorage.getItem('id')
-      .then(async (ID) => {
-        const formData = new FormData()
-        if (imageData.length != 0 && commentsForm != '') { // 이미지, 글 모두 있을 때
-          formData.append('image', {
-            uri: imageData[0].uri,
-            type: imageData[0].type,
-            name: imageData[0].fileName,
-          })
-          formData.append('data', JSON.stringify({
-            accountID: ID,
-            postID: postID,
-            content: commentsForm,
-          }))
-        } else if (imageData.length != 0) { // 이미지만 있을 때
-          formData.append('image', {
-            uri: imageData[0].uri,
-            type: imageData[0].type,
-            name: imageData[0].fileName,
-          })
-          formData.append('data', JSON.stringify({
-            accountID: ID,
-            postID: postID,
-          }))
-        } else { // 글만 있을 때
-          formData.append('data', JSON.stringify({
-            accountID: ID,
-            postID: postID,
-            content: commentsForm,
-          }))
-        }
-        handleCommentsForm(formData)
-      }).catch((error) => {
-        console.log(error)
+    const ID = await AsyncStorage.getItem('id')
+    const JOB = await AsyncStorage.getItem('job')
+
+    const formData = new FormData()
+
+    if (imageData.length != 0 && commentsForm != '') { // 이미지, 글 모두 있을 때
+      formData.append('image', {
+        uri: imageData[0].uri,
+        type: imageData[0].type,
+        name: imageData[0].fileName,
       })
+      formData.append('data', JSON.stringify({
+        accountID: ID,
+        postID: postID,
+        content: commentsForm,
+      }))
+    } else if (imageData.length != 0) { // 이미지만 있을 때
+      formData.append('image', {
+        uri: imageData[0].uri,
+        type: imageData[0].type,
+        name: imageData[0].fileName,
+      })
+      formData.append('data', JSON.stringify({
+        accountID: ID,
+        job: JOB,
+        postID: postID,
+      }))
+    } else { // 글만 있을 때
+      formData.append('data', JSON.stringify({
+        accountID: ID,
+        job: JOB,
+        postID: postID,
+        content: commentsForm,
+      }))
+    }
+
+    handleCommentsForm(formData)
   }
 
   const handleRefresh = () => {
     setRefreshing(true)
+
     commentsCheck()
     repliesCheck()
+
     setRefreshing(false)
   }
 
@@ -764,8 +839,6 @@ export default function WriteComments({ navigation }) {
     <SafeAreaView style={[{ ...styles.container, backgroundColor: '#ffffff' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' }]}>
       {/* 이미지뷰어 */}
       <ImageViewer imageData={imageViewerData} imageInfo={imageViewerInfo} visible={imageViewerState} onClose={() => closeImageViewer()} />
-      {/* 업로드 모달 */}
-      <UploadModal uploadCount={uploadCount} isDarkMode={isDarkMode} visible={uploadModalState} />
       {/* 더보기 모달 */}
       <SeeMoreModal reporterUserID={reporterUserID} contentType={contentType} contentData={contentData} openReportModal={openReportSelectModal} handleDeleteComment={() => handleDeleteComment(contentData)} handleDeleteReplies={() => handleDeleteReplies(contentData)} isDarkMode={isDarkMode} visible={seeMoreModalState} onClose={() => closeSeeMoreModal()} />
       {/* 신고 모달 */}
@@ -822,7 +895,7 @@ export default function WriteComments({ navigation }) {
 
                                 <View>
                                   {/* 사용자ID */}
-                                  <Text style={[{ ...styles.CommentsAuthorText, color: '#000000' }, isDarkMode && { ...styles.CommentsAuthorText, color: '#ffffff' }]}>{data.author}</Text>
+                                  <Text style={[{ ...styles.CommentsAuthorText, color: '#000000' }, isDarkMode && { ...styles.CommentsAuthorText, color: '#ffffff' }]}>{category === 'board-Anonymous' ? '익명' : data.author}</Text>
                                   {/* 댓글만 존재 */}
                                   {data.content != null && !data.image &&
                                     <Text style={[{ ...styles.CommentsContentText, color: '#000000' }, isDarkMode && { ...styles.CommentsContentText, color: '#ffffff' }]}>{data.content}</Text>
@@ -892,7 +965,7 @@ export default function WriteComments({ navigation }) {
                                             {/* 답글 */}
                                             <View key={data.id} style={{ marginBottom: 13, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
                                               {/* 사용자ID */}
-                                              <Text style={[{ ...styles.RepliesAuthorText, color: '#000000' }, isDarkMode && { ...styles.RepliesAuthorText, color: '#ffffff' }]}>{_data.author}</Text>
+                                              <Text style={[{ ...styles.RepliesAuthorText, color: '#000000' }, isDarkMode && { ...styles.RepliesAuthorText, color: '#ffffff' }]}>{category === 'board-Anonymous' ? '익명' : _data.author}</Text>
                                               {/* 댓글만 존재 */}
                                               {_data.content != null && !_data.image &&
                                                 <Text style={[{ ...styles.RepliesContentText, color: '#000000' }, isDarkMode && { ...styles.RepliesContentText, color: '#ffffff' }]}>{_data.content}</Text>

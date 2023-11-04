@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal } from 'react-native';
 import { CommonActions, useFocusEffect, useIsFocused } from "@react-navigation/native";
-import DeviceInfo from 'react-native-device-info';
+import Toast from "react-native-toast-message";
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -20,6 +20,7 @@ export default function StudentAllTab({ navigation }) {
     try {
       const ID = await AsyncStorage.getItem('id')
       const JOB = await AsyncStorage.getItem('job')
+
       await axiosInstance.post('/profile', { id: ID, job: JOB })
         .then((res) => {
           if (res.status === 200) {
@@ -27,44 +28,66 @@ export default function StudentAllTab({ navigation }) {
             setProfileType(1)
           } else {
             setProfileType(0)
-            return Alert.alert('정보', '계정 인증을 하지 못했습니다.', [
-              {
-                text: '확인',
-              },
-            ])
+
+            Toast.show({
+              type: 'error',
+              text1: '계정을 확인하지 못했어요.'
+            })
           }
         }).catch((error) => {
           setProfileType(0)
-          console.log('Profile API |', error)
           if (error.response) {
             const res = error.response
             if (res.status === 400) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`
+              })
             } else if (res.status === 500) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`
+              })
             } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `서버와 연결할 수 없습니다.`,
+              })
             }
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-              { text: '확인' },
-            ])
+            Toast.show({
+              type: 'error',
+              text1: `서버와 연결할 수 없습니다.`,
+              text2: `${error}`,
+            })
           }
         })
     } catch (error) {
       setProfileType(0)
-      console.log('Profile API |', error)
+      Toast.show({
+        type: 'error',
+        text1: `계정 데이터를 불러올 수 없어요.`,
+        text2: `${error}`,
+      })
     }
   }
 
+  const handleGuestLogout = () => {
+    AsyncStorage.removeItem('job')
+    navigation.navigate('Login')
+  }
+
   useEffect(() => {
-    handleProfile() // 스크린이 처음 시작될 때 한번 실행
+    AsyncStorage.getItem('job')
+      .then((data) => {
+        if (data === 'guest') {
+          setProfileType(2)
+        } else {
+          handleProfile()
+        }
+      })
   }, [isFocused])
 
   return (
@@ -102,6 +125,13 @@ export default function StudentAllTab({ navigation }) {
                     {/* 아이콘 */}
                     <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: '#dcdcdc', top: 5, right: 5, position: 'absolute' }}></View>
                     <Icon_Feather name='user' size={30} style={{ color: 'black', borderRadius: 25, top: 13, right: 15, position: 'absolute' }} />
+                  </TouchableOpacity>
+                }
+                {profileType === 2 &&
+                  <TouchableOpacity onPress={() => handleGuestLogout()}>
+                    <Text style={[{ fontSize: 15, fontWeight: '600', color: '#000000' }, isDarkMode && { fontSize: 15, fontWeight: '600', color: '#ffffff' }]}>
+                      여기를 눌러 로그인을 시도하세요.
+                    </Text>
                   </TouchableOpacity>
                 }
               </>

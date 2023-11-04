@@ -3,6 +3,7 @@ import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAre
 import { useRoute } from '@react-navigation/native';
 import { CommonActions } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -22,9 +23,57 @@ export default function EditEmail({ navigation }) {
   const [oldPassword, setOldPassword] = useState(null)
   const [newEmail, setNewEmail] = useState(null)
 
+  const handelCheckEmail = async () => {
+    if (newEmail === null) {
+      Toast.show({
+        type: 'error',
+        text1: '새로운 이메일을 입력해주세요.',
+      })
+    } else {
+      await axiosInstance.post('/register', {
+        email: newEmail,
+      }).then((res) => {
+        setIsLoading(false)
+        if (res.status === 200) {
+          handleEditProfile()
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: `이메일 확인 도중 예외가 발생했습니다.`,
+          })
+        }
+      }).catch((error) => {
+        setIsLoading(false)
+        const res = error.response
+        if (res.status === 400) {
+          Toast.show({
+            type: 'error',
+            text1: `${res.data.errorDescription}`,
+            text2: `${res.data.error}`,
+          })
+        } else if (res.status === 500) {
+          Toast.show({
+            type: 'error',
+            text1: `${res.data.errorDescription}`,
+            text2: `${res.data.error}`,
+          })
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: `이메일을 확인하지 못했습니다.`,
+            text2: `${error}`,
+          })
+        }
+      })
+    }
+  }
+
   const handleEditProfile = async () => {
     if (newEmail === null) {
-      return Alert.alert('정보', '새로운 이메일을 입력해주세요.')
+      Toast.show({
+        type: 'error',
+        text1: '새로운 이메일을 입력해주세요.',
+      })
     } else {
       setIsLoading(true)
       try {
@@ -35,46 +84,57 @@ export default function EditEmail({ navigation }) {
             .then((res) => {
               setIsLoading(false)
               if (res.status === 200) {
-                return Alert.alert('성공', '이메일을 성공적으로 수정했어요.', [
-                  {
-                    text: '확인',
-                    onPress: () => { navigation.goBack() }
-                  }
-                ])
+                Toast.show({
+                  type: 'success',
+                  text1: '이메일을 변경했어요.',
+                })
+                navigation.goBack()
               } else {
-                Alert.alert('에러', '서버와 연결할 수 없습니다.')
+                Toast.show({
+                  type: 'error',
+                  text1: '이메일을 변경하지 못했어요.',
+                  text2: '다시 시도해 주세요.',
+                })
               }
             }).catch((error) => {
               setIsLoading(false)
-              console.log(error)
               if (error.response) {
                 const res = error.response
                 if (res.status === 400) {
-                  return Alert.alert(res.data.error, res.data.errorDescription, [
-                    { text: '확인' },
-                  ])
+                  Toast.show({
+                    type: 'error',
+                    text1: `${res.data.errorDescription}`,
+                    text2: `${res.data.error}`,
+                  })
                 } else if (res.status === 500) {
-                  return Alert.alert(res.data.error, res.data.errorDescription, [
-                    { text: '확인' },
-                  ])
+                  Toast.show({
+                    type: 'error',
+                    text1: `${res.data.errorDescription}`,
+                    text2: `${res.data.error}`,
+                  })
                 } else {
-                  return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                    { text: '확인' },
-                  ])
+                  Toast.show({
+                    type: 'error',
+                    text1: '서버와 연결할 수 없습니다.',
+                    text2: '다시 시도해 주세요.',
+                  })
                 }
               } else {
-                return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                  { text: '확인' },
-                ])
+                Toast.show({
+                  type: 'error',
+                  text1: '서버와 연결할 수 없습니다.',
+                  text2: `${error}`,
+                })
               }
             })
         }
       } catch (error) {
         setIsLoading(false)
-        console.log('ProfileEdit API |', error)
-        return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-          { text: '확인' },
-        ])
+        Toast.show({
+          type: 'error',
+          text1: '이메일을 변경하지 못했어요.',
+          text2: `${error}`,
+        })
       }
     }
   }
@@ -85,12 +145,11 @@ export default function EditEmail({ navigation }) {
     if (methodName === 'email') {
       setPlaceholder(email)
     } else {
-      return Alert.alert('에러', '나중에 다시 시도해보세요.', [
-        {
-          text: '확인',
-          onPress: () => { navigation.goBack() }
-        }
-      ])
+      Toast.show({
+        type: 'error',
+        text1: '나중에 다시 시도해보세요.',
+      })
+      navigation.goBack()
     }
   }
 
@@ -145,7 +204,7 @@ export default function EditEmail({ navigation }) {
       </ScrollView>
 
       {/* 요청 */}
-      <TouchableOpacity style={styles.checkBtnContainer} onPress={handleEditProfile}>
+      <TouchableOpacity style={styles.checkBtnContainer} onPress={handelCheckEmail}>
         {isLoading === false ?
           <Text style={styles.checkBtnText}>{<Icon_Feather name="check" size={17} />} 확인</Text>
           :

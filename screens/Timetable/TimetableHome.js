@@ -190,6 +190,9 @@ export default function TimetableHomeScreen({ navigation }) {
   }
 
   const FriendTimetableRefresh = async (grade, _class) => {
+    AsyncStorage.setItem('FriendTimetable_grade', grade)
+    AsyncStorage.setItem('FriendTimetable_class', _class)
+
     setFriendTimetableStateType(null)
     await axiosInstance.post('/timeTable', { GRADE: Number(grade), CLASS_NM: Number(_class), })
       .then((res) => {
@@ -214,8 +217,21 @@ export default function TimetableHomeScreen({ navigation }) {
     setSelectType('')
   }
 
+  const handleGetFriendTimetable = async () => {
+    const FriendGrade = await AsyncStorage.getItem('FriendTimetable_grade')
+    const FriendClass = await AsyncStorage.getItem('FriendTimetable_class')
+
+    if (FriendGrade != null && FriendClass != null) {
+      setFriendGrade(FriendGrade)
+      setFriendClass(FriendClass)
+
+      FriendTimetableRefresh(FriendGrade, FriendClass)
+    }
+  }
+
   useEffect(() => {
     MytimetableRefresh() // 스크린이 처음 시작될 때 한번 실행
+    handleGetFriendTimetable()
   }, [isFocused])
 
   return (

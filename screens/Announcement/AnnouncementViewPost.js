@@ -4,6 +4,7 @@ import { useRoute } from '@react-navigation/native';
 import { CommonActions, useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FastImage from 'react-native-fast-image';
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -49,27 +50,39 @@ export default function AnnouncementViewPost({ navigation }) {
           if (error.response) {
             const res = error.response
             if (res.status === 400) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else if (res.status === 500) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: '다시 시도해 주세요.',
+              })
             }
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-              { text: '확인' },
-            ])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: `${error}`,
+            })
           }
         })
     } catch (error) {
       setPostsType(0)
-      console.log(error)
+      Toast.show({
+        type: 'error',
+        text1: '공지사항을 불러오지 못했어요.',
+        text2: `${error}`,
+      })
     }
   }
 

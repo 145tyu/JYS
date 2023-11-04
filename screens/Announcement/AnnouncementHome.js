@@ -5,6 +5,7 @@ import { CommonActions, useIsFocused } from '@react-navigation/native';
 import DeviceInfo from 'react-native-device-info';
 import { Picker } from '@react-native-picker/picker';
 import FastImage from 'react-native-fast-image';
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -51,23 +52,42 @@ export default function AnnouncementHome({ navigation }) {
           }
         }).catch((error) => {
           setPostType(0)
-          console.log(error)
           if (error.response) {
             const res = error.response
             if (res.status === 400) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else if (res.status === 500) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: '다시 시도해 주세요.',
+              })
             }
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: `${error}`,
+            })
           }
         })
     } catch (error) {
       setPostType(0)
-      console.log(error)
+      Toast.show({
+        type: 'error',
+        text1: '공지를 불러오지 못했어요.',
+        text2: `${error}`
+      })
     }
   }
 

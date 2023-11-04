@@ -7,6 +7,7 @@ import { Picker } from '@react-native-picker/picker';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { PERMISSIONS, request, check } from 'react-native-permissions';
 import FastImage from 'react-native-fast-image';
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -28,20 +29,6 @@ const requestCameraPermission = async () => {
     Alert.alert('CameraPermission API', `${error}`)
     return false
   }
-}
-
-const UploadModal = ({ uploadCount, isDarkMode, visible }) => {
-  return (
-    <Modal animationType='none' transparent={true} visible={visible}>
-      <View style={uploadModalStyles.container}>
-        <View style={[{ ...uploadModalStyles.boxContainer, borderBlockColor: '#f2f4f6' }, isDarkMode && { ...uploadModalStyles.boxContainer, backgroundColor: '#121212' }]}>
-          <Text style={[{ ...uploadModalStyles.boxText, color: '#000000' }, isDarkMode && { ...uploadModalStyles.boxText, color: '#ffffff' }]}>게시글 생성 중... {uploadCount}</Text>
-          <Text style={[{ ...uploadModalStyles.boxFooter, color: '#666666' }, isDarkMode && { ...uploadModalStyles.boxFooter, color: '#999999' }]}>앱을 종료하지 마세요.</Text>
-          <ActivityIndicator style={{ marginTop: 10, }} size="large" color="blue" />
-        </View>
-      </View>
-    </Modal>
-  )
 }
 
 const uploadModalStyles = StyleSheet.create({
@@ -83,8 +70,6 @@ export default function WritePost({ navigation }) {
   const [selectBoard, setSelectBoard] = useState('board-Free')
   const [isSelectBoardVisible, setIsSelectBoardVisible] = useState(false)
 
-  const [uploadModalState, setUploadModalState] = useState(false)
-
   const handleTakePhoto = async () => {
     const hasPermission = await requestCameraPermission()
     if (hasPermission) {
@@ -97,14 +82,22 @@ export default function WritePost({ navigation }) {
         if (res.didCancel) {
           return null
         } else if (res.errorCode) {
-          return Alert.alert(res.errorCode, res.errorMessage)
+          Toast.show({
+            type: 'error',
+            text1: `${res.errorMessage}`,
+            text2: `${res.errorCode}`,
+          })
         } else {
           const _imageData = res.assets
           setSelectedImages((prevImages) => [...prevImages, _imageData])
         }
       })
     } else {
-      return Alert.alert('권한 확인', '카메라 권한을 확인해주세요.')
+      Toast.show({
+        type: 'error',
+        text1: '카메라 권한을 확인해주세요.',
+        text2: '권한 확인 필요!',
+      })
     }
   }
 
@@ -122,14 +115,22 @@ export default function WritePost({ navigation }) {
         if (res.didCancel) {
           return null
         } else if (res.errorCode) {
-          return Alert.alert(res.errorCode, res.errorMessage)
+          Toast.show({
+            type: 'error',
+            text1: `${res.errorMessage}`,
+            text2: `${res.errorCode}`,
+          })
         } else {
           const _imageData = res.assets
           setSelectedImages((prevImages) => [...prevImages, _imageData])
         }
       })
     } catch (error) {
-      return Alert.alert('권한 확인', '저장공간 접근 권한이 없습니다.')
+      Toast.show({
+        type: 'error',
+        text1: '저장공간 접근 권한이 없습니다.',
+        text2: `${error}`,
+      })
     }
   }
 
@@ -142,7 +143,13 @@ export default function WritePost({ navigation }) {
   }
 
   const handlePostForm = async (formData) => {
-    setUploadModalState(true)
+    Toast.show({
+      type: 'info',
+      text1: `전송 중... ${uploadCount}`,
+      text2: '앱을 종료하지 마세요.',
+      autoHide: false,
+    })
+
     try {
       await axiosInstance.post('/Community/postWrite', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -151,76 +158,82 @@ export default function WritePost({ navigation }) {
           setUploadCount(percentCompleted)
         },
       }).then((res) => {
-        setUploadModalState(false)
         if (res.status === 200) {
-          Alert.alert('성공', res.data.message)
-          return navigation.goBack()
+          navigation.goBack()
+          Toast.show({
+            type: 'success',
+            text1: `${res.data.message}`,
+          })
         } else {
-          return Alert.alert('에러', '게시글을 작성하지 못했습니다.')
+          Toast.show({
+            type: 'error',
+            text1: '게시글을 작성하지 못했어요.',
+          })
         }
       }).catch((error) => {
-        setUploadModalState(false)
-        console.log(error)
         if (error.response) {
           const res = error.response
           if (res.status === 400) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else if (res.status === 500) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: '다시 시도해 주세요.',
+            })
           }
         } else {
-          return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+          Toast.show({
+            type: 'error',
+            text1: '서버와 연결할 수 없습니다.',
+            text2: `${error}`,
+          })
         }
       })
     } catch (error) {
-      setUploadModalState(false)
-      return Alert.alert('에러', '게시글을 작성하지 못했어요.', [
-        {
-          text: '확인',
-        }
-      ])
+      Toast.show({
+        type: 'error',
+        text1: '게시글을 작성하지 못했어요.',
+        text2: `${error}`
+      })
     }
   }
 
   const handleSumit = async () => {
-    AsyncStorage.getItem('id')
-      .then(async (ID) => {
-        AsyncStorage.getItem('job')
-          .then(async (JOB) => {
-            const formData = new FormData()
-            if (selectedImages != 0) {
-              selectedImages.forEach((imageData, index) => {
-                formData.append(`image`, {
-                  uri: imageData[0].uri,
-                  type: imageData[0].type,
-                  name: `image${index}${imageData[0].fileName.substr((imageData[0].fileName).indexOf('.'), imageData[0].fileName.length)}`,
-                })
-              })
-            }
-            formData.append('data', JSON.stringify({
-              accountID: ID,
-              job: JOB,
-              category: selectBoard,
-              title: title,
-              content: content,
-            }))
-            handlePostForm(formData)
-          }).catch((error) => {
-            console.log(error)
-          }).finally(() => {
-            // setTitle('')
-            // setContent('')
-            // setSelectedImages([])
-          })
-      }).catch((error) => {
-        console.log(error)
-      }).finally(() => {
-        // setTitle('')
-        // setContent('')
-        // setSelectedImages([])
+    const ID = await AsyncStorage.getItem('id')
+    const JOB = await AsyncStorage.getItem('job')
+
+    const formData = new FormData()
+
+    if (selectedImages != 0) {
+      selectedImages.forEach((imageData, index) => {
+        formData.append(`image`, {
+          uri: imageData[0].uri,
+          type: imageData[0].type,
+          name: `image${index}${imageData[0].fileName.substr((imageData[0].fileName).indexOf('.'), imageData[0].fileName.length)}`,
+        })
       })
+    }
+
+    formData.append('data', JSON.stringify({
+      accountID: ID,
+      job: JOB,
+      category: selectBoard,
+      title: title,
+      content: content,
+    }))
+
+    handlePostForm(formData)
   }
 
   const renderSelectedImages = () => {
@@ -231,7 +244,6 @@ export default function WritePost({ navigation }) {
 
   return (
     <SafeAreaView style={[{ ...styles.safeArea, backgroundColor: '#FFFFFF' }, isDarkMode && { ...styles.safeArea, backgroundColor: '#000000' }]}>
-      <UploadModal uploadCount={uploadCount} isDarkMode={isDarkMode} visible={uploadModalState} />
       <KeyboardAvoidingView style={{ flex: 1, }} behavior={Platform.select({ ios: 'padding' })}>
         {/* 로고 */}
         <View style={styles.logoView}>
@@ -335,6 +347,12 @@ export default function WritePost({ navigation }) {
               - 음란물, 성적 수치심을 유발하는 행위
               {'\n'}
               - 스포일러, 공포, 속임, 놀라게 하는 행위
+              {'\n'}{'\n'}
+              3. 익명게시판
+              {'\n'}{'\n'}
+              - 익명게시판의 작성자 이름(댓글 포함)은 등록 시 매번 변경됩니다.
+              {'\n'}
+              - 규칙 위반 시 게시글이 경고 없이 삭제될 수 있습니다.
               {'\n'}
             </Text>
           </View>

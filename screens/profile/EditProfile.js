@@ -3,6 +3,7 @@ import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAre
 import { useRoute } from '@react-navigation/native';
 import { CommonActions } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -32,150 +33,239 @@ export default function EditProfile({ navigation }) {
   const [newFirstName, setNewFirstName] = useState(null)
   const [newLastName, setNewLastName] = useState(null)
 
-  const handleEditProfile = async () => {
+  const handleEditAccountID = async () => {
+    const ID = await AsyncStorage.getItem('id')
+    const JOB = await AsyncStorage.getItem('job')
+
+    await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', accountID: newAccountID, oldPassword: oldPassword })
+      .then((res) => {
+        setIsLoading(false)
+        if (res.status === 200) {
+          Toast.show({
+            type: 'success',
+            text1: '아이디를 변경했어요.',
+          })
+          navigation.goBack()
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: '아이디를 변경하지 못했어요.',
+            text2: '다시 시도해 주세요.',
+          })
+        }
+      }).catch((error) => {
+        setIsLoading(false)
+        if (error.response) {
+          const res = error.response
+          if (res.status === 400) {
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
+          } else if (res.status === 500) {
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: '다시 시도해 주세요.',
+            })
+          }
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: '서버와 연결할 수 없습니다.',
+            text2: `${error}`,
+          })
+        }
+      })
+  }
+
+  const handleCheckProfile = async () => {
     if (oldPassword === null) {
-      return Alert.alert('에러', '현재 비밀번호를 입력해주세요.')
+      Toast.show({
+        type: 'error',
+        text1: '현재 비밀번호를 입력해주세요.',
+      })
     } else {
       setIsLoading(true)
       try {
         const ID = await AsyncStorage.getItem('id')
         const JOB = await AsyncStorage.getItem('job')
+
         if (methodName === 'accountID') {
           if (newAccountID === null) {
             setIsLoading(false)
-            return Alert.alert('정보', '새로운 아이디를 입력하지 않았습니다.')
+            Toast.show({
+              type: 'error',
+              text1: '새로운 아이디를 입력하지 않았습니다.',
+            })
           } else {
-            await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', accountID: newAccountID, oldPassword: oldPassword })
+            await axiosInstance.post('/register', { accountID: newAccountID, })
               .then((res) => {
-                setIsLoading(false)
                 if (res.status === 200) {
-                  return Alert.alert('성공', '프로필을 성공적으로 수정했어요.', [
-                    {
-                      text: '확인',
-                      onPress: () => { navigation.goBack() }
-                    }
-                  ])
+                  handleEditAccountID()
                 } else {
-                  Alert.alert('에러', '서버와 연결할 수 없습니다.')
+                  setIsLoading(false)
+                  Toast.show({
+                    type: 'error',
+                    text1: '아이디 확인 도중 예외가 발생했습니다.',
+                  })
                 }
               }).catch((error) => {
                 setIsLoading(false)
-                console.log(error)
-                if (error.response) {
-                  const res = error.response
-                  if (res.status === 400) {
-                    return Alert.alert(res.data.error, res.data.errorDescription, [
-                      { text: '확인' },
-                    ])
-                  } else if (res.status === 500) {
-                    return Alert.alert(res.data.error, res.data.errorDescription, [
-                      { text: '확인' },
-                    ])
-                  } else {
-                    return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                      { text: '확인' },
-                    ])
-                  }
+                const res = error.response
+                if (res.status === 400) {
+                  Toast.show({
+                    type: 'error',
+                    text1: `${res.data.errorDescription}`,
+                    text2: `${res.data.error}`,
+                  })
+                } else if (res.status === 500) {
+                  Toast.show({
+                    type: 'error',
+                    text1: `${res.data.errorDescription}`,
+                    text2: `${res.data.error}`,
+                  })
                 } else {
-                  return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                    { text: '확인' },
-                  ])
+                  Toast.show({
+                    type: 'error',
+                    text1: '아이디 확인 도중 예외가 발생했습니다.',
+                    text2: `${error}`,
+                  })
                 }
               })
           }
         } else if (methodName === 'phoneNumber') {
           if (newPhoneNumber === null) {
             setIsLoading(false)
-            return Alert.alert('에러', '새로운 전화번호를 입력하지 않았습니다.')
+            Toast.show({
+              type: 'error',
+              text1: '새로운 전화번호를 입력하지 않았습니다.',
+            })
+          } else if (!validatePhoneNumber(newPhoneNumber)) {
+            setIsLoading(false)
+            Toast.show({
+              type: 'error',
+              text1: '전화번호 형식이 맞지 않습니다.',
+              text2: '숫자만 입력해주세요.'
+            })
           } else {
             await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', phoneNumber: newPhoneNumber, oldPassword: oldPassword })
               .then((res) => {
                 setIsLoading(false)
                 if (res.status === 200) {
-                  return Alert.alert('성공', '프로필을 성공적으로 수정했어요.', [
-                    {
-                      text: '확인',
-                      onPress: () => { navigation.goBack() }
-                    }
-                  ])
+                  Toast.show({
+                    type: 'success',
+                    text1: '전화번호를 변경했어요.',
+                  })
+                  navigation.goBack()
                 } else {
-                  Alert.alert('에러', '서버와 연결할 수 없습니다.')
+                  Toast.show({
+                    type: 'error',
+                    text1: '전화번호를 변경하지 못했습니다.',
+                  })
                 }
               }).catch((error) => {
                 setIsLoading(false)
-                console.log(error)
                 if (error.response) {
                   const res = error.response
                   if (res.status === 400) {
-                    return Alert.alert(res.data.error, res.data.errorDescription, [
-                      { text: '확인' },
-                    ])
+                    Toast.show({
+                      type: 'error',
+                      text1: `${res.data.errorDescription}`,
+                      text2: `${res.data.error}`,
+                    })
                   } else if (res.status === 500) {
-                    return Alert.alert(res.data.error, res.data.errorDescription, [
-                      { text: '확인' },
-                    ])
+                    Toast.show({
+                      type: 'error',
+                      text1: `${res.data.errorDescription}`,
+                      text2: `${res.data.error}`,
+                    })
                   } else {
-                    return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                      { text: '확인' },
-                    ])
+                    Toast.show({
+                      type: 'error',
+                      text1: '서버와 연결할 수 없습니다.',
+                      text2: '다시 시도해 주세요.',
+                    })
                   }
                 } else {
-                  return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                    { text: '확인' },
-                  ])
+                  Toast.show({
+                    type: 'error',
+                    text1: '서버와 연결할 수 없습니다.',
+                    text2: `${error}`,
+                  })
                 }
               })
           }
         } else if (methodName === 'name') {
           if (newFirstName === null || newLastName === null) {
             setIsLoading(false)
-            return Alert.alert('에러', '성 또는 이름을 입력하지 않았습니다.')
+            Toast.show({
+              type: 'error',
+              text1: '성 또는 이름을 입력하지 않았습니다.',
+            })
           } else {
             await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', firstName: newFirstName, lastName: newLastName, oldPassword: oldPassword })
               .then((res) => {
                 setIsLoading(false)
                 if (res.status === 200) {
-                  return Alert.alert('성공', '프로필을 성공적으로 수정했어요.', [
-                    {
-                      text: '확인',
-                      onPress: () => { navigation.goBack() }
-                    }
-                  ])
+                  Toast.show({
+                    type: 'success',
+                    text1: '이름을 변경했어요.',
+                  })
+                  navigation.goBack()
                 } else {
-                  Alert.alert('에러', '서버와 연결할 수 없습니다.')
+                  Toast.show({
+                    type: 'error',
+                    text1: '이름을 변경하지 못했어요.',
+                  })
                 }
               }).catch((error) => {
                 setIsLoading(false)
-                console.log(error)
                 if (error.response) {
                   const res = error.response
                   if (res.status === 400) {
-                    return Alert.alert(res.data.error, res.data.errorDescription, [
-                      { text: '확인' },
-                    ])
+                    Toast.show({
+                      type: 'error',
+                      text1: `${res.data.errorDescription}`,
+                      text2: `${res.data.error}`,
+                    })
                   } else if (res.status === 500) {
-                    return Alert.alert(res.data.error, res.data.errorDescription, [
-                      { text: '확인' },
-                    ])
+                    Toast.show({
+                      type: 'error',
+                      text1: `${res.data.errorDescription}`,
+                      text2: `${res.data.error}`,
+                    })
                   } else {
-                    return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                      { text: '확인' },
-                    ])
+                    Toast.show({
+                      type: 'error',
+                      text1: '서버와 연결할 수 없습니다.',
+                      text2: '다시 시도해 주세요.',
+                    })
                   }
                 } else {
-                  return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                    { text: '확인' },
-                  ])
+                  Toast.show({
+                    type: 'error',
+                    text1: '서버와 연결할 수 없습니다.',
+                    text2: `${error}`,
+                  })
                 }
               })
           }
         }
       } catch (error) {
         setIsLoading(false)
-        console.log('ProfileEdit API |', error)
-        return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-          { text: '확인' },
-        ])
+        Toast.show({
+          type: 'error',
+          text1: '프로필을 변경하지 못했어요.',
+          text2: `${error}`,
+        })
       }
     }
   }
@@ -200,12 +290,11 @@ export default function EditProfile({ navigation }) {
       setOldFirstName(firstName)
       setOldLastName(lastName)
     } else {
-      return Alert.alert('에러', '나중에 다시 시도해보세요.', [
-        {
-          text: '확인',
-          onPress: () => { navigation.goBack() }
-        }
-      ])
+      Toast.show({
+        type: 'error',
+        text1: '나중에 다시 시도해보세요.',
+      })
+      navigation.goBack()
     }
   }
 
@@ -335,7 +424,7 @@ export default function EditProfile({ navigation }) {
         </>
       </ScrollView>
       {/* 요청 */}
-      <TouchableOpacity style={styles.checkBtnContainer} onPress={handleEditProfile}>
+      <TouchableOpacity style={styles.checkBtnContainer} onPress={handleCheckProfile}>
         {isLoading === false ?
           <Text style={styles.checkBtnText}>{<Icon_Feather name="check" size={17} />} 확인</Text>
           :
@@ -344,6 +433,11 @@ export default function EditProfile({ navigation }) {
       </TouchableOpacity>
     </SafeAreaView>
   )
+}
+
+function validatePhoneNumber(phoneNumber) {
+  const pattern = /^010-\d{4}-\d{4}$/
+  return pattern.test(phoneNumber)
 }
 
 const styles = StyleSheet.create({

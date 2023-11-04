@@ -9,27 +9,45 @@ import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
 
 import axiosInstance from '../../../api/API_Server';
+import Toast from 'react-native-toast-message';
 
 export default function Settings_setNotificationScreen({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
 
-  const [isEnabled, setIsEnabled] = useState(false)
+  const [isEnabledMainNotification, setIsEnabledMainNotification] = useState(false)
 
-  const toggleSwitch = async () => {
-    setIsEnabled(previousState => !previousState)
-    if (isEnabled) {
+  const [isEnabledLunch, setIsEnabledLunch] = useState(false)
+
+  const toggleSwitchMainNotification = async () => {
+    setIsEnabledMainNotification(previousState => !previousState)
+    if (isEnabledMainNotification) {
       await AsyncStorage.setItem('Notification_Allowed_Status', 'false')
         .then(() => {
-          console.log('알림 권한을 거부로 변경했습니다.')
+          //console.log('알림 권한을 거부로 변경했습니다.')
           //handleDeleteFcmToken()
           handleFcmDelete()
         })
     } else {
       await AsyncStorage.setItem('Notification_Allowed_Status', 'true')
         .then(() => {
-          console.log('알림 권한을 허용으로 변경했습니다.')
+          //console.log('알림 권한을 허용으로 변경했습니다.')
           //handleCreateFcmToken()
           fcmInsertToken()
+        })
+    }
+  }
+
+  const toggleSwitchLunch = async () => {
+    setIsEnabledLunch(previousState => !previousState)
+    if (isEnabledLunch) {
+      await AsyncStorage.setItem('Meal_Lunch_Notification_Allowed_Status', 'false')
+        .then(() => {
+          console.log('중식 알림 권한을 거부로 변경했습니다.')
+        })
+    } else {
+      await AsyncStorage.setItem('Meal_Lunch_Notification_Allowed_Status', 'true')
+        .then(() => {
+          console.log('중식 알림 권한을 허용으로 변경했습니다.')
         })
     }
   }
@@ -38,7 +56,8 @@ export default function Settings_setNotificationScreen({ navigation }) {
     await messaging()
       .getToken()
       .then(async (fcmToken) => {
-        AsyncStorage.setItem('fcm_token', fcmToken)
+        await AsyncStorage.setItem('fcm_token', fcmToken)
+
         const data = [
           {
             "fcmToken": fcmToken,
@@ -59,22 +78,19 @@ export default function Settings_setNotificationScreen({ navigation }) {
             if (res.status === 200) {
               console.log(res.data.message)
             } else {
-              console.log('FCM을 등록하지 못했습니다.')
+              Toast.show({
+                type: 'error',
+                text1: '알림 서비스를 등록하지 못했습니다.',
+                position: 'bottom',
+              })
             }
           }).catch((error) => {
-            console.log('FcmInsertToken |', error)
-            if (error.response) {
-              const res = error.response
-              if (res.status === 400) {
-                console.log(error.data.errorDescription)
-              } else if (res.status === 500) {
-                console.log(error.data.errorDescription)
-              } else {
-                console.log('FCM을 등록하지 못했습니다.')
-              }
-            } else {
-              console.log('FCM을 등록하지 못했습니다.')
-            }
+            Toast.show({
+              type: 'error',
+              text1: '알림 서비스를 등록하지 못했습니다.',
+              text2: `${error}`,
+              position: 'bottom',
+            })
           })
       })
   }
@@ -84,38 +100,97 @@ export default function Settings_setNotificationScreen({ navigation }) {
       const fcmToken = await messaging().getToken()
       await axiosInstance.post('/Fcm/deleteToken', { fcmToken: fcmToken })
         .then((res) => {
-          console.log(res.data.message)
+          Toast.show({
+            type: 'success',
+            text1: `알림 서비스를 해지했어요.`,
+            position: 'bottom',
+          })
         }).catch((error) => {
-          console.log('Fcm API | ', error)
+          Toast.show({
+            type: 'error',
+            text1: '알름 서비스를 해지하지 못했어요.',
+            text2: `${error}`,
+            position: 'bottom',
+          })
         })
     } catch (error) {
-      console.log('Fcm API | ', error)
+      Toast.show({
+        type: 'error',
+        text1: '알름 서비스를 해지하지 못했어요.',
+        text2: `${error}`,
+        position: 'bottom',
+      })
     }
   }
 
-  const handleCreateFcmToken = async () => {
-    try {
-      await messaging().getToken()
-        .then((res) => {
-          console.log('FcmToken | ', res)
-        }).catch((error) => {
-          console.log('FcmToken | ', error)
-        })
-    } catch (error) {
-      console.log('FcmToken | ', error)
-    }
+  const LunchfcmInsertToken = async () => {
+    await messaging()
+      .getToken()
+      .then(async (fcmToken) => {
+        await AsyncStorage.setItem('fcm_token', fcmToken)
+
+        const data = [
+          {
+            "fcmToken": fcmToken,
+            "accountID": await AsyncStorage.getItem('id'),
+            "deviceInfo": {
+              "uniqueId": await DeviceInfo.getUniqueId(),
+              "brand": DeviceInfo.getBrand(),
+              "model": DeviceInfo.getModel(),
+              "systemVersion": DeviceInfo.getSystemVersion(),
+              "appVersion": DeviceInfo.getVersion(),
+              "buildNumber": DeviceInfo.getBuildNumber(),
+            },
+          }
+        ]
+
+        await axiosInstance.post('/Fcm/insertToken', { data: data[0] })
+          .then((res) => {
+            if (res.status === 200) {
+              console.log(res.data.message)
+            } else {
+              Toast.show({
+                type: 'error',
+                text1: '알림 서비스를 등록하지 못했습니다.',
+                position: 'bottom',
+              })
+            }
+          }).catch((error) => {
+            Toast.show({
+              type: 'error',
+              text1: '알림 서비스를 등록하지 못했습니다.',
+              text2: `${error}`,
+              position: 'bottom',
+            })
+          })
+      })
   }
 
-  const handleDeleteFcmToken = async () => {
+  const LunchhandleFcmDelete = async () => {
     try {
-      await messaging().deleteToken()
+      const fcmToken = await messaging().getToken()
+      await axiosInstance.post('/Fcm/deleteToken', { fcmToken: fcmToken })
         .then((res) => {
-          console.log('FcmToken | ', res)
+          Toast.show({
+            type: 'success',
+            text1: `알림 서비스를 해지했어요.`,
+            position: 'bottom',
+          })
         }).catch((error) => {
-          console.log('FcmToken | ', error)
+          Toast.show({
+            type: 'error',
+            text1: '알름 서비스를 해지하지 못했어요.',
+            text2: `${error}`,
+            position: 'bottom',
+          })
         })
     } catch (error) {
-      console.log('FcmToken | ', error)
+      Toast.show({
+        type: 'error',
+        text1: '알름 서비스를 해지하지 못했어요.',
+        text2: `${error}`,
+        position: 'bottom',
+      })
     }
   }
 
@@ -124,9 +199,22 @@ export default function Settings_setNotificationScreen({ navigation }) {
       .then((res) => {
         if (res != null) {
           if (res == 'true') {
-            setIsEnabled(true)
+            setIsEnabledMainNotification(true)
           } else if (res == 'false') {
-            setIsEnabled(false)
+            setIsEnabledMainNotification(false)
+          }
+        }
+      })
+  }
+
+  const checkLunchNotificationState = () => {
+    AsyncStorage.getItem('Meal_Lunch_Notification_Allowed_Status')
+      .then((res) => {
+        if (res != null) {
+          if (res == 'true') {
+            setIsEnabledMainNotification(true)
+          } else if (res == 'false') {
+            setIsEnabledMainNotification(false)
           }
         }
       })
@@ -134,6 +222,7 @@ export default function Settings_setNotificationScreen({ navigation }) {
 
   useEffect(() => {
     checkNotificationState()
+    checkLunchNotificationState()
   }, [])
 
   return (
@@ -157,10 +246,10 @@ export default function Settings_setNotificationScreen({ navigation }) {
             <Switch
               style={Platform.OS === 'ios' ? { position: 'absolute', right: 20, top: 15, } : { position: 'absolute', right: 20, top: 20, }}
               trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={isEnabled ? '#4682B4' : '#f4f3f4'}
+              thumbColor={isEnabledMainNotification ? '#4682B4' : '#f4f3f4'}
               ios_backgroundColor="#3e3e3e"
-              onValueChange={toggleSwitch}
-              value={isEnabled}
+              onValueChange={toggleSwitchMainNotification}
+              value={isEnabledMainNotification}
             />
           </View>
 
@@ -170,6 +259,27 @@ export default function Settings_setNotificationScreen({ navigation }) {
             </Text>
           </View>
         </>
+
+        {/* 급식 알림 */}
+        {/* <>
+          <View style={{ ...styles.Info, marginTop: 30, backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
+            <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>급식 알림</Text>
+            <Switch
+              style={Platform.OS === 'ios' ? { position: 'absolute', right: 20, top: 15, } : { position: 'absolute', right: 20, top: 20, }}
+              trackColor={{ false: '#767577', true: '#81b0ff' }}
+              thumbColor={isEnabledLunch ? '#4682B4' : '#f4f3f4'}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={toggleSwitchLunch}
+              value={isEnabledLunch}
+            />
+          </View>
+
+          <View style={{ paddingLeft: 20, paddingRight: 20, }}>
+            <Text style={[{ color: '#333333' }, isDarkMode && { color: '#999999' }]}>
+              아침마다 전송되는 중식 알림을 활성화하거나 비활성화합니다.
+            </Text>
+          </View>
+        </> */}
       </ScrollView>
     </SafeAreaView>
   )

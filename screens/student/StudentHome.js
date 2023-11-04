@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, RefreshControl, ScrollView, View, Text, TextInput, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useIsFocused } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Entypo from 'react-native-vector-icons/Entypo';
@@ -8,21 +10,11 @@ import Icon_Entypo from 'react-native-vector-icons/Entypo';
 import axiosInstance from '../../api/API_Server';
 import { MoveScreen } from '../../api/MoveScreen';
 
-const daysOfWeek = ['월', '화', '수', '목', '금']
-const times = ['1교시', '2교시', '3교시', '4교시', '5교시', '6교시', '7교시', '8교시']
-
 export default function StudentHomeScreen({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
+  const isFocused = useIsFocused()
 
-  const [startMessage, setStartMessage] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
-
-  const [roomStateType, setRoomStateType] = useState(null)
-  const [roomStateMessage, setRoomStateMessage] = useState(null)
-  const [roomNumber, setRoomNumber] = useState(null)
-  const [roomAcceptor, setRoomAcceptor] = useState(null)
-  const [roomStartTime, setRoomStartTime] = useState(null)
-  const [roomEndTime, setRoomEndTime] = useState(null)
 
   const [mealStateType, setMealStateType] = useState(null)
   const [mealNowScreen, setMealNowScreen] = useState(1)
@@ -41,86 +33,10 @@ export default function StudentHomeScreen({ navigation }) {
   const handleRefresh = () => {
     setRefreshing(true)
 
-    rentalRefresh()
     mealRefresh()
     getBusStopID()
 
     setRefreshing(false)
-  }
-
-  const rentalRefresh = async () => {
-    setRoomStateType(null) // 'Type'을 'null'로 설정하여 '로딩중...'을 표시
-    AsyncStorage.getItem('id') // 'ID' 가져오기
-      .then(async (ID) => {
-        axiosInstance.post('/RoomRental/CheckUserStatus', { id: ID }) // '/CheckUserStatus'에 'ID'값을 넣어 API요청
-          .then((res) => {
-            //console.log(res.data)
-            if (res.status === 200) { // 'status'가 '200'이면
-              if (res.data.type === 3) { // 'Type'이 '3'이면 데이터를 순차적으로 저장
-                setRoomStateType(res.data.type) // 'Type'을 '3'으로 설정
-                setRoomNumber(res.data.room_number)
-                setRoomStartTime(res.data.start_time)
-                setRoomEndTime(res.data.end_time)
-                setRoomAcceptor(res.data.acceptor)
-              } else if (res.data.type === 4 || res.data.type === 2 || res.data.type === 1) { // 'Type'이 '1' 또는 '2'이면
-                setRoomStateType(res.data.type) // 'Type'을 'data.type'에서 받아온 값으로 설정
-                setRoomStateMessage(res.data.message) // 'Message'를 'data.message'에서 받아온 값으로 설정
-              }
-            } else { // 예외가 발생하면
-              setRoomStateType(0) // 'Type'을 '0'으로 설정
-              setRoomStateMessage('예외가 발생했습니다.\n나중에 다시 시도해 주세요.')
-            }
-          }).catch((error) => {
-            console.log('CheckUserStatus API | ', error)
-            setRoomStateType(0) // 'Type'을 '0'으로 설정
-            setRoomStateMessage('오류가 발생했습니다.\n나중에 다시 시도해 주세요.') // 'Message'를 'error.message'로 설정
-          })
-      }).catch((error) => {
-        setRoomStateType(0) // 'Type'을 '0'으로 설정
-        setRoomStateMessage('오류가 발생했습니다.\n나중에 다시 시도해 주세요.') // 'Message'를 'error.message'로 설정
-      })
-  }
-
-  const rentalCancel = async () => {
-    AsyncStorage.getItem('id') // 'ID' 가져오기
-      .then(async (ID) => {
-        axiosInstance.post('/RoomRental/RentalCancel', { id: ID }) // '/RentalCancel'에 'ID'값을 넣어 API요청
-          .then((res) => {
-            if (res.status === 200) { // 'status'가 '200'이면
-              Alert.alert('부스 대여', res.data.message) // 'data.message' 메세지 표시
-              rentalRefresh() // 정보를 새로고침
-            } else {
-              setRoomStateType(0) // 'Type'을 '0'으로 설정
-              setRoomStateMessage('예외가 발생했습니다.\n나중에 다시 시도해 주세요.')
-            }
-          }).catch((error) => { // 에러가 발생하면
-            console.log(error)
-            return Alert.alert('에러', '요청에 실패했습니다.', [
-              {
-                text: '다시시도',
-                onPress: () => {
-                  rentalCancel()
-                },
-              },
-              {
-                text: '확인',
-              }
-            ])
-          })
-      }).catch((error) => { // 에러가 발생하면
-        console.log('RentalCancel API | ', error)
-        return Alert.alert('에러', '요청에 실패했습니다.', [
-          {
-            text: '다시시도',
-            onPress: () => {
-              rentalCancel()
-            },
-          },
-          {
-            text: '확인',
-          }
-        ])
-      })
   }
 
   const mealRefresh = async () => {
@@ -248,140 +164,96 @@ export default function StudentHomeScreen({ navigation }) {
   }
 
   useEffect(() => {
-    rentalRefresh() // 스크린이 처음 시작될 때 한번 실행
     mealRefresh() // 스크린이 처음 시작될 때 한번 실행
     mealNowScreenTime() // 스크린이 처음 시작될 때 한번 실행
     getBusStopID()
 
     // 알림 이동 함수 실행
     MoveScreen(navigation)
+
+    const intervalId = setInterval(() => {
+      if (isFocused) {
+        getBusStopID()
+      }
+    }, 15000)
+
+    // 컴포넌트가 언마운트 될 때 clearInterval 호출하여 메모리 누수 방지
+    return () => {
+      clearInterval(intervalId)
+    }
   }, [])
 
+  // const {showSnackbar} = useSnackbar()
+
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#FFFFFF', }, isDarkMode && { ...styles.container, backgroundColor: '#000000', }]}>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#FFFFFF', }}>
       {/* 로고 */}
       <View style={styles.logoView}>
-        <Text style={[{ ...styles.logo, color: '#000000', }, isDarkMode && { ...styles.logo, color: '#ffffff', }]}>홈</Text>
+        <Text style={{ ...styles.logo, color: isDarkMode ? '#ffffff' : '#000000', }}>홈</Text>
       </View>
 
-      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />} contentContainerStyle={[{ ...styles.scrollContainer, backgroundColor: '#FFFFFF', }, isDarkMode && { ...styles.scrollContainer, backgroundColor: '#000000', }]}>
+      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />} contentContainerStyle={{ ...styles.scrollContainer, backgroundColor: isDarkMode ? '#000000' : '#FFFFFF', }}>
         {/* 공지사항 */}
-        <TouchableOpacity onPress={() => { navigation.navigate('Announcement_Home') }} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-          <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>공지사항</Text>
+        <TouchableOpacity onPress={() => { navigation.navigate('Announcement_Home') }} style={{ ...styles.Info, backgroundColor: isDarkMode ? '#121212' : '#f2f4f6', }}>
+          <Text style={{ ...styles.Title, color: isDarkMode ? '#ffffff' : '#000000' }}>공지사항</Text>
         </TouchableOpacity>
 
         {/* 방음부스 */}
-        <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-          <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>방음부스</Text>
-          {roomStateType === null &&
-            <ActivityIndicator style={{ marginTop: 15 }} size="large" color="#0000ff" />
-          }
-          {roomStateType === 0 || roomStateType === 4 &&
-            <View>
-              <Text style={[{ ...rentalStyles.Text, color: '#000000', marginBottom: -30 }, isDarkMode && { ...rentalStyles.Text, color: '#ffffff', marginBottom: -30 }]}>{roomStateMessage}</Text>
-            </View>
-          }
-          {roomStateType === 1 &&
-            <View>
-              <Text style={[{ ...rentalStyles.Text, color: '#000000', }, isDarkMode && { ...rentalStyles.Text, color: '#ffffff', }]}>{roomStateMessage}</Text>
-              <TouchableOpacity style={rentalStyles.rentalBtn} onPress={() => navigation.navigate('S_RoomRental')}>
-                <Text style={rentalStyles.rentalBtnText}>대여하기</Text>
-              </TouchableOpacity>
-            </View>
-          }
-          {roomStateType === 2 &&
-            <View>
-              <Text style={[{ ...rentalStyles.Text, color: '#000000', }, isDarkMode && { ...rentalStyles.Text, color: '#ffffff', }]}>{roomStateMessage}</Text>
-              <TouchableOpacity style={rentalStyles.rentalBtn} onPress={rentalCancel}>
-                <Text style={rentalStyles.rentalBtnText}>취소하기</Text>
-              </TouchableOpacity>
-            </View>
-          }
-          {roomStateType === 3 &&
-            <View>
-              <View style={{ marginTop: 10, marginBottom: 50, marginLeft: 20 }}>
-                <View style={rentalStyles.Item}>
-                  <Text style={[{ ...rentalStyles.Label, color: '#000000' }, isDarkMode && { ...rentalStyles.Label, color: '#ffffff' }]}>방번호</Text>
-                  <Text style={[{ ...rentalStyles.Value, color: '#000000' }, isDarkMode && { ...rentalStyles.Value, color: '#ffffff' }]}>{roomNumber}</Text>
-                </View>
-
-                <View style={rentalStyles.Item}>
-                  <Text style={[{ ...rentalStyles.Label, color: '#000000' }, isDarkMode && { ...rentalStyles.Label, color: '#ffffff' }]}>시작 시간</Text>
-                  <Text style={[{ ...rentalStyles.Value, color: '#000000' }, isDarkMode && { ...rentalStyles.Value, color: '#ffffff' }]}>{roomStartTime}</Text>
-                </View>
-
-                <View style={rentalStyles.Item}>
-                  <Text style={[{ ...rentalStyles.Label, color: '#000000' }, isDarkMode && { ...rentalStyles.Label, color: '#ffffff' }]}>종료 시간</Text>
-                  <Text style={[{ ...rentalStyles.Value, color: '#000000' }, isDarkMode && { ...rentalStyles.Value, color: '#ffffff' }]}>{roomEndTime}</Text>
-                </View>
-
-                <View style={rentalStyles.Item}>
-                  <Text style={[{ ...rentalStyles.Label, color: '#000000' }, isDarkMode && { ...rentalStyles.Label, color: '#ffffff' }]}>승인자</Text>
-                  <Text style={[{ ...rentalStyles.Value, color: '#000000' }, isDarkMode && { ...rentalStyles.Value, color: '#ffffff' }]}>{roomAcceptor}</Text>
-                </View>
-              </View>
-
-              <TouchableOpacity style={rentalStyles.rentalBtn} onPress={() => navigation.navigate('S_RoomCancel')}>
-                <Text style={rentalStyles.rentalBtnText}>사용 종료하기</Text>
-              </TouchableOpacity>
-            </View>
-          }
-        </View>
 
         {/* 급식 */}
-        <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-          <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>{mealTitle}</Text>
+        <View style={{ ...styles.Info, backgroundColor: isDarkMode ? '#121212' : '#f2f4f6', }}>
+          <Text style={{ ...styles.Title, color: isDarkMode ? '#ffffff' : '#000000', }}>{mealTitle}</Text>
 
           {mealStateType === null ?
             <ActivityIndicator style={{ marginTop: 15 }} size="large" color="#0000ff" /> : null
           }
           {mealStateType === 2 || mealStateType === 3 ?
-            <Text style={[{ ...mealStyles.Text, color: '#000000', }, isDarkMode && { ...mealStyles.Text, color: '#ffffff', }]}>{mealMessage}</Text> : null
+            <Text style={{ ...mealStyles.Text, color: isDarkMode ? '#ffffff' : '#000000', }}>{mealMessage}</Text> : null
           }
           {mealStateType === 1 && mealNowScreen === 0 &&
             <View>
-              <Text style={[{ ...mealStyles.Text, color: '#000000', }, isDarkMode && { ...mealStyles.Text, color: '#ffffff', }]}>{mealBreakfast}</Text>
+              <Text style={{ ...mealStyles.Text, color: isDarkMode ? '#ffffff' : '#000000', }}>{mealBreakfast}</Text>
 
               <TouchableOpacity style={mealStyles.leftBtn} onPress={beforeMeal}>
-                <Text style={[{ textAlign: 'center', color: '#000000' }, isDarkMode && { textAlign: 'center', color: '#ffffff' }]}>{<Icon_Entypo name="chevron-with-circle-left" size={25} />}</Text>
+                <Text style={{ textAlign: 'center', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Entypo name="chevron-with-circle-left" size={25} />}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={mealStyles.rightBtn} onPress={nextMeal}>
-                <Text style={[{ textAlign: 'center', color: '#000000' }, isDarkMode && { textAlign: 'center', color: '#ffffff' }]}>{<Icon_Entypo name="chevron-with-circle-right" size={25} />}</Text>
+                <Text style={{ textAlign: 'center', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Entypo name="chevron-with-circle-right" size={25} />}</Text>
               </TouchableOpacity>
             </View>
           }
           {mealStateType === 1 && mealNowScreen === 1 &&
             <View>
-              <Text style={[{ ...mealStyles.Text, color: '#000000', }, isDarkMode && { ...mealStyles.Text, color: '#ffffff', }]}>{mealLunch}</Text>
+              <Text style={{ ...mealStyles.Text, color: isDarkMode ? '#ffffff' : '#000000', }}>{mealLunch}</Text>
 
               <TouchableOpacity style={mealStyles.leftBtn} onPress={beforeMeal}>
-                <Text style={[{ textAlign: 'center', color: '#000000' }, isDarkMode && { textAlign: 'center', color: '#ffffff' }]}>{<Icon_Entypo name="chevron-with-circle-left" size={25} />}</Text>
+                <Text style={{ textAlign: 'center', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Entypo name="chevron-with-circle-left" size={25} />}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={mealStyles.rightBtn} onPress={nextMeal}>
-                <Text style={[{ textAlign: 'center', color: '#000000' }, isDarkMode && { textAlign: 'center', color: '#ffffff' }]}>{<Icon_Entypo name="chevron-with-circle-right" size={25} />}</Text>
+                <Text style={{ textAlign: 'center', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Entypo name="chevron-with-circle-right" size={25} />}</Text>
               </TouchableOpacity>
             </View>
           }
           {mealStateType === 1 && mealNowScreen === 2 &&
             <View>
-              <Text style={[{ ...mealStyles.Text, color: '#000000', }, isDarkMode && { ...mealStyles.Text, color: '#ffffff', }]}>{mealDinner}</Text>
+              <Text style={{ ...mealStyles.Text, color: isDarkMode ? '#ffffff' : '#000000', }}>{mealDinner}</Text>
 
               <TouchableOpacity style={mealStyles.leftBtn} onPress={beforeMeal}>
-                <Text style={[{ textAlign: 'center', color: '#000000' }, isDarkMode && { textAlign: 'center', color: '#ffffff' }]}>{<Icon_Entypo name="chevron-with-circle-left" size={25} />}</Text>
+                <Text style={{ textAlign: 'center', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Entypo name="chevron-with-circle-left" size={25} />}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={mealStyles.rightBtn} onPress={nextMeal}>
-                <Text style={[{ textAlign: 'center', color: '#000000' }, isDarkMode && { textAlign: 'center', color: '#ffffff' }]}>{<Icon_Entypo name="chevron-with-circle-right" size={25} />}</Text>
+                <Text style={{ textAlign: 'center', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Entypo name="chevron-with-circle-right" size={25} />}</Text>
               </TouchableOpacity>
             </View>
           }
         </View>
 
         {/* 버스 */}
-        <TouchableOpacity onPress={() => navigation.navigate('Bus_Home')} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-          <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>{busArrivalInformationTitle}</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Bus_Home')} style={{ ...styles.Info, backgroundColor: isDarkMode ? '#121212' : '#f2f4f6', }}>
+          <Text style={{ ...styles.Title, color: isDarkMode ? '#ffffff' : '#000000' }}>{busArrivalInformationTitle}</Text>
 
           {busArrivalInformationIsRefreshing === true ?
             <>
@@ -397,13 +269,13 @@ export default function StudentHomeScreen({ navigation }) {
                 <>
                   {busArrivalInformationType === 3 &&
                     <>
-                      <Text style={[{ ...mealStyles.Text, color: '#000000', }, isDarkMode && { ...mealStyles.Text, color: '#ffffff', }]}>{busArrivalInformationMessage}</Text>
+                      <Text style={{ ...mealStyles.Text, color: isDarkMode ? '#ffffff' : '#000000', }}>{busArrivalInformationMessage}</Text>
                     </>
                   }
                   {busArrivalInformationType === 1 &&
                     <View>
-                      <Text style={[{ ...busArrivalInformationStyles.Text, color: '#000000', }, isDarkMode && { ...busArrivalInformationStyles.Text, color: '#ffffff', }]}>{busArrivalInformationMessage}</Text>
-                      <TouchableOpacity style={busArrivalInformationStyles.addBusStopBtn} onPress={() => navigation.navigate('Bus_Search')}>
+                      <Text style={{ ...busArrivalInformationStyles.Text, color: isDarkMode ? '#ffffff' : '#000000', }}>{busArrivalInformationMessage}</Text>
+                      <TouchableOpacity style={busArrivalInformationStyles.addBusStopBtn} onPress={() => navigation.navigate('Bus_Search', { setType: 'BusStop', })}>
                         <Text style={busArrivalInformationStyles.addBusStopBtnText}>추가하기</Text>
                       </TouchableOpacity>
                     </View>
@@ -419,14 +291,13 @@ export default function StudentHomeScreen({ navigation }) {
                           <View style={{ marginTop: 15 }}></View>
                           {busArrivalInformationData.map((data, index) => {
                             const direction = (data.direction).substr(0, data.direction.length - 2).length >= 5 ? `${(data.direction).substr(0, 4)}...` : `${(data.direction).substr(0, data.direction.length - 2)} 방향`
-                            //console.log(direction)
                             const currentLocation = (data.currentLocation).substring((data.currentLocation).lastIndexOf('(') + 1, (data.currentLocation).lastIndexOf(')'))
                             return (
                               <View key={index} style={{ marginBottom: 25 }}>
-                                <Text style={[{ left: 10, marginBottom: 7, color: '#000000', fontWeight: 'bold', position: 'absolute' }, isDarkMode && { left: 10, marginBottom: 7, color: '#ffffff', fontWeight: 'bold', position: 'absolute' }]}>
+                                <Text style={{ left: 10, marginBottom: 7, color: isDarkMode ? '#ffffff' : '#000000', fontWeight: 'bold', position: 'absolute' }}>
                                   {data.busNumber}번 {'('}{direction}{')'}
                                 </Text>
-                                <Text style={[{ right: 10, marginBottom: 7, color: '#000000', fontWeight: 'bold', position: 'absolute' }, isDarkMode && { right: 10, marginBottom: 7, color: '#ffffff', fontWeight: 'bold', position: 'absolute' }]}>
+                                <Text style={{ right: 10, marginBottom: 7, color: isDarkMode ? '#ffffff' : '#000000', fontWeight: 'bold', position: 'absolute' }}>
                                   {data.arrivalTime} {currentLocation ? `[${currentLocation}]` : null}
                                 </Text>
                               </View>
@@ -442,7 +313,7 @@ export default function StudentHomeScreen({ navigation }) {
           }
         </TouchableOpacity>
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaView >
   )
 }
 
@@ -565,3 +436,142 @@ const busArrivalInformationStyles = StyleSheet.create({
     fontWeight: 'bold',
   },
 })
+
+// const [roomStateType, setRoomStateType] = useState(null)
+// const [roomStateMessage, setRoomStateMessage] = useState(null)
+// const [roomNumber, setRoomNumber] = useState(null)
+// const [roomAcceptor, setRoomAcceptor] = useState(null)
+// const [roomStartTime, setRoomStartTime] = useState(null)
+// const [roomEndTime, setRoomEndTime] = useState(null)
+
+// const rentalRefresh = async () => {
+//   setRoomStateType(null) // 'Type'을 'null'로 설정하여 '로딩중...'을 표시
+//   AsyncStorage.getItem('id') // 'ID' 가져오기
+//     .then(async (ID) => {
+//       axiosInstance.post('/RoomRental/CheckUserStatus', { id: ID }) // '/CheckUserStatus'에 'ID'값을 넣어 API요청
+//         .then((res) => {
+//           //console.log(res.data)
+//           if (res.status === 200) { // 'status'가 '200'이면
+//             if (res.data.type === 3) { // 'Type'이 '3'이면 데이터를 순차적으로 저장
+//               setRoomStateType(res.data.type) // 'Type'을 '3'으로 설정
+//               setRoomNumber(res.data.room_number)
+//               setRoomStartTime(res.data.start_time)
+//               setRoomEndTime(res.data.end_time)
+//               setRoomAcceptor(res.data.acceptor)
+//             } else if (res.data.type === 4 || res.data.type === 2 || res.data.type === 1) { // 'Type'이 '1' 또는 '2'이면
+//               setRoomStateType(res.data.type) // 'Type'을 'data.type'에서 받아온 값으로 설정
+//               setRoomStateMessage(res.data.message) // 'Message'를 'data.message'에서 받아온 값으로 설정
+//             }
+//           } else { // 예외가 발생하면
+//             setRoomStateType(0) // 'Type'을 '0'으로 설정
+//             setRoomStateMessage('예외가 발생했습니다.\n나중에 다시 시도해 주세요.')
+//           }
+//         }).catch((error) => {
+//           console.log('CheckUserStatus API | ', error)
+//           setRoomStateType(0) // 'Type'을 '0'으로 설정
+//           setRoomStateMessage('오류가 발생했습니다.\n나중에 다시 시도해 주세요.') // 'Message'를 'error.message'로 설정
+//         })
+//     }).catch((error) => {
+//       setRoomStateType(0) // 'Type'을 '0'으로 설정
+//       setRoomStateMessage('오류가 발생했습니다.\n나중에 다시 시도해 주세요.') // 'Message'를 'error.message'로 설정
+//     })
+// }
+
+// const rentalCancel = async () => {
+//   AsyncStorage.getItem('id') // 'ID' 가져오기
+//     .then(async (ID) => {
+//       axiosInstance.post('/RoomRental/RentalCancel', { id: ID }) // '/RentalCancel'에 'ID'값을 넣어 API요청
+//         .then((res) => {
+//           if (res.status === 200) { // 'status'가 '200'이면
+//             Alert.alert('부스 대여', res.data.message) // 'data.message' 메세지 표시
+//             rentalRefresh() // 정보를 새로고침
+//           } else {
+//             setRoomStateType(0) // 'Type'을 '0'으로 설정
+//             setRoomStateMessage('예외가 발생했습니다.\n나중에 다시 시도해 주세요.')
+//           }
+//         }).catch((error) => { // 에러가 발생하면
+//           console.log(error)
+//           return Alert.alert('에러', '요청에 실패했습니다.', [
+//             {
+//               text: '다시시도',
+//               onPress: () => {
+//                 rentalCancel()
+//               },
+//             },
+//             {
+//               text: '확인',
+//             }
+//           ])
+//         })
+//     }).catch((error) => { // 에러가 발생하면
+//       console.log('RentalCancel API | ', error)
+//       return Alert.alert('에러', '요청에 실패했습니다.', [
+//         {
+//           text: '다시시도',
+//           onPress: () => {
+//             rentalCancel()
+//           },
+//         },
+//         {
+//           text: '확인',
+//         }
+//       ])
+//     })
+// }
+
+{/* <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+<Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>방음부스</Text>
+{roomStateType === null &&
+  <ActivityIndicator style={{ marginTop: 15 }} size="large" color="#0000ff" />
+}
+{roomStateType === 0 || roomStateType === 4 &&
+  <View>
+    <Text style={[{ ...rentalStyles.Text, color: '#000000', marginBottom: -30 }, isDarkMode && { ...rentalStyles.Text, color: '#ffffff', marginBottom: -30 }]}>{roomStateMessage}</Text>
+  </View>
+}
+{roomStateType === 1 &&
+  <View>
+    <Text style={[{ ...rentalStyles.Text, color: '#000000', }, isDarkMode && { ...rentalStyles.Text, color: '#ffffff', }]}>{roomStateMessage}</Text>
+    <TouchableOpacity style={rentalStyles.rentalBtn} onPress={() => navigation.navigate('S_RoomRental')}>
+      <Text style={rentalStyles.rentalBtnText}>대여하기</Text>
+    </TouchableOpacity>
+  </View>
+}
+{roomStateType === 2 &&
+  <View>
+    <Text style={[{ ...rentalStyles.Text, color: '#000000', }, isDarkMode && { ...rentalStyles.Text, color: '#ffffff', }]}>{roomStateMessage}</Text>
+    <TouchableOpacity style={rentalStyles.rentalBtn} onPress={rentalCancel}>
+      <Text style={rentalStyles.rentalBtnText}>취소하기</Text>
+    </TouchableOpacity>
+  </View>
+}
+{roomStateType === 3 &&
+  <View>
+    <View style={{ marginTop: 10, marginBottom: 50, marginLeft: 20 }}>
+      <View style={rentalStyles.Item}>
+        <Text style={[{ ...rentalStyles.Label, color: '#000000' }, isDarkMode && { ...rentalStyles.Label, color: '#ffffff' }]}>방번호</Text>
+        <Text style={[{ ...rentalStyles.Value, color: '#000000' }, isDarkMode && { ...rentalStyles.Value, color: '#ffffff' }]}>{roomNumber}</Text>
+      </View>
+
+      <View style={rentalStyles.Item}>
+        <Text style={[{ ...rentalStyles.Label, color: '#000000' }, isDarkMode && { ...rentalStyles.Label, color: '#ffffff' }]}>시작 시간</Text>
+        <Text style={[{ ...rentalStyles.Value, color: '#000000' }, isDarkMode && { ...rentalStyles.Value, color: '#ffffff' }]}>{roomStartTime}</Text>
+      </View>
+
+      <View style={rentalStyles.Item}>
+        <Text style={[{ ...rentalStyles.Label, color: '#000000' }, isDarkMode && { ...rentalStyles.Label, color: '#ffffff' }]}>종료 시간</Text>
+        <Text style={[{ ...rentalStyles.Value, color: '#000000' }, isDarkMode && { ...rentalStyles.Value, color: '#ffffff' }]}>{roomEndTime}</Text>
+      </View>
+
+      <View style={rentalStyles.Item}>
+        <Text style={[{ ...rentalStyles.Label, color: '#000000' }, isDarkMode && { ...rentalStyles.Label, color: '#ffffff' }]}>승인자</Text>
+        <Text style={[{ ...rentalStyles.Value, color: '#000000' }, isDarkMode && { ...rentalStyles.Value, color: '#ffffff' }]}>{roomAcceptor}</Text>
+      </View>
+    </View>
+
+    <TouchableOpacity style={rentalStyles.rentalBtn} onPress={() => navigation.navigate('S_RoomCancel')}>
+      <Text style={rentalStyles.rentalBtnText}>사용 종료하기</Text>
+    </TouchableOpacity>
+  </View>
+}
+</View> */}

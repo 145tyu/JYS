@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, RefreshControl, ScrollView, View, Text, TextInput, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Entypo from 'react-native-vector-icons/Entypo';
 
 import axiosInstance from '../../api/API_Server';
 import { MoveScreen } from '../../api/MoveScreen';
-
-const daysOfWeek = ['월', '화', '수', '목', '금']
-const times = ['1교시', '2교시', '3교시', '4교시', '5교시', '6교시', '7교시', '8교시']
 
 export default function ArrivalInformationHomeScreen({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
@@ -82,17 +80,19 @@ export default function ArrivalInformationHomeScreen({ navigation }) {
   }, [])
 
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#FFFFFF', }, isDarkMode && { ...styles.container, backgroundColor: '#000000', }]}>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
       {/* 로고 */}
-      <View style={styles.logoView}>
-        <Text style={[{ ...styles.logo, color: '#000000', }, isDarkMode && { ...styles.logo, color: '#ffffff', }]}>홈</Text>
-      </View>
+      < View style={styles.logoView} >
+        <Text style={{ ...styles.logo, color: isDarkMode ? '#ffffff' : '#000000', }}>홈</Text>
+      </View >
 
-      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />} contentContainerStyle={[{ ...styles.scrollContainer, backgroundColor: '#FFFFFF', }, isDarkMode && { ...styles.scrollContainer, backgroundColor: '#000000', }]}>
+      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />} contentContainerStyle={{ ...styles.scrollContainer, backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
         {/* 버스 */}
-        <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+        <View style={{ ...styles.Info, backgroundColor: isDarkMode ? '#121212' : '#f2f4f6', }}>
           <TouchableOpacity>
-            <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>{busArrivalInformationTitle}{<Icon_Ionicons name="chevron-forward-outline" size={25} />}</Text>
+            <Text style={{ ...styles.Title, color: isDarkMode ? '#ffffff' : '#000000', }}>
+              {busArrivalInformationTitle}{<Icon_Ionicons name="chevron-forward-outline" size={25} />}
+            </Text>
           </TouchableOpacity>
 
           {busArrivalInformationIsRefreshing === true ?
@@ -110,14 +110,14 @@ export default function ArrivalInformationHomeScreen({ navigation }) {
                   {busArrivalInformationType === 3 &&
                     <>
                       <TouchableOpacity>
-                        <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>{busArrivalInformationTitle}{<Icon_Ionicons name="chevron-forward-outline" size={25} />}</Text>
+                        <Text style={{ ...styles.Title, color: isDarkMode ? '#ffffff' : '#000000' }}>{busArrivalInformationTitle}{<Icon_Ionicons name="chevron-forward-outline" size={25} />}</Text>
                       </TouchableOpacity>
                     </>
                   }
                   {busArrivalInformationType === 1 &&
                     <View>
                       <TouchableOpacity>
-                        <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>{busArrivalInformationTitle}{<Icon_Ionicons name="chevron-forward-outline" size={25} />}</Text>
+                        <Text style={{ ...styles.Title, color: isDarkMode ? '#ffffff' : '#000000' }}>{busArrivalInformationTitle}{<Icon_Ionicons name="chevron-forward-outline" size={25} />}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity style={busArrivalInformationStyles.addBusStopBtn} onPress={() => navigation.navigate('Bus_AddBusStopID')}>
                         <Text style={busArrivalInformationStyles.addBusStopBtnText}>추가하기</Text>
@@ -135,14 +135,13 @@ export default function ArrivalInformationHomeScreen({ navigation }) {
                           <View style={{ marginTop: 15 }}></View>
                           {busArrivalInformationData.map((data, index) => {
                             const direction = (data.direction).substr(0, data.direction.length - 2).length >= 5 ? `${(data.direction).substr(0, 4)}...` : `${(data.direction).substr(0, data.direction.length - 2)} 방향`
-                            //console.log(direction)
                             const currentLocation = (data.currentLocation).substring((data.currentLocation).lastIndexOf('(') + 1, (data.currentLocation).lastIndexOf(')'))
                             return (
                               <View key={index} style={{ marginBottom: 25 }}>
-                                <Text style={[{ left: 10, marginBottom: 7, color: '#000000', fontWeight: 'bold', position: 'absolute' }, isDarkMode && { left: 10, marginBottom: 7, color: '#ffffff', fontWeight: 'bold', position: 'absolute' }]}>
+                                <Text style={{ left: 10, marginBottom: 7, fontWeight: 'bold', position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>
                                   {data.busNumber}번 {'('}{direction}{')'}
                                 </Text>
-                                <Text style={[{ right: 10, marginBottom: 7, color: '#000000', fontWeight: 'bold', position: 'absolute' }, isDarkMode && { right: 10, marginBottom: 7, color: '#ffffff', fontWeight: 'bold', position: 'absolute' }]}>
+                                <Text style={{ right: 10, marginBottom: 7, fontWeight: 'bold', position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>
                                   {data.arrivalTime} {currentLocation ? `[${currentLocation}]` : null}
                                 </Text>
                               </View>
@@ -158,7 +157,7 @@ export default function ArrivalInformationHomeScreen({ navigation }) {
           }
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaView >
   )
 }
 

@@ -3,6 +3,7 @@ import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAre
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions, useRoute } from '@react-navigation/native';
 import DeviceInfo from 'react-native-device-info';
+import Toast from 'react-native-toast-message';
 
 import axiosInstance from '../../api/API_Server';
 
@@ -12,8 +13,6 @@ import Icon_Feather from 'react-native-vector-icons/Feather';
 export default function BusSearch({ navigation }) {
   const route = useRoute()
   const isDarkMode = useColorScheme() === 'dark'
-
-  const [message, setMessage] = useState('')
 
   const [RouteSearchValue, setRouteSearchValue] = useState(null)
   const [RouteSearchData, setRouteSearchData] = useState([])
@@ -41,18 +40,33 @@ export default function BusSearch({ navigation }) {
       }).catch((error) => {
         setRouteSearchLoadingState(false)
         setRouteSearchType(0)
-        console.log(error)
         if (error.response) {
           const res = error.response
           if (res.status === 400) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else if (res.status === 500) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: '다시 시도해 주세요.',
+            })
           }
         } else {
-          return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+          Toast.show({
+            type: 'error',
+            text1: '서버와 연결할 수 없습니다.',
+            text2: `${error}`,
+          })
         }
       })
   }
@@ -71,18 +85,33 @@ export default function BusSearch({ navigation }) {
       }).catch((error) => {
         setBusStopSearchLoadingState(false)
         setBusStopSearchType(0)
-        console.log(error)
         if (error.response) {
           const res = error.response
           if (res.status === 400) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else if (res.status === 500) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: '다시 시도해 주세요.',
+            })
           }
         } else {
-          return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+          Toast.show({
+            type: 'error',
+            text1: '서버와 연결할 수 없습니다.',
+            text2: `${error}`,
+          })
         }
       })
   }
@@ -98,18 +127,18 @@ export default function BusSearch({ navigation }) {
   }, [])
 
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#ffffff' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' }]}>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
       {/* 로고 */}
       <View style={styles.logoView}>
         <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
-          <Text style={[{ ...styles.backButtonText, color: '#000000' }, isDarkMode && { ...styles.backButtonText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 검색</Text>
+          <Text style={{ ...styles.backButtonText, color: isDarkMode ? '#ffffff' : '#000000' }}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 검색</Text>
         </TouchableOpacity>
       </View>
 
       <TouchableOpacity onPress={() => navigation.navigate('Bus_Search')} style={styles.inputContainer}>
-        <View style={[{ ...styles.inputView, backgroundColor: '#E9E9E9', borderColor: '#E9E9E9' }, isDarkMode && { ...styles.inputView, backgroundColor: '#333333', borderColor: '#333333' }]}>
+        <View style={{ ...styles.inputView, backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', borderColor: isDarkMode ? '#333333' : '#E9E9E9' }}>
           <TextInput
-            style={[{ ...styles.inputText, color: '#000000', }, isDarkMode && { ...styles.inputText, color: '#ffffff' }]}
+            style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
             placeholder={option === 'Route' ? '버스 검색' : '정류장 검색'}
             placeholderTextColor={isDarkMode ? "#CCCCCC" : "#999999"}
             value={option === 'Route' ? RouteSearchValue : BusStopSearchValue}
@@ -136,15 +165,19 @@ export default function BusSearch({ navigation }) {
           if (option === 'BusStop') {
             setOption('Route')
           }
-        }} style={{ width: '50%', height: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: option === 'Route' ? '#E6E6E6' : '#FAFAFA' }}>
-          <Text style={{ textAlign: 'center', color: '#000000', }}>버스</Text>
+        }} style={{
+          width: '50%', height: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#121212' : '#f2f4f6', borderBottomWidth: option === 'Route' ? 1.3 : 0, borderColor: isDarkMode ? '#ffffff' : '#000000'
+        }}>
+          <Text style={{ textAlign: 'center', color: option === 'Route' ? `${isDarkMode ? '#ffffff' : '#000000'}` : `${isDarkMode ? '#666666' : '#777777'}` }}>버스</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => {
           if (option === 'Route') {
             setOption('BusStop')
           }
-        }} style={{ width: '50%', height: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: option === 'BusStop' ? '#E6E6E6' : '#FAFAFA' }}>
-          <Text style={{ textAlign: 'center', color: '#000000', }}>정류장</Text>
+        }} style={{
+          width: '50%', height: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#121212' : '#f2f4f6', borderBottomWidth: option === 'BusStop' ? 1.3 : 0, borderColor: isDarkMode ? '#ffffff' : '#000000'
+        }}>
+          <Text style={{ textAlign: 'center', color: option === 'BusStop' ? `${isDarkMode ? '#ffffff' : '#000000'}` : `${isDarkMode ? '#666666' : '#777777'}`, }}>정류장</Text>
         </TouchableOpacity>
       </View>
 
@@ -161,7 +194,7 @@ export default function BusSearch({ navigation }) {
               {RouteSearchData.length === 0 ?
                 <>
                   <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
-                    <Text style={[{ marginTop: 20, color: '#333333' }, isDarkMode && { marginTop: 20, color: '#999999' }]}>검색 결과가 없습니다.</Text>
+                    <Text style={{ marginTop: 20, color: isDarkMode ? '#999999' : '#333333' }}>검색 결과가 없습니다.</Text>
                   </View>
                 </>
                 :
@@ -172,10 +205,11 @@ export default function BusSearch({ navigation }) {
                         <TouchableOpacity key={index} onPress={() => {
                           navigation.navigate('Bus_RouteView', { data, index, RouteSearchValue })
                         }}>
-                          <View style={{ width: '100%', height: 85, marginBottom: 5, backgroundColor: '#E9E9E9' }}>
-                            <Text style={{ marginTop: 13, marginLeft: 13, fontSize: 20, fontWeight: '700', color: '#000000', }}>{data.type ? data.type : '구분'} {data.busID}번</Text>
-                            <Text style={{ marginTop: 10, marginLeft: 13, fontSize: 13, fontWeight: '400', color: '#000000', }}>{data.StartingPoint} {'->'} {data.EndingPoint}</Text>
+                          <View style={{ width: '100%', height: 85, marginBottom: 5, backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
+                            <Text style={{ marginTop: 13, marginLeft: 13, fontSize: 20, fontWeight: '700', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.type ? data.type : '구분'} {data.busID}번</Text>
+                            <Text style={{ marginTop: 10, marginLeft: 13, fontSize: 13, fontWeight: '400', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.StartingPoint} {'->'} {data.EndingPoint}</Text>
                           </View>
+                          <View style={{ width: '100%', height: 0.7, backgroundColor: '#999999' }}></View>
                         </TouchableOpacity>
                       )
                     })}
@@ -199,7 +233,7 @@ export default function BusSearch({ navigation }) {
               {BusStopSearchData.length === 0 ?
                 <>
                   <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
-                    <Text style={[{ marginTop: 20, color: '#333333' }, isDarkMode && { marginTop: 20, color: '#999999' }]}>검색 결과가 없습니다.</Text>
+                    <Text style={{ marginTop: 20, color: isDarkMode ? '#999999' : '#333333' }}>검색 결과가 없습니다.</Text>
                   </View>
                 </>
                 :
@@ -210,10 +244,11 @@ export default function BusSearch({ navigation }) {
                         <TouchableOpacity key={index} onPress={() => {
                           navigation.navigate('Bus_BusStopView', { data })
                         }}>
-                          <View style={{ width: '100%', height: 85, marginBottom: 5, backgroundColor: '#E9E9E9' }}>
-                            <Text style={{ marginTop: 13, marginLeft: 13, fontSize: 20, fontWeight: '700', color: '#000000', }}>{data.busStopName}</Text>
-                            <Text style={{ marginTop: 10, marginLeft: 13, fontSize: 13, fontWeight: '400', color: '#000000', }}>{data.busStopID}</Text>
+                          <View style={{ width: '100%', height: 85, marginBottom: 5, backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
+                            <Text style={{ marginTop: 13, marginLeft: 13, fontSize: 20, fontWeight: '700', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.busStopName}</Text>
+                            <Text style={{ marginTop: 10, marginLeft: 13, fontSize: 13, fontWeight: '400', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.busStopID}</Text>
                           </View>
+                          <View style={{ width: '100%', height: 0.7, backgroundColor: '#999999' }}></View>
                         </TouchableOpacity>
                       )
                     })}

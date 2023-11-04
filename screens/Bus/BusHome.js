@@ -3,6 +3,8 @@ import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAre
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions, useIsFocused } from '@react-navigation/native';
 import DeviceInfo from 'react-native-device-info';
+import FastImage from 'react-native-fast-image';
+import Toast from 'react-native-toast-message';
 
 import axiosInstance from '../../api/API_Server';
 
@@ -24,28 +26,30 @@ export default function BusHome({ navigation }) {
           setBusFavoritesData([])
         }
       }).catch((error) => {
-        console.log(error)
         setBusFavoritesData([])
-        Alert.alert('에러', '데이터를 불러오지 못했어요.', [{ text: '확인' }])
+        Toast.show({
+          type: 'error',
+          text1: '데이터를 불러오지 못했어요.',
+          text2: `${error}`
+        })
       })
   }
 
   useEffect(() => {
-    //AsyncStorage.removeItem('Bus_FavoritesList')
     handleGetBusFavorites()
   }, [isFocused])
 
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#ffffff' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' }]}>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
       {/* 로고 */}
       <View style={{ ...styles.logoView, }}>
         <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50, } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
-          <Text style={[{ ...styles.backButtonText, color: '#000000' }, isDarkMode && { ...styles.backButtonText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 버스</Text>
+          <Text style={{ ...styles.backButtonText, color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 버스</Text>
         </TouchableOpacity>
       </View>
 
       <TouchableOpacity onPress={() => navigation.navigate('Bus_Search')} style={{ ...styles.inputContainer, }}>
-        <View style={[{ ...styles.inputView, backgroundColor: '#E9E9E9', borderColor: '#E9E9E9' }, isDarkMode && { ...styles.inputView, backgroundColor: '#333333', borderColor: '#333333' }]}>
+        <View style={{ ...styles.inputView, backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', borderColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
           <Text style={{ color: isDarkMode ? '#CCCCCC' : '#999999' }}>버스, 정류장 검색</Text>
         </View>
       </TouchableOpacity>
@@ -53,7 +57,7 @@ export default function BusHome({ navigation }) {
       {BusFavoritesData.length === 0 ?
         <>
           <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
-            <Text style={[{ fontSize: 15, textAlign: 'center', color: '#000000' }, isDarkMode && { fontSize: 15, textAlign: 'center', color: '#ffffff' }]}>검색을 사용하여 버스, 정류장을 검색하여{'\n'}즐겨찾기에 추가해보세요.</Text>
+            <Text style={{ fontSize: 15, textAlign: 'center', color: isDarkMode ? '#ffffff' : '#000000', }}>검색을 사용하여 버스, 정류장을 검색하여{'\n'}즐겨찾기에 추가해보세요.</Text>
           </View>
         </>
         :
@@ -65,9 +69,10 @@ export default function BusHome({ navigation }) {
                   <TouchableOpacity key={index} onPress={() => {
                     navigation.navigate('Bus_RouteView', { data: data.data, index, RouteSearchValue: data.data.busID })
                   }}>
-                    <View style={{ width: '100%', height: 85, marginBottom: 5, backgroundColor: isDarkMode ? '#121212' : '#E9E9E9', }}>
-                      <Text style={{ marginTop: 13, marginLeft: 13, fontSize: 20, fontWeight: '700', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.data.type ? data.data.type : '구분'} {data.data.busID}번</Text>
-                      <Text style={{ marginTop: 10, marginLeft: 13, fontSize: 13, fontWeight: '400', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.data.EndingPoint} 방면</Text>
+                    <View style={{ width: '100%', height: 70, marginBottom: 5, backgroundColor: isDarkMode ? '#121212' : '#F5F5F5', }}>
+                      <FastImage style={{ width: 30, height: 30, left: 10, top: 20, position: 'absolute', }} source={require('../../resource/bus/bus_Icon.png')} />
+                      <Text style={{ marginTop: 10, marginLeft: 53, fontSize: 20, fontWeight: '700', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.data.type ? data.data.type : '구분'} {data.data.busID}번</Text>
+                      <Text style={{ marginTop: 1, marginLeft: 50, fontSize: 13, fontWeight: '400', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.data.EndingPoint} 방면</Text>
                     </View>
                   </TouchableOpacity>
                 )
@@ -76,9 +81,10 @@ export default function BusHome({ navigation }) {
                   <TouchableOpacity key={index} onPress={() => {
                     navigation.navigate('Bus_BusStopView', { data: data.data })
                   }}>
-                    <View style={{ width: '100%', height: 85, marginBottom: 5, backgroundColor: isDarkMode ? '#121212' : '#E9E9E9', }}>
-                      <Text style={{ marginTop: 13, marginLeft: 13, fontSize: 20, fontWeight: '700', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.data.busStopName}</Text>
-                      <Text style={{ marginTop: 10, marginLeft: 13, fontSize: 13, fontWeight: '400', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.data.busStopID}</Text>
+                    <View style={{ width: '100%', height: 70, marginBottom: 5, backgroundColor: isDarkMode ? '#121212' : '#F5F5F5', }}>
+                      <Icon_Feather style={{ width: 30, height: 30, left: 12, top: 20, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }} name='map-pin' size={30} />
+                      <Text style={{ marginTop: 10, marginLeft: 53, fontSize: 20, fontWeight: '700', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.data.busStopName}</Text>
+                      <Text style={{ marginTop: 1, marginLeft: 53, fontSize: 13, fontWeight: '400', color: isDarkMode ? '#ffffff' : '#000000', }}>{data.data.busStopID}</Text>
                     </View>
                   </TouchableOpacity>
                 )

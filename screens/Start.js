@@ -5,9 +5,9 @@ import messaging from '@react-native-firebase/messaging';
 import { CommonActions } from '@react-navigation/native';
 import DeviceInfo from 'react-native-device-info';
 import FastImage from 'react-native-fast-image';
+import Toast from 'react-native-toast-message';
 
 import axiosInstance from '../api/API_Server';
-import ErrorAlert from '../api/ErrorModal';
 
 const appVersion = DeviceInfo.getVersion()
 const buildVersion = DeviceInfo.getBuildNumber()
@@ -20,10 +20,11 @@ export default function StartScreen({ navigation }) {
 
   const [message, setMessage] = useState('시작 중...')
 
-  const checkTokenValidation = async (job) => {
+  const checkTokenValidation = async (job, profileData) => {
     setIsLoading(true)
     setRetry(false)
     setMessage('로그인 중...')
+
     try {
       const accessToken = await AsyncStorage.getItem('access_token')
       const refreshToken = await AsyncStorage.getItem('refresh_token')
@@ -33,6 +34,7 @@ export default function StartScreen({ navigation }) {
         setIsLoading(true)
         setRetry(false)
         setMessage('로그인 중...')
+
         await axiosInstance.post('/v1/refreshToken', { refreshToken: refreshToken, accountID: accountID })
           .then((res) => {
             if (res.status === 200) {
@@ -40,36 +42,54 @@ export default function StartScreen({ navigation }) {
               AsyncStorage.setItem('refresh_token', res.data.refreshToken)
               handleTokenCheck(res.data.accessToken)
             } else {
-              setIsLoading(false)
-              setRetry(true)
-              setMessage('로그인을 실패했습니다.')
+              deleteData()
+              moveLoginScreen()
+
+              Toast.show({
+                type: 'error',
+                text1: '로그인을 실패했어요.',
+              })
             }
           }).catch((error) => {
-            console.error(error)
             if (error.response) {
               const res = error.response
               if (res.status === 400) {
                 deleteData()
                 moveLoginScreen()
-                setIsLoading(false)
-                setRetry(true)
-                setMessage('로그인을 실패했습니다.')
-                return Alert.alert('로그인 실패', '자동 로그아웃되었습니다.', [{ text: '확인', }])
+
+                Toast.show({
+                  type: 'error',
+                  text1: '자동 로그아웃되었습니다.',
+                  text2: '다시 로그인을 해주세요.',
+                })
               } else if (res.status === 401) {
                 deleteData()
                 moveLoginScreen()
-                setIsLoading(false)
-                setMessage('세션이 만료되었습니다.')
-                return Alert.alert('로그인 실패', '자동 로그아웃되었습니다.\n다시 로그인 해주세요.', [{ text: '확인', }])
+
+                Toast.show({
+                  type: 'error',
+                  text1: '세션이 만료되었습니다.',
+                  text2: '다시 로그인을 해주세요.',
+                })
               } else {
                 setIsLoading(false)
                 setRetry(true)
                 setMessage('서버와 연결할 수 없습니다.')
+
+                Toast.show({
+                  type: 'error',
+                  text1: '서버와 연결할 수 없습니다.',
+                })
               }
             } else {
               setIsLoading(false)
               setRetry(true)
               setMessage('서버와 연결할 수 없습니다.')
+
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+              })
             }
           })
       }
@@ -78,9 +98,15 @@ export default function StartScreen({ navigation }) {
         setIsLoading(true)
         setRetry(false)
         setMessage('로그인 중...')
+
         await axiosInstance.get('/v1/tokenCheck', { headers: { Authorization: accessToken } })
           .then((res) => {
             if (res.status === 200) {
+              Toast.show({ // 메세지 표시
+                type: 'success',
+                text1: `${profileData.firstName + profileData.lastName}(으)로 로그인했습니다.`
+              })
+
               if (job === 'student') {
                 return navigation.dispatch( // 기존에 있던 모든 스크린을 없애고 'S_Home'스크린으로 이동
                   CommonActions.reset({
@@ -98,12 +124,20 @@ export default function StartScreen({ navigation }) {
               } else {
                 deleteData()
                 moveLoginScreen()
+
+                Toast.show({
+                  type: 'error',
+                  text1: '로그아웃 되었어요.',
+                })
               }
             } else {
-              setIsLoading(false)
-              setRetry(true)
-              setMessage('로그인을 실패했습니다.')
-              return Alert.alert('로그인 실패', '자동 로그아웃 되었습니다.', [{ text: '확인', }])
+              deleteData()
+              moveLoginScreen()
+
+              Toast.show({
+                type: 'error',
+                text1: '로그아웃 되었어요.',
+              })
             }
           }).catch((error) => {
             console.error(error)
@@ -119,26 +153,44 @@ export default function StartScreen({ navigation }) {
                 setIsLoading(false)
                 setRetry(true)
                 setMessage('서버와 연결할 수 없습니다.')
+
+                Toast.show({
+                  type: 'error',
+                  text1: '서버와 연결할 수 없습니다.',
+                })
               }
             } else {
               setIsLoading(false)
               setRetry(true)
               setMessage('서버와 연결할 수 없습니다.')
+
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+              })
             }
           })
       }
+
       if (accessToken && refreshToken) {
         handleTokenCheck(accessToken)
       } else {
         deleteData()
         moveLoginScreen()
+
+        Toast.show({
+          type: 'error',
+          text1: '로그인을 실패했어요.',
+        })
       }
     } catch (error) {
-      console.log(error)
       deleteData()
-      setIsLoading(false)
-      setRetry(true)
-      setMessage('로그인을 실패했습니다.')
+      moveLoginScreen()
+
+      Toast.show({
+        type: 'error',
+        text1: '로그인을 실패했어요.',
+      })
     }
   }
 
@@ -146,73 +198,92 @@ export default function StartScreen({ navigation }) {
     setIsLoading(true)
     setRetry(false)
     setMessage('데이터 무결성 검사 중...')
+
     try {
-      await AsyncStorage.getItem('id')
-        .then(async (ID) => {
-          if (ID) {
-            await AsyncStorage.getItem('job')
-              .then(async (job) => {
-                if (job) {
-                  await axiosInstance.post('/profile', { id: ID, job: job })
-                    .then((res) => {
-                      if (res.status === 200) {
-                        checkTokenValidation(job)
-                      } else {
-                        setIsLoading(false)
-                        setRetry(true)
-                        setMessage('계정 인증 도중 예외가 발생했습니다.')
-                      }
-                    }).catch((error) => {
-                      console.error(error)
-                      if (error.response) {
-                        const res = error.response
-                        if (res.status === 400) {
-                          deleteData()
-                          moveLoginScreen()
-                          return Alert.alert(res.data.error, res.data.errorDescription)
-                        } else {
-                          setIsLoading(false)
-                          setRetry(true)
-                          setMessage('서버와 연결할 수 없습니다.')
-                        }
-                      } else {
-                        setIsLoading(false)
-                        setRetry(true)
-                        setMessage('서버와 연결할 수 없습니다.')
-                      }
-                    })
-                } else {
-                  // job 데이터 유실
-                  deleteData()
-                  moveLoginScreen()
-                }
-              }).catch((error) => {
-                // job 가져오기 에러
-                console.log(error)
-                deleteData()
+      const ID = await AsyncStorage.getItem('id')
+      const JOB = await AsyncStorage.getItem('job')
+
+      if (ID && JOB) {
+        if (JOB === 'student' || JOB === 'teacher') {
+          await axiosInstance.post('/profile', { id: ID, job: JOB })
+            .then((res) => {
+              if (res.status === 200) {
+                checkTokenValidation(JOB, res.data)
+              } else {
                 setIsLoading(false)
                 setRetry(true)
-                setMessage('데이터 무결성 검사를 실패했습니다.')
-              })
-          } else {
-            // 계정ID 데이터 유실
-            deleteData()
-            moveLoginScreen()
-          }
-        }).catch((error) => {
-          // 계정ID 가져오기 에러
-          console.log(error)
+                setMessage('계정 인증 도중 예외가 발생했습니다.')
+
+                Toast.show({
+                  type: 'error',
+                  text1: '계정 인증을 실패했어요.',
+                })
+              }
+            }).catch((error) => {
+              if (error.response) {
+                const res = error.response
+                if (res.status === 400) {
+                  deleteData()
+                  moveLoginScreen()
+
+                  Toast.show({
+                    type: 'error',
+                    text1: `${res.data.errorDescription}`,
+                  })
+                } else {
+                  setIsLoading(false)
+                  setRetry(true)
+                  setMessage('서버와 연결할 수 없습니다.')
+
+                  Toast.show({
+                    type: 'error',
+                    text1: '서버와 연결할 수 없습니다.',
+                  })
+                }
+              } else {
+                setIsLoading(false)
+                setRetry(true)
+                setMessage('서버와 연결할 수 없습니다.')
+
+                Toast.show({
+                  type: 'error',
+                  text1: '서버와 연결할 수 없습니다.',
+                })
+              }
+            })
+        } else if (JOB === 'guest') {
+          Toast.show({ // 메세지 표시
+            type: 'success',
+            text1: '게스트로 로그인했습니다.',
+          })
+
+          return navigation.dispatch( // 기존에 있던 모든 스크린을 없애고 'S_Home'스크린으로 이동
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'S_Home' }]
+            })
+          )
+        } else {
           deleteData()
-          setIsLoading(false)
-          setRetry(true)
-          setMessage('데이터 무결성 검사를 실패했습니다.')
-        })
+          moveLoginScreen()
+
+          Toast.show({
+            type: 'error',
+            text1: '무결성을 위반했습니다.',
+          })
+        }
+      } else {
+        deleteData()
+        moveLoginScreen()
+      }
     } catch (error) {
-      console.log(error)
       deleteData()
-      setIsLoading(false)
-      setRetry(true)
-      setMessage('데이터 무결성 검사를 실패했습니다.')
+      moveLoginScreen()
+
+      Toast.show({
+        type: 'error',
+        text1: '데이터 무결성 검사를 실패했습니다.',
+      })
     }
   }
 
@@ -220,6 +291,7 @@ export default function StartScreen({ navigation }) {
     setIsLoading(true)
     setRetry(false)
     setMessage('버전 확인 중...')
+
     try {
       await axiosInstance.post('/v2/version', { os: `${Platform.OS === 'android' ? `android` : `ios`}` })
         .then((res) => {
@@ -241,7 +313,12 @@ export default function StartScreen({ navigation }) {
                     setIsLoading(false)
                     setRetry(true)
                     setMessage('필수 업데이트를 진행해야 합니다.')
-                    return Alert.alert('정보', '죄송합니다 스토어로 이동할 수 없습니다.\n수동으로 스토어에서 업데이트를 해주세요.')
+
+                    Toast.show({
+                      type: 'error',
+                      text1: '스토어로 이동할 수 없습니다.',
+                      text2: '스토어에서 업데이트가 필요합니다.',
+                    })
                   },
                 }
               ])
@@ -259,7 +336,12 @@ export default function StartScreen({ navigation }) {
                     setIsLoading(false)
                     setRetry(true)
                     setMessage('스토어로 이동하여 업데이트를 해주세요.')
-                    return Alert.alert('정보', '죄송합니다 스토어로 이동할 수 없습니다.\n수동으로 스토어에서 업데이트를 해주세요.')
+
+                    Toast.show({
+                      type: 'error',
+                      text1: '스토어로 이동할 수 없습니다.',
+                      text2: '스토어에서 업데이트가 필요합니다.',
+                    })
                   },
                 },
               ])
@@ -268,57 +350,59 @@ export default function StartScreen({ navigation }) {
             checkIntegrity()
           }
         }).catch((error) => {
-          console.log(error)
           if (error.response) {
             const res = error.response
             if (res.status === 400) {
               setIsLoading(false)
               setRetry(true)
               setMessage('지원 기기 : Android, IOS, MacOS')
-            } else if (res.status === 500) {
-              setIsLoading(false)
-              setRetry(true)
-              setMessage('서버가 점검 중일 수 있습니다.')
             } else {
               setIsLoading(false)
               setRetry(true)
               setMessage('서버와 연결할 수 없습니다.')
+
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+              })
             }
           } else {
             setIsLoading(false)
             setRetry(true)
             setMessage('서버와 연결할 수 없습니다.')
+
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+            })
           }
         })
     } catch (error) {
-      console.error(error)
       setIsLoading(false)
       setRetry(true)
       setMessage('버전 검사를 실패했습니다.')
+
+      Toast.show({
+        type: 'error',
+        text1: '버전 검사를 실패했습니다.',
+      })
     }
   }
 
   const handelNotificationStatus = async () => {
-    await AsyncStorage.getItem('Notification_Allowed_Status')
-      .then((res) => {
-        if (res === null) {
-          fcmInsertToken()
-        } else {
-          if (res === 'true') {
-            fcmInsertToken()
-          }
-        }
-      }).catch((error) => {
-        console.log(error)
-      })
+    const NotificationAllowedStatus = await AsyncStorage.getItem('Notification_Allowed_Status')
+
+    if (NotificationAllowedStatus === null || NotificationAllowedStatus === 'true') {
+      fcmInsertToken()
+    }
   }
 
   const fcmInsertToken = async () => {
     await messaging()
       .getToken()
       .then(async (fcmToken) => {
-        console.log('Token | ', fcmToken)
-        AsyncStorage.setItem('fcm_token', fcmToken)
+        await AsyncStorage.setItem('fcm_token', fcmToken)
+
         const data = [
           {
             "fcmToken": fcmToken,
@@ -339,22 +423,16 @@ export default function StartScreen({ navigation }) {
             if (res.status === 200) {
               console.log(res.data.message)
             } else {
-              console.log('FCM을 등록하지 못했습니다.')
+              Toast.show({
+                type: 'error',
+                text1: '알림 서비스를 등록하지 못했습니다.',
+              })
             }
           }).catch((error) => {
-            console.log('FcmInsertToken |', error)
-            if (error.response) {
-              const res = error.response
-              if (res.status === 400) {
-                console.log(error.data.errorDescription)
-              } else if (res.status === 500) {
-                console.log(error.data.errorDescription)
-              } else {
-                console.log('FCM을 등록하지 못했습니다.')
-              }
-            } else {
-              console.log('FCM을 등록하지 못했습니다.')
-            }
+            Toast.show({
+              type: 'error',
+              text1: '알림 서비스를 등록하지 못했습니다.',
+            })
           })
       })
   }

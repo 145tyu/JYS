@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Image, Modal, RefreshControl } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CommonActions } from "@react-navigation/native";
+import { CommonActions, useIsFocused } from "@react-navigation/native";
 // import messaging from '@react-native-firebase/messaging';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
+import Icon_Entypo from 'react-native-vector-icons/Entypo';
 
 import axiosInstance from '../../api/API_Server';
 import ImageViewer from '../../api/ImageViewer';
 
 export default function TeacherHomeScreen({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
+  const isFocused = useIsFocused()
 
   const [startMessage, setStartMessage] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
@@ -40,7 +42,7 @@ export default function TeacherHomeScreen({ navigation }) {
   const handleRefresh = () => {
     setRefreshing(true)
 
-    rentalInquiry()
+    // rentalInquiry()
     mealRefresh()
     getBusStopID()
 
@@ -125,103 +127,6 @@ export default function TeacherHomeScreen({ navigation }) {
     }
   }
 
-  const rentalInquiry = async () => {
-    setSaveRentalStateType(null)
-    await axiosInstance.post('/RoomRental/RentalInquiry')
-      .then((res) => {
-        if (res.status === 200) {
-          if (res.data.type === 1) {
-            setSaveRentalMessage(res.data.message)
-            setSaveRentalStateType(1)
-          } else if (res.data.type === 2) {
-            setSaveRentalInfo(res.data.data)
-            setSaveRentalStateType(2)
-          }
-        } else {
-          setSaveRentalStateType(0)
-          setSaveRentalMessage('예외가 발생했습니다.\n나중에 다시 시도해 주세요.')
-        }
-      }).catch((error) => {
-        console.log('RentalInquiry API | ', error)
-        setSaveRentalStateType(0)
-        setSaveRentalMessage('오류가 발생했습니다.\n나중에 다시 시도해 주세요.')
-      })
-  }
-
-  async function acceptBtn(studentID, query) {
-    const teacherID = await AsyncStorage.getItem('id')
-    if (query === 'rental') {
-      axiosInstance.post('/RoomRental/AcceptorButton', { studentID: studentID, teacherID: teacherID, buttonType: 'accept', methodName: 'rentalForm' })
-        .then((res) => {
-          if (res.status === 200) {
-            rentalInquiry()
-          } else {
-            return Alert.alert('에러', '요청에 실패했습니다.', [
-              { text: '확인', }
-            ])
-          }
-        }).catch((error) => {
-          console.log('AcceptorButton API | ', error)
-          return Alert.alert('에러', '서버와 연결할 수 없습니다.', [
-            { text: '확인', }
-          ])
-        })
-    } else if (query === 'return') {
-      axiosInstance.post('/RoomRental/AcceptorButton', { studentID: studentID, teacherID: teacherID, buttonType: 'accept', methodName: 'rentalReturn' })
-        .then((res) => {
-          if (res.status === 200) {
-            rentalInquiry()
-          } else {
-            return Alert.alert('에러', '요청에 실패했습니다.', [
-              { text: '확인', }
-            ])
-          }
-        }).catch((error) => {
-          console.log('AcceptorButton API | ', error)
-          return Alert.alert('에러', '서버와 연결할 수 없습니다.', [
-            { text: '확인', }
-          ])
-        })
-    }
-  }
-
-  async function declineBtn(studentID, query) {
-    const teacherID = await AsyncStorage.getItem('id')
-    if (query === 'rental') {
-      axiosInstance.post('/RoomRental/AcceptorButton', { studentID: studentID, teacherID: teacherID, buttonType: 'decline', methodName: 'rentalForm', query: 'rental' })
-        .then((res) => {
-          if (res.status === 200) {
-            rentalInquiry()
-          } else {
-            return Alert.alert('에러', '요청에 실패했습니다.', [
-              { text: '확인', }
-            ])
-          }
-        }).catch((error) => {
-          console.log('DeclineButton API | ', error)
-          return Alert.alert('에러', '서버와 연결할 수 없습니다.', [
-            { text: '확인', }
-          ])
-        })
-    } else if (query === 'return') {
-      axiosInstance.post('/RoomRental/AcceptorButton', { studentID: studentID, teacherID: teacherID, buttonType: 'decline', methodName: 'rentalReturn', query: 'rental' })
-        .then((res) => {
-          if (res.status === 200) {
-            rentalInquiry()
-          } else {
-            return Alert.alert('에러', '요청에 실패했습니다.', [
-              { text: '확인', }
-            ])
-          }
-        }).catch((error) => {
-          console.log('DeclineButton API | ', error)
-          return Alert.alert('에러', '서버와 연결할 수 없습니다.', [
-            { text: '확인', }
-          ])
-        })
-    }
-  }
-
   const getBusStopID = async () => {
     setBusArrivalInformationIsRefreshing(true)
     setBusArrivalInformationTitle('버스')
@@ -279,9 +184,20 @@ export default function TeacherHomeScreen({ navigation }) {
   }
 
   useEffect(() => {
-    rentalInquiry() // 스크린이 처음 시작될 때 한번 실행
+    // rentalInquiry() // 스크린이 처음 시작될 때 한번 실행
     mealRefresh() // 스크린이 처음 시작될 때 한번 실행
     getBusStopID()
+
+    const intervalId = setInterval(() => {
+      if (isFocused) {
+        getBusStopID()
+      }
+    }, 15000)
+
+    // 컴포넌트가 언마운트 될 때 clearInterval 호출하여 메모리 누수 방지
+    return () => {
+      clearInterval(intervalId)
+    }
   }, [])
 
   return (
@@ -296,118 +212,6 @@ export default function TeacherHomeScreen({ navigation }) {
 
       <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />} contentContainerStyle={[{ ...styles.scrollContainer, backgroundColor: '#FFFFFF', }, isDarkMode && { ...styles.scrollContainer, backgroundColor: '#000000', }]}>
         {/* 방음부스 */}
-        <>
-          {saveRentalStateType === null &&
-            <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-              <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>부스대여 신청</Text>
-              {saveRentalStateType === null &&
-                <ActivityIndicator style={{ marginTop: 15 }} size="large" color="#0000ff" />
-              }
-            </View>
-          }
-          {saveRentalStateType === 1 &&
-            <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-              <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>부스대여 신청</Text>
-              <Text style={[{ ...styles.Text, color: '#000000', marginBottom: -30 }, isDarkMode && { ...styles.Text, color: '#ffffff', marginBottom: -30 }]}>{saveRentalMessage}</Text>
-            </View>
-          }
-          {saveRentalStateType === 2 &&
-            <>
-              {saveRentalInfo.map((Info) => {
-                if (Info.type === 2) {
-                  return (
-                    <View key={Info.id} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                      <Text style={[{ ...styles.Title, marginBottom: 10, color: '#000000' }, isDarkMode && { ...styles.Title, marginBottom: 10, color: '#FFFFFF' }]}>대여 요청</Text>
-
-                      <View style={RoomRentalStyles.Item}>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>방 번호 : </Text>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.room_number}번 방`}</Text>
-                      </View>
-
-                      <View style={RoomRentalStyles.Item}>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>학번 이름 : </Text>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.studentID} ${Info.first_name}${Info.last_name}`}</Text>
-                      </View>
-
-                      <View style={RoomRentalStyles.Item}>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>사용 시간 : </Text>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.start_time} ~ ${Info.end_time}`}</Text>
-                      </View>
-
-                      <View style={RoomRentalStyles.Item}>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>대여 목적 : </Text>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.purpose}`}</Text>
-                      </View>
-
-                      {/* 버튼 */}
-                      <>
-                        <TouchableOpacity style={RoomRentalStyles.acceptBtn} onPress={() => {
-                          acceptBtn(Info.id, 'rental')
-                          rentalInquiry()
-                        }}>
-                          <Text style={RoomRentalStyles.acceptBtnText}>수락</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={RoomRentalStyles.declineBtn} onPress={() => {
-                          declineBtn(Info.id, 'rental')
-                          rentalInquiry()
-                        }}>
-                          <Text style={RoomRentalStyles.declineBtnText}>거절</Text>
-                        </TouchableOpacity>
-                      </>
-                    </View>
-                  )
-                }
-                if (Info.type === 4) {
-                  return (
-                    <View key={Info.id} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                      <Text style={[{ ...styles.Title, marginBottom: 10, color: '#000000' }, isDarkMode && { ...styles.Title, marginBottom: 10, color: '#FFFFFF' }]}>반납 요청</Text>
-
-                      <View style={RoomRentalStyles.Item}>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>방 번호 : </Text>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.room_number}번 방`}</Text>
-                      </View>
-
-                      <View style={RoomRentalStyles.Item}>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>학번 : </Text>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.studentID}`}</Text>
-                      </View>
-
-                      <View style={RoomRentalStyles.Item}>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>이름 : </Text>
-                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.first_name}${Info.last_name}`}</Text>
-                      </View>
-
-                      <TouchableOpacity style={{ position: 'absolute', top: 13, right: 13, }} onPress={() => {
-                        openImageViewer(`data:image/jpeg;base64,${Info.image}`, [{ "type": "image/jpeg", "width": 2000, "height": 2000, "size": 3261937 }])
-                      }}>
-                        {Info.image && <Image source={{ uri: Info.image }} style={{ width: 100, height: 100 }} />}
-                      </TouchableOpacity>
-
-                      {/* 버튼 */}
-                      <>
-                        <TouchableOpacity style={RoomRentalStyles.acceptBtn} onPress={() => {
-                          acceptBtn(Info.id, 'return')
-                          rentalInquiry()
-                        }}>
-                          <Text style={RoomRentalStyles.acceptBtnText}>수락</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={RoomRentalStyles.declineBtn} onPress={() => {
-                          declineBtn(Info.id, 'return')
-                          rentalInquiry()
-                        }}>
-                          <Text style={RoomRentalStyles.declineBtnText}>거절</Text>
-                        </TouchableOpacity>
-                      </>
-                    </View>
-                  )
-                } else {
-                  setSaveRentalStateType(1)
-                }
-                return null
-              })}
-            </>
-          }
-        </>
 
         {/* 급식 */}
         <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
@@ -461,7 +265,7 @@ export default function TeacherHomeScreen({ navigation }) {
         </View>
 
         {/* 버스 */}
-        <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+        <TouchableOpacity onPress={() => navigation.navigate('Bus_Home')} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
           <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>{busArrivalInformationTitle}</Text>
           {busArrivalInformationIsRefreshing === true ?
             <>
@@ -520,7 +324,7 @@ export default function TeacherHomeScreen({ navigation }) {
               }
             </>
           }
-        </View>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   )
@@ -741,3 +545,213 @@ const busArrivalInformationStyles = StyleSheet.create({
     fontWeight: 'bold',
   },
 })
+
+{/* <>
+          {saveRentalStateType === null &&
+            <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+              <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>부스대여 신청</Text>
+              {saveRentalStateType === null &&
+                <ActivityIndicator style={{ marginTop: 15 }} size="large" color="#0000ff" />
+              }
+            </View>
+          }
+          {saveRentalStateType === 1 &&
+            <View style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+              <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>부스대여 신청</Text>
+              <Text style={[{ ...styles.Text, color: '#000000', marginBottom: -30 }, isDarkMode && { ...styles.Text, color: '#ffffff', marginBottom: -30 }]}>{saveRentalMessage}</Text>
+            </View>
+          }
+          {saveRentalStateType === 2 &&
+            <>
+              {saveRentalInfo.map((Info) => {
+                if (Info.type === 2) {
+                  return (
+                    <View key={Info.id} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+                      <Text style={[{ ...styles.Title, marginBottom: 10, color: '#000000' }, isDarkMode && { ...styles.Title, marginBottom: 10, color: '#FFFFFF' }]}>대여 요청</Text>
+
+                      <View style={RoomRentalStyles.Item}>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>방 번호 : </Text>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.room_number}번 방`}</Text>
+                      </View>
+
+                      <View style={RoomRentalStyles.Item}>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>학번 이름 : </Text>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.studentID} ${Info.first_name}${Info.last_name}`}</Text>
+                      </View>
+
+                      <View style={RoomRentalStyles.Item}>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>사용 시간 : </Text>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.start_time} ~ ${Info.end_time}`}</Text>
+                      </View>
+
+                      <View style={RoomRentalStyles.Item}>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>대여 목적 : </Text>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.purpose}`}</Text>
+                      </View>
+
+                      {/* 버튼
+                      <>
+                        <TouchableOpacity style={RoomRentalStyles.acceptBtn} onPress={() => {
+                          acceptBtn(Info.id, 'rental')
+                          rentalInquiry()
+                        }}>
+                          <Text style={RoomRentalStyles.acceptBtnText}>수락</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={RoomRentalStyles.declineBtn} onPress={() => {
+                          declineBtn(Info.id, 'rental')
+                          rentalInquiry()
+                        }}>
+                          <Text style={RoomRentalStyles.declineBtnText}>거절</Text>
+                        </TouchableOpacity>
+                      </>
+                    </View>
+                  )
+                }
+                if (Info.type === 4) {
+                  return (
+                    <View key={Info.id} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+                      <Text style={[{ ...styles.Title, marginBottom: 10, color: '#000000' }, isDarkMode && { ...styles.Title, marginBottom: 10, color: '#FFFFFF' }]}>반납 요청</Text>
+
+                      <View style={RoomRentalStyles.Item}>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>방 번호 : </Text>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.room_number}번 방`}</Text>
+                      </View>
+
+                      <View style={RoomRentalStyles.Item}>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>학번 : </Text>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.studentID}`}</Text>
+                      </View>
+
+                      <View style={RoomRentalStyles.Item}>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>이름 : </Text>
+                        <Text style={[{ ...RoomRentalStyles.Value, color: '#000000' }, isDarkMode && { ...RoomRentalStyles.Value, color: '#ffffff' }]}>{`${Info.first_name}${Info.last_name}`}</Text>
+                      </View>
+
+                      <TouchableOpacity style={{ position: 'absolute', top: 13, right: 13, }} onPress={() => {
+                        openImageViewer(`data:image/jpeg;base64,${Info.image}`, [{ "type": "image/jpeg", "width": 2000, "height": 2000, "size": 3261937 }])
+                      }}>
+                        {Info.image && <Image source={{ uri: Info.image }} style={{ width: 100, height: 100 }} />}
+                      </TouchableOpacity>
+
+                      {/* 버튼
+                      <>
+                        <TouchableOpacity style={RoomRentalStyles.acceptBtn} onPress={() => {
+                          acceptBtn(Info.id, 'return')
+                          rentalInquiry()
+                        }}>
+                          <Text style={RoomRentalStyles.acceptBtnText}>수락</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={RoomRentalStyles.declineBtn} onPress={() => {
+                          declineBtn(Info.id, 'return')
+                          rentalInquiry()
+                        }}>
+                          <Text style={RoomRentalStyles.declineBtnText}>거절</Text>
+                        </TouchableOpacity>
+                      </>
+                    </View>
+                  )
+                } else {
+                  setSaveRentalStateType(1)
+                }
+                return null
+              })}
+            </>
+          }
+        </> */}
+
+// const rentalInquiry = async () => {
+//   setSaveRentalStateType(null)
+//   await axiosInstance.post('/RoomRental/RentalInquiry')
+//     .then((res) => {
+//       if (res.status === 200) {
+//         if (res.data.type === 1) {
+//           setSaveRentalMessage(res.data.message)
+//           setSaveRentalStateType(1)
+//         } else if (res.data.type === 2) {
+//           setSaveRentalInfo(res.data.data)
+//           setSaveRentalStateType(2)
+//         }
+//       } else {
+//         setSaveRentalStateType(0)
+//         setSaveRentalMessage('예외가 발생했습니다.\n나중에 다시 시도해 주세요.')
+//       }
+//     }).catch((error) => {
+//       console.log('RentalInquiry API | ', error)
+//       setSaveRentalStateType(0)
+//       setSaveRentalMessage('오류가 발생했습니다.\n나중에 다시 시도해 주세요.')
+//     })
+// }
+
+// async function acceptBtn(studentID, query) {
+//   const teacherID = await AsyncStorage.getItem('id')
+//   if (query === 'rental') {
+//     axiosInstance.post('/RoomRental/AcceptorButton', { studentID: studentID, teacherID: teacherID, buttonType: 'accept', methodName: 'rentalForm' })
+//       .then((res) => {
+//         if (res.status === 200) {
+//           rentalInquiry()
+//         } else {
+//           return Alert.alert('에러', '요청에 실패했습니다.', [
+//             { text: '확인', }
+//           ])
+//         }
+//       }).catch((error) => {
+//         console.log('AcceptorButton API | ', error)
+//         return Alert.alert('에러', '서버와 연결할 수 없습니다.', [
+//           { text: '확인', }
+//         ])
+//       })
+//   } else if (query === 'return') {
+//     axiosInstance.post('/RoomRental/AcceptorButton', { studentID: studentID, teacherID: teacherID, buttonType: 'accept', methodName: 'rentalReturn' })
+//       .then((res) => {
+//         if (res.status === 200) {
+//           rentalInquiry()
+//         } else {
+//           return Alert.alert('에러', '요청에 실패했습니다.', [
+//             { text: '확인', }
+//           ])
+//         }
+//       }).catch((error) => {
+//         console.log('AcceptorButton API | ', error)
+//         return Alert.alert('에러', '서버와 연결할 수 없습니다.', [
+//           { text: '확인', }
+//         ])
+//       })
+//   }
+// }
+
+// async function declineBtn(studentID, query) {
+//   const teacherID = await AsyncStorage.getItem('id')
+//   if (query === 'rental') {
+//     axiosInstance.post('/RoomRental/AcceptorButton', { studentID: studentID, teacherID: teacherID, buttonType: 'decline', methodName: 'rentalForm', query: 'rental' })
+//       .then((res) => {
+//         if (res.status === 200) {
+//           rentalInquiry()
+//         } else {
+//           return Alert.alert('에러', '요청에 실패했습니다.', [
+//             { text: '확인', }
+//           ])
+//         }
+//       }).catch((error) => {
+//         console.log('DeclineButton API | ', error)
+//         return Alert.alert('에러', '서버와 연결할 수 없습니다.', [
+//           { text: '확인', }
+//         ])
+//       })
+//   } else if (query === 'return') {
+//     axiosInstance.post('/RoomRental/AcceptorButton', { studentID: studentID, teacherID: teacherID, buttonType: 'decline', methodName: 'rentalReturn', query: 'rental' })
+//       .then((res) => {
+//         if (res.status === 200) {
+//           rentalInquiry()
+//         } else {
+//           return Alert.alert('에러', '요청에 실패했습니다.', [
+//             { text: '확인', }
+//           ])
+//         }
+//       }).catch((error) => {
+//         console.log('DeclineButton API | ', error)
+//         return Alert.alert('에러', '서버와 연결할 수 없습니다.', [
+//           { text: '확인', }
+//         ])
+//       })
+//   }
+// }

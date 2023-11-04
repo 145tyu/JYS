@@ -3,6 +3,7 @@ import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAre
 import { CommonActions, useFocusEffect, useIsFocused } from "@react-navigation/native";
 import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -32,31 +33,42 @@ export default function ViewProfile({ navigation }) {
           }
         }).catch((error) => {
           setProfileType(0)
-          console.log('Profile API |', error)
           if (error.response) {
             const res = error.response
             if (res.status === 400) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else if (res.status === 500) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: '다시 시도해 주세요.',
+              })
             }
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-              { text: '확인' },
-            ])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: `${error}`,
+            })
           }
         })
     } catch (error) {
       setProfileType(0)
-      console.log('Profile API |', error)
+      Toast.show({
+        type: 'error',
+        text1: '계정을 불러오지 못했어요.',
+        text2: `${error}`,
+      })
     }
   }
 
@@ -65,24 +77,40 @@ export default function ViewProfile({ navigation }) {
       const fcmToken = await messaging().getToken()
       await axiosInstance.post('/Fcm/deleteToken', { fcmToken: fcmToken })
         .then((res) => {
-          console.log(res.data.message)
+          Toast.show({
+            type: 'success',
+            text1: `알림 서비스를 해지했어요.`,
+          })
         }).catch((error) => {
-          console.log('Fcm API | ', error)
+          Toast.show({
+            type: 'error',
+            text1: '알름 서비스를 해지하지 못했어요.',
+            text2: `${error}`,
+          })
         })
     } catch (error) {
-      console.log('Fcm API | ', error)
+      Toast.show({
+        type: 'error',
+        text1: '알름 서비스를 해지하지 못했어요.',
+        text2: `${error}`,
+      })
     }
   }
 
   const handleLogout = async () => {
     try {
-      handleFcmDelete()
+      await handleFcmDelete()
       AsyncStorage.removeItem('id')
       AsyncStorage.removeItem('job')
       AsyncStorage.removeItem('access_token')
       AsyncStorage.removeItem('refresh_token')
       AsyncStorage.removeItem('fcm_token')
       AsyncStorage.removeItem('Notification_List')
+
+      Toast.show({
+        type: 'success',
+        text1: `로그아웃을 성공했어요.`,
+      })
       return navigation.dispatch(
         CommonActions.reset({
           index: 0,
@@ -90,11 +118,11 @@ export default function ViewProfile({ navigation }) {
         })
       )
     } catch (error) {
-      console.log('logout | ', error)
-      return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-        { text: '확인' },
-        { text: '다시시도', onPress: () => handleLogout() }
-      ])
+      Toast.show({
+        type: 'error',
+        text1: '서버와 연결할 수 없습니다.',
+        text2: `${error}`,
+      })
     }
   }
 

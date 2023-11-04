@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Button, View, Text, TextInput, Modal, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CommonActions, useRoute } from '@react-navigation/native';
-import DeviceInfo from 'react-native-device-info';
+import { CommonActions, useIsFocused, useRoute } from '@react-navigation/native';
+import FastImage from 'react-native-fast-image';
+import Toast from 'react-native-toast-message';
 
 import axiosInstance from '../../api/API_Server';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
-import FastImage from 'react-native-fast-image';
 
 export default function RouteView({ navigation }) {
   const route = useRoute()
   const { data, index, RouteSearchValue } = route.params
 
   const isDarkMode = useColorScheme() === 'dark'
+  const isFocused = useIsFocused()
 
   const [RouteData, setRouteDate] = useState([])
   const [RouteType, setRouteType] = useState(null)
@@ -57,19 +58,34 @@ export default function RouteView({ navigation }) {
                 tempData.push(DATA)
                 AsyncStorage.setItem('Bus_FavoritesList', JSON.stringify(tempData)) // 데이터 저장
                 handleGetBusFavorites() // 즐겨찾기 데이터 다시 조회
-              } else {
+
+                Toast.show({
+                  type: 'info',
+                  text1: '즐겨찾기에 추가했어요.',
+                  position: 'bottom',
+                })
+              } else { // 삭제
                 const newData = []
                 for (const [index, favoriteData] of tempData.entries()) {
-                  console.log(favoriteData)
                   if (favoriteData != tempData[result]) {
                     newData.push(favoriteData)
                   }
                 }
                 AsyncStorage.setItem('Bus_FavoritesList', JSON.stringify(newData)) // 데이터 저장
                 handleGetBusFavorites() // 즐겨찾기 데이터 다시 조회
+
+                Toast.show({
+                  type: 'info',
+                  text1: '즐겨찾기에서 삭제했어요.',
+                  position: 'bottom',
+                })
               }
             }).catch((error) => {
-              Alert.alert('에러', '데이터를 추가하거나 삭제하지 못했습니다.')
+              Toast.show({
+                type: 'error',
+                text1: '데이터를 추가하거나 삭제하지 못했습니다.',
+                text2: `${error}`,
+              })
             })
         } else {
           // 데이터를 처음 저장
@@ -81,9 +97,19 @@ export default function RouteView({ navigation }) {
           tempData.push(DATA)
           AsyncStorage.setItem('Bus_FavoritesList', JSON.stringify(tempData))
           handleGetBusFavorites() // 즐겨찾기 데이터 조회
+
+          Toast.show({
+            type: 'info',
+            text1: '즐겨찾기에 추가했어요.',
+            position: 'bottom',
+          })
         }
       }).catch((error) => {
-        Alert.alert('에러', '데이터를 추가하지 못했습니다.')
+        Toast.show({
+          type: 'error',
+          text1: '데이터를 추가하지 못했습니다.',
+          text2: `${error}`,
+        })
       })
   }
 
@@ -100,18 +126,26 @@ export default function RouteView({ navigation }) {
       }).catch((error) => {
         setNowLoading(false)
         setRouteType(0)
-        console.log(error)
         if (error.response) {
           const res = error.response
-          if (res.status === 400) {
-            // return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
-          } else if (res.status === 500) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+          if (res.status === 500) {
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+            })
           }
         } else {
-          return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+          Toast.show({
+            type: 'error',
+            text1: '서버와 연결할 수 없습니다.',
+            text2: `${error}`,
+          })
         }
       })
   }
@@ -121,26 +155,28 @@ export default function RouteView({ navigation }) {
     handleGetBusFavorites() // 즐겨찾기에 추가되어있는지 조회
 
     const intervalId = setInterval(() => {
-      setNowLoading(true)
-      handleBusLocationInquiry()
+      if (isFocused) {
+        setNowLoading(true)
+        handleBusLocationInquiry()
+      }
     }, 20000)
 
     // 컴포넌트가 언마운트 될 때 clearInterval 호출하여 메모리 누수 방지
     return () => {
       clearInterval(intervalId)
     }
-  }, [])
+  }, [isFocused])
 
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#ffffff' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' }]}>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
       {/* 로고 */}
       <View style={styles.logoView}>
         <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
-          <Text style={[{ ...styles.backButtonText, color: '#000000' }, isDarkMode && { ...styles.backButtonText, color: '#ffffff' }]}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} {data.busID ? data.busID : '버스'}</Text>
+          <Text style={{ ...styles.backButtonText, color: isDarkMode ? '#ffffff' : '#000000' }}>{<Icon_Ionicons name='chevron-back-outline' size={21} />} 노선 정보</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => handleBusFavorites()} style={Platform.OS === 'ios' ? { position: 'absolute', marginTop: 50, right: 20, } : { position: 'absolute', right: 20, }}>
-          <Icon_Feather style={{ color: favoriteState ? 'yellow' : `${isDarkMode ? '#ffffff' : '#000000'}` }} color={isDarkMode ? '#ffffff' : '#000000'} name="star" size={20} />
+          <Icon_Feather style={{ color: favoriteState ? '#FFD700' : `${isDarkMode ? '#ffffff' : '#000000'}` }} color={isDarkMode ? '#ffffff' : '#000000'} name="star" size={20} />
         </TouchableOpacity>
       </View>
 
@@ -156,30 +192,28 @@ export default function RouteView({ navigation }) {
         <TouchableOpacity onPress={() => {
           setNowLoading(true)
           handleBusLocationInquiry()
-        }} style={{ zIndex: 999, position: 'absolute', width: 50, height: 50, right: 10, bottom: 13, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: '#999999' }}>
-          <Icon_Feather color={'#333333'} name="refresh-cw" size={25} />
+        }} style={{ zIndex: 999, position: 'absolute', right: 10, bottom: 13, }}>
+          <View style={{ width: 50, height: 50, borderRadius: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#999999' : '#1D1E23', }}>
+            <Icon_Feather color={'#ffffff'} name="rotate-cw" size={25} />
+          </View>
         </TouchableOpacity>
       </>
 
       {/* 노선 정보 */}
       <>
-        <View style={{ width: '100%', height: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
+        <View style={{ width: '100%', height: 100, justifyContent: 'center', alignItems: 'center', borderBottomWidth: 0.5, borderBottomColor: '#999999', backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
           <Text style={{ marginBottom: 10, fontSize: 20, color: isDarkMode ? '#ffffff' : '#000000' }}>{data.busID}번</Text>
-          <Text style={{ fontSize: 15, color: isDarkMode ? '#999999' : '#333333' }}>{data.StartingPoint} -{'>'} {data.EndingPoint}</Text>
+          <Text style={{ fontSize: 15, color: isDarkMode ? '#D3D3D3' : '#333333' }}>{data.StartingPoint} -{'>'} {data.EndingPoint}</Text>
         </View>
-        {/* 줄 */}
-        <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
       </>
 
       {/* 운행 정보 */}
       <>
         {RouteType === 1 && RouteData.RouteRunningCount != 0 &&
           <>
-            <View style={{ padding: 7, marginLeft: 13, backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
-              <Text style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>현재 {RouteData.RouteRunningCount}대 운행중</Text>
+            <View style={{ padding: 7, borderTopWidth: 0.5, borderBottomWidth: 0.5, borderTopColor: '#999999', borderBottomColor: '#999999', backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
+              <Text style={{ marginLeft: 7, color: isDarkMode ? '#ffffff' : '#000000' }}>현재 {RouteData.RouteRunningCount}대 운행중</Text>
             </View>
-            {/* 줄 */}
-            <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
           </>
         }
       </>
@@ -204,7 +238,7 @@ export default function RouteView({ navigation }) {
 
                     {/* 방향 아이콘 */}
                     <FastImage style={{ zIndex: 999, position: 'absolute', left: 43, width: 20, height: 20, }} source={require('../../resource/bus/bus_Direction.png')} />
-                    
+
                     {/* 줄 */}
                     <View style={{ position: 'absolute', left: 50, width: 5, height: 72, backgroundColor: '#999999' }}></View>
 

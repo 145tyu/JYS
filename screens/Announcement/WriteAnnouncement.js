@@ -7,6 +7,7 @@ import { Picker } from '@react-native-picker/picker';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { PERMISSIONS, request, check } from 'react-native-permissions';
 import FastImage from 'react-native-fast-image';
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -222,14 +223,22 @@ export default function WriteAnnouncement({ navigation }) {
         if (res.didCancel) {
           return null
         } else if (res.errorCode) {
-          return Alert.alert(res.errorCode, res.errorMessage)
+          Toast.show({
+            type: 'error',
+            text1: `${res.errorMessage}`,
+            text2: `${res.errorCode}`,
+          })
         } else {
           const _imageData = res.assets
           setSelectedImages((prevImages) => [...prevImages, _imageData])
         }
       })
     } else {
-      return Alert.alert('권한 확인', '카메라 권한을 확인해주세요.')
+      Toast.show({
+        type: 'error',
+        text1: '카메라 권한을 확인해주세요.',
+        text2: '권한 확인 필요!',
+      })
     }
   }
 
@@ -247,14 +256,22 @@ export default function WriteAnnouncement({ navigation }) {
         if (res.didCancel) {
           return null
         } else if (res.errorCode) {
-          return Alert.alert(res.errorCode, res.errorMessage)
+          Toast.show({
+            type: 'error',
+            text1: `${res.errorMessage}`,
+            text2: `${res.errorCode}`,
+          })
         } else {
           const _imageData = res.assets
           setSelectedImages((prevImages) => [...prevImages, _imageData])
         }
       })
     } catch (error) {
-      return Alert.alert('권한 확인', '저장공간 접근 권한이 없습니다.')
+      Toast.show({
+        type: 'error',
+        text1: '저장공간 접근 권한이 없습니다.',
+        text2: `${error}`,
+      })
     }
   }
 
@@ -272,7 +289,7 @@ export default function WriteAnnouncement({ navigation }) {
         if (res.status === 200) {
           const data = res.data.data
           const postID = data.insertId
-          Alert.alert('성공', `${res.data.message}\n기기에 푸쉬를 발송하겠습니까?`, [
+          Alert.alert('정보', `${res.data.message}\n기기에 푸쉬를 발송하겠습니까?`, [
             {
               text: '전송', onPress: () => {
                 handlePushSend(postID)
@@ -286,7 +303,10 @@ export default function WriteAnnouncement({ navigation }) {
             }
           ])
         } else {
-          return Alert.alert('에러', '게시글을 작성하지 못했습니다.')
+          Toast.show({
+            type: 'error',
+            text1: '공지를 작성하지 못했습니다.',
+          })
         }
       }).catch((error) => {
         setUploadModalState(false)
@@ -294,23 +314,39 @@ export default function WriteAnnouncement({ navigation }) {
         if (error.response) {
           const res = error.response
           if (res.status === 400) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else if (res.status === 500) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: '다시 시도해 주세요.',
+            })
           }
         } else {
-          return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+          Toast.show({
+            type: 'error',
+            text1: '서버와 연결할 수 없습니다.',
+            text2: `${error}`,
+          })
         }
       })
     } catch (error) {
       setUploadModalState(false)
-      return Alert.alert('에러', '게시글을 작성하지 못했어요.', [
-        {
-          text: '확인',
-        }
-      ])
+      Toast.show({
+        type: 'error',
+        text1: '공지를 작성하지 못했어요.',
+        text2: `${error}`,
+      })
     }
   }
 
@@ -341,10 +377,19 @@ export default function WriteAnnouncement({ navigation }) {
             }))
             handlePostForm(formData)
           }).catch((error) => {
-            console.log(error)
+            Toast.show({
+              type: 'error',
+              text1: '예외가 발생했습니다.',
+              text2: `${error}`,
+            })
+
           })
       }).catch((error) => {
-        console.log(error)
+        Toast.show({
+          type: 'error',
+          text1: '예외가 발생했습니다.',
+          text2: `${error}`,
+        })
       })
   }
 
@@ -384,25 +429,47 @@ export default function WriteAnnouncement({ navigation }) {
               handleFcmTokenInquiry(_data.id)
             })
           } else {
-            return Alert.alert('에러', '사용자를 불러오지 못했습니다.')
+            Toast.show({
+              type: 'error',
+              text1: '사용자를 불러오지 못했습니다.',
+            })
           }
         }).catch((error) => {
-          console.log(error)
           if (error.response) {
             const res = error.response
             if (res.status === 400) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else if (res.status === 500) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: '다시 시도해 주세요.',
+              })
             }
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: `${error}`,
+            })
           }
         })
     } catch (error) {
-      console.log(error)
+      Toast.show({
+        type: 'error',
+        text1: '예외가 발생했습니다.',
+        text2: `${error}`,
+      })
     }
   }
 
@@ -418,25 +485,47 @@ export default function WriteAnnouncement({ navigation }) {
               return [...prevFcmTokens, ...newFcmTokens]
             })
           } else {
-            return Alert.alert('에러', '조회를 실패했습니다.')
+            Toast.show({
+              type: 'error',
+              text1: '조회를 실패했습니다.',
+            })
           }
         }).catch((error) => {
-          console.log(error)
           if (error.response) {
             const res = error.response
             if (res.status === 400) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else if (res.status === 500) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: '다시 시도해 주세요.',
+              })
             }
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: `${error}`,
+            })
           }
         })
     } catch (error) {
-      console.log(error)
+      Toast.show({
+        type: 'error',
+        text1: '예외가 발생했습니다.',
+        text2: `${error}`,
+      })
     }
   }
 
@@ -457,23 +546,44 @@ export default function WriteAnnouncement({ navigation }) {
     await axiosInstance.post('/Fcm/pushSend', { FcmTokenArray: FcmTokenArray, message: message })
       .then((res) => {
         if (res.status === 200) {
-          return Alert.alert('정보', res.data.message)
+          Toast.show({
+            type: 'error',
+            text1: `${res.data.message}`,
+          })
         } else {
-          return Alert.alert('에러', '전송을 실패했습니다.')
+          Toast.show({
+            type: 'error',
+            text1: '전송을 실패했습니다.',
+          })
         }
       }).catch((error) => {
-        console.log(error)
         if (error.response) {
           const res = error.response
           if (res.status === 400) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else if (res.status === 500) {
-            return Alert.alert(res.data.error, res.data.errorDescription, [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: '다시 시도해 주세요.',
+            })
           }
         } else {
-          return Alert.alert('정보', '서버와 연결할 수 없습니다.', [{ text: '확인', }])
+          Toast.show({
+            type: 'error',
+            text1: '서버와 연결할 수 없습니다.',
+            text2: `${error}`,
+          })
         }
       })
   }
@@ -525,14 +635,6 @@ export default function WriteAnnouncement({ navigation }) {
         cook: checkDepartment.cook === true ? false : true
       }))
     }
-  }
-
-  const UserCustomSelectionOpenModal = () => {
-
-  }
-
-  const UserCustomSelectionCloseModal = () => {
-
   }
 
   const UserSelectionOpenModal = () => {

@@ -3,6 +3,7 @@ import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAre
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
 import DeviceInfo from 'react-native-device-info';
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -44,9 +45,18 @@ export default function SettingsHomeScreen({ navigation }) {
           <TouchableOpacity style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]} onPress={() => {
             AsyncStorage.removeItem('community_blockedUser')
               .then((res) => {
-                Alert.alert('정보', '모든 사용자 차단을 해제했습니다.')
+                Toast.show({
+                  type: 'success',
+                  text1: '모든 사용자 차단을 해제했습니다.',
+                  position: 'bottom',
+                })
               }).catch((error) => {
-                Alert.alert('정보', '차단 해제를 실패했습니다.')
+                Toast.show({
+                  type: 'error',
+                  text1: '차단을 해제할 수 없어요.',
+                  text2: `${error}`,
+                  position: 'bottom',
+                })
               })
           }}>
             <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>사용자 차단 모두 해제</Text>

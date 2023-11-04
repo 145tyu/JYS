@@ -3,6 +3,7 @@ import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAre
 import { useRoute } from '@react-navigation/native';
 import { CommonActions } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -111,13 +112,19 @@ export default function Profile_DeleteAccount({ navigation }) {
 
   const handleLogout = async () => {
     try {
-      handleFcmDelete()
+      await handleFcmDelete()
       AsyncStorage.removeItem('id')
       AsyncStorage.removeItem('job')
       AsyncStorage.removeItem('access_token')
       AsyncStorage.removeItem('refresh_token')
       AsyncStorage.removeItem('fcm_token')
       AsyncStorage.removeItem('Notification_List')
+
+      Toast.show({
+        type: 'success',
+        text1: `로그아웃을 성공했어요.`,
+      })
+
       return navigation.dispatch(
         CommonActions.reset({
           index: 0,
@@ -125,11 +132,11 @@ export default function Profile_DeleteAccount({ navigation }) {
         })
       )
     } catch (error) {
-      console.log('logout | ', error)
-      return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-        { text: '확인' },
-        { text: '다시시도', onPress: () => handleLogout() }
-      ])
+      Toast.show({
+        type: 'error',
+        text1: '서버와 연결할 수 없습니다.',
+        text2: `${error}`,
+      })
     }
   }
 
@@ -138,12 +145,23 @@ export default function Profile_DeleteAccount({ navigation }) {
       const fcmToken = await messaging().getToken()
       await axiosInstance.post('/Fcm/deleteToken', { fcmToken: fcmToken })
         .then((res) => {
-          console.log(res.data.message)
+          Toast.show({
+            type: 'success',
+            text1: `알림 서비스를 해지했어요.`,
+          })
         }).catch((error) => {
-          console.log('Fcm API | ', error)
+          Toast.show({
+            type: 'error',
+            text1: '알름 서비스를 해지하지 못했어요.',
+            text2: `${error}`,
+          })
         })
     } catch (error) {
-      console.log('Fcm API | ', error)
+      Toast.show({
+        type: 'error',
+        text1: '알름 서비스를 해지하지 못했어요.',
+        text2: `${error}`,
+      })
     }
   }
 
@@ -156,49 +174,64 @@ export default function Profile_DeleteAccount({ navigation }) {
         .then((res) => {
           setIsLoading(false)
           if (res.status === 200) {
+            Toast.show({
+              type: 'success',
+              text1: `${res.data.message}`,
+            })
             handleLogout()
-            return Alert.alert('완료', res.data.message, [
-              { text: '확인', }
-            ])
           } else {
-            Alert.alert('에러', '서버와 연결할 수 없습니다.')
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+            })
           }
         }).catch((error) => {
           setIsLoading(false)
-          console.log(error)
           if (error.response) {
             const res = error.response
             if (res.status === 400) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else if (res.status === 500) {
-              return Alert.alert(res.data.error, res.data.errorDescription, [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: `${res.data.errorDescription}`,
+                text2: `${res.data.error}`,
+              })
             } else {
-              return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-                { text: '확인' },
-              ])
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: '다시 시도해 주세요.',
+              })
             }
           } else {
-            return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-              { text: '확인' },
-            ])
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: `${error}`,
+            })
           }
         })
     } catch (error) {
       setIsLoading(false)
-      console.log('ProfileEdit API |', error)
-      return Alert.alert('정보', '서버와 연결할 수 없습니다.', [
-        { text: '확인' },
-      ])
+      Toast.show({
+        type: 'error',
+        text1: '서버와 연결할 수 없습니다.',
+        text2: `${error}`,
+      })
     }
   }
 
   const handleSubmit = async () => {
     if (reason === '선택된 사유가 없습니다.') {
-      Alert.alert('정보', '탈퇴 사유를 선택하지 않았습니다.')
+      Toast.show({
+        type: 'error',
+        text1: '탈퇴 사유를 선택하지 않았습니다.',
+      })
     } else {
       Alert.alert('경고', '회원 탈퇴를 신청하면 더 이상 로그인할 수 없게 됩니다.\n회원탈퇴를 신청하시겠습니까?', [
         { text: '신청', onPress: () => handleAccountDelete() },

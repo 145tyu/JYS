@@ -1,4 +1,4 @@
-import React, { useEffect, useState, } from 'react';
+import React, { Component, useEffect, useState, } from 'react';
 import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal, Button } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { PERMISSIONS, RESULTS, check, request } from 'react-native-permissions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FastImage from 'react-native-fast-image';
+import Toast, { BaseToast } from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -37,17 +38,17 @@ import T_HomeScreen from './screens/teacher/TeacherHome';
 import T_AllTab from './screens/teacher/AllTab';
 import T_RoomSituation from './screens/teacher/RoomSituation';
 
-import Profile_View from './screens/Profile/ViewProfile';
-import Profile_Edit from './screens/Profile/EditProfile';
-import Profile_Edit_Email from './screens/Profile/EditEmail';
-import Profile_Edit_Password from './screens/Profile/EditPassword';
-import Profile_DeleteAccount from './screens/Profile/DeleteAccount';
+import Profile_View from './screens/profile/ViewProfile';
+import Profile_Edit from './screens/profile/EditProfile';
+import Profile_Edit_Email from './screens/profile/EditEmail';
+import Profile_Edit_Password from './screens/profile/EditPassword';
+import Profile_DeleteAccount from './screens/profile/DeleteAccount';
 
-import Community_Home from './screens/Community/CommunityHome';
-import Community_ViewPost from './screens/Community/ViewPost';
-import Community_WritePost from './screens/Community/WritePost';
-import Community_WriteComments from './screens/Community/WriteComments';
-import Community_WriteReplies from './screens/Community/WriteReplies';
+import Community_Home from './screens/community/CommunityHome';
+import Community_ViewPost from './screens/community/ViewPost';
+import Community_WritePost from './screens/community/WritePost';
+import Community_WriteComments from './screens/community/WriteComments';
+import Community_WriteReplies from './screens/community/WriteReplies';
 
 import Bus_Home from './screens/Bus/BusHome';
 import Bus_AddBusStopID from './screens/Bus/AddBusStopID';
@@ -61,11 +62,11 @@ import Announcement_ViewPost from './screens/Announcement/AnnouncementViewPost';
 
 import Timetable_Home from './screens/Timetable/TimetableHome';
 
-import Notification_Home from './screens/Notification/home';
+import Notification_Home from './screens/notification/home';
 
-import Meal_Home from './screens/Meal/MealHome';
+import Meal_Home from './screens/meal/MealHome';
 
-import Credits_Home from './screens/Credits/Credits'
+import Credits_Home from './screens/credits/Credits'
 
 import WebView_ysit from './screens/WebView/ysit'
 import WebView_SejongJangYeongsilHighSchool from './screens/WebView/SejongJangYeongsilHighSchool'
@@ -308,12 +309,7 @@ const SaveNotification = (remoteMessage: any) => {
 
 const App = () => {
   const navigationRef: any = React.createRef()
-
   const isDarkMode = useColorScheme() === 'dark'
-
-  const [isModalVisible, setModalVisible] = useState(false)
-  const [notificationTitle, setNotificationTitle] = useState('')
-  const [notificationContent, setNotificationContent] = useState('')
 
   useEffect(() => {
     const onNotificationOpenedAppListener = messaging().onNotificationOpenedApp((notificationOpen) => {
@@ -342,14 +338,14 @@ const App = () => {
     const onMessageListener = messaging().onMessage(async (remoteMessage: any) => {
       SaveNotification(remoteMessage)  // 알림 데이터를 저장
 
-      setNotificationTitle(remoteMessage.notification.title ? remoteMessage.notification.title : '새로운 알림이 도착했습니다.')
-      setNotificationContent(remoteMessage.notification.body ? remoteMessage.notification.body : '불러오지 못했어요.')
-
-      setModalVisible(true)
-
-      setTimeout(() => {
-        setModalVisible(false)
-      }, 10000)
+      Toast.show({
+        type: 'notification',
+        text1: `${remoteMessage.notification.title ? remoteMessage.notification.title : '새로운 알림이 도착했습니다.'}`,
+        text2: `${remoteMessage.notification.body ? remoteMessage.notification.body : '불러오지 못했어요.'}`,
+        props: {
+          data: remoteMessage
+        },
+      })
     }) // 새로운 메시지 도착 시 핸들링
 
     const processInitialNotification = async () => {
@@ -369,26 +365,106 @@ const App = () => {
     }
   }, [])
 
+  const toastConfig = {
+    success: (props: any) => (
+      <>
+        <View style={{ flex: 1, width: '95%', height: 70, borderRadius: 5, justifyContent: 'center', backgroundColor: isDarkMode ? '#1D1E23' : '#F8F8FF', }}>
+          <View style={{ width: 5, height: 70, borderTopLeftRadius: 20, borderBottomLeftRadius: 20, zIndex: 999, position: 'absolute', backgroundColor: '#32CD32', }}></View>
+          <View style={{ width: 45, height: 45, marginLeft: 18, borderRadius: 10, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
+            <FastImage style={{ width: 33, height: 33 }} source={require('./resource/logo_v1.png')} />
+          </View>
+          {props.text1 && props.text2 ?
+            <>
+              <Text style={{ marginLeft: 75, marginRight: 5, fontWeight: 'bold', fontSize: 15, color: isDarkMode ? '#ffffff' : '#000000', }}>{props.text1}</Text>
+              <Text style={{ marginLeft: 75, marginRight: 5, fontWeight: '300', fontSize: 13, color: isDarkMode ? '#ffffff' : '#000000', }}>{props.text2}</Text>
+            </>
+            :
+            <>
+              <Text style={{ marginLeft: 75, marginRight: 5, fontWeight: 'bold', fontSize: 15, color: isDarkMode ? '#ffffff' : '#000000', }}>{props.text1}</Text>
+            </>
+          }
+        </View>
+      </>
+    ),
+    error: (props: any) => (
+      <>
+        <View style={{ flex: 1, width: '95%', height: 70, borderRadius: 5, justifyContent: 'center', backgroundColor: isDarkMode ? '#1D1E23' : '#F8F8FF', }}>
+          <View style={{ width: 5, height: 70, borderTopLeftRadius: 20, borderBottomLeftRadius: 20, zIndex: 999, position: 'absolute', backgroundColor: '#B22222', }}></View>
+          <View style={{ width: 45, height: 45, marginLeft: 18, borderRadius: 10, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
+            <FastImage style={{ width: 33, height: 33 }} source={require('./resource/logo_v1.png')} />
+          </View>
+          {props.text1 && props.text2 ?
+            <>
+              <Text style={{ marginLeft: 75, marginRight: 5, fontWeight: 'bold', fontSize: 15, color: isDarkMode ? '#ffffff' : '#000000', }}>{props.text1}</Text>
+              <Text style={{ marginLeft: 75, marginRight: 5, fontWeight: '300', fontSize: 13, color: isDarkMode ? '#ffffff' : '#000000', }}>{props.text2}</Text>
+            </>
+            :
+            <>
+              <Text style={{ marginLeft: 75, marginRight: 5, fontWeight: 'bold', fontSize: 15, color: isDarkMode ? '#ffffff' : '#000000', }}>{props.text1}</Text>
+            </>
+          }
+        </View>
+      </>
+    ),
+    notification: (props: any,) => (
+      <>
+        <TouchableOpacity onPress={() => {
+          const data: any = props.props.data.data
+          if (data.screenType === 'community_Post') { // 알림 유형 : 게시글
+            const ScreenData = (data.screenData).split(',')
+            navigationRef.current.navigate('Community_ViewPost', { postID: ScreenData[0] })
+          } else if (data.screenType === 'community_Comment') { // 알림 유형 : 댓글
+            const ScreenData = (data.screenData).split(',')
+            navigationRef.current.navigate('Community_WriteComments', { postID: ScreenData[0] })
+          } else if (data.screenType === 'community_Replie') { // 알림 유형 : 답글
+            const ScreenData = (data.screenData).split(',')
+            navigationRef.current.navigate('Community_WriteReplies', { commentsID: ScreenData[0], postID: ScreenData[1] })
+          } else if (data.screenType === 'Announcement_ViewPost') { // 알림 유형 : 공지
+            const ScreenData = (data.screenData).split(',')
+            navigationRef.current.navigate('Announcement_ViewPost', { postID: ScreenData[0] })
+          } else { // 알림 유형 : 없음
+            navigationRef.current.navigate('Notification_Tab_Home')
+          }
+        }} style={{ flex: 1, width: '95%', height: 70, borderRadius: 5, justifyContent: 'center', backgroundColor: isDarkMode ? '#1D1E23' : '#F8F8FF', }}>
+          <View style={{ width: 45, height: 45, marginLeft: 18, borderRadius: 10, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
+            <FastImage style={{ width: 33, height: 33 }} source={require('./resource/logo_v1.png')} />
+          </View>
+          {props.text1 && props.text2 ?
+            <>
+              <Text style={{ marginLeft: 75, marginRight: 5, fontWeight: 'bold', fontSize: 15, color: isDarkMode ? '#ffffff' : '#000000', }}>{props.text1}</Text>
+              <Text style={{ marginLeft: 75, marginRight: 5, fontWeight: '300', fontSize: 13, color: isDarkMode ? '#ffffff' : '#000000', }}>{props.text2}</Text>
+            </>
+            :
+            <>
+              <Text style={{ marginLeft: 75, marginRight: 5, fontWeight: 'bold', fontSize: 15, color: isDarkMode ? '#ffffff' : '#000000', }}>{props.text1}</Text>
+            </>
+          }
+        </TouchableOpacity>
+      </>
+    ),
+    info: (props: any) => (
+      <>
+        <View style={{ flex: 1, width: '95%', height: 70, borderRadius: 5, justifyContent: 'center', backgroundColor: isDarkMode ? '#1D1E23' : '#F8F8FF', }}>
+          <View style={{ width: 45, height: 45, marginLeft: 18, borderRadius: 10, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
+            <FastImage style={{ width: 33, height: 33 }} source={require('./resource/logo_v1.png')} />
+          </View>
+          {props.text1 && props.text2 ?
+            <>
+              <Text style={{ marginLeft: 75, marginRight: 5, fontWeight: 'bold', fontSize: 15, color: isDarkMode ? '#ffffff' : '#000000', }}>{props.text1}</Text>
+              <Text style={{ marginLeft: 75, marginRight: 5, fontWeight: '300', fontSize: 13, color: isDarkMode ? '#ffffff' : '#000000', }}>{props.text2}</Text>
+            </>
+            :
+            <>
+              <Text style={{ marginLeft: 75, marginRight: 5, fontWeight: 'bold', fontSize: 15, color: isDarkMode ? '#ffffff' : '#000000', }}>{props.text1}</Text>
+            </>
+          }
+        </View>
+      </>
+    ),
+  }
+
   return (
     <>
-      {isModalVisible === true &&
-        <SafeAreaView style={{ flex: 1, position: 'absolute', zIndex: 999, top: 10, left: 10, right: 10 }}>
-          <TouchableOpacity onPress={() => {
-            navigationRef.current.navigate('Notification_Tab_Home')
-            setModalVisible(false)
-          }}>
-            <View style={[{ flex: 1, height: 70, justifyContent: 'center', borderRadius: 20, backgroundColor: '#f2f4f6', }, isDarkMode && { flex: 1, height: 70, justifyContent: 'center', borderRadius: 20, backgroundColor: '#121212', }]}>
-              <View style={{ width: 43, height: 43, marginLeft: 20, borderRadius: 10, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
-                <FastImage style={{ width: 33, height: 33 }} source={require('./resource/logo_v1.png')} />
-              </View>
-
-              <Text style={[{ marginLeft: 75, fontWeight: 'bold', fontSize: 15, color: '#000000' }, isDarkMode && { marginLeft: 75, fontWeight: 'bold', fontSize: 15, color: '#ffffff' }]}>{notificationTitle}</Text>
-              <Text style={[{ marginLeft: 75, fontWeight: '500', fontSize: 15, color: '#000000' }, isDarkMode && { marginLeft: 75, fontWeight: '500', fontSize: 15, color: '#ffffff' }]}>{notificationContent}</Text>
-            </View>
-          </TouchableOpacity>
-        </SafeAreaView>
-      }
-
       <NavigationContainer ref={navigationRef}>
         <Stack.Navigator>
           <Stack.Screen name="Start" component={StartScreen} options={{ headerShown: false, animation: 'fade' }} />
@@ -444,6 +520,9 @@ const App = () => {
           <Stack.Screen name="WebView_SejongJangYeongsilHighSchool" component={WebView_SejongJangYeongsilHighSchool} options={{ headerShown: true, title: '세종장영실고등학교', animation: 'fade' }} />
         </Stack.Navigator>
       </NavigationContainer>
+
+      {/* 토스트 메세지 */}
+      <Toast autoHide={true} config={toastConfig} />
     </>
   )
 }
