@@ -174,6 +174,10 @@ export default function CommunityHome({ navigation }) {
   const renderItems = ({ item }) => {
     const today = new Date()
     const itemDate = new Date(item.date)
+    const departmentColor = item.studentID.substr(2, 1) == '1' || item.studentID.substr(2, 1) == '2' ? '#82FA58' :
+      item.studentID.substr(2, 1) == '3' || item.studentID.substr(2, 1) == '4' ? '#2E9AFE' :
+        item.studentID.substr(2, 1) == '5' || item.studentID.substr(2, 1) == '6' ? '#FA58F4' :
+          item.studentID.substr(2, 1) == '7' || item.studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7'
 
     return (
       <View style={{ ...styles.InfoContainer, }}>
@@ -186,14 +190,18 @@ export default function CommunityHome({ navigation }) {
             </>
           </View>
           <View style={styles.Item}>
+            <View style={{ width: 30, height: 15, borderRadius: 3, top: 7, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: departmentColor, }}>
+              <Text style={{ fontSize: 10, fontWeight: '400', color: '#000000' }}>{item.studentID.substr(0, 1)}학년</Text>
+            </View>
             <Text style={[{ ...styles.Value, color: '#666666', }, isDarkMode && { ...styles.Value, color: '#666666', }]}>
-              {
-                <>
-                  {item.post_type === 0 && item.author}
-                  {item.post_type === 1 && '신고됨'}
-                  {item.post_type === 2 && '비공개'}
-                </>
-              }{'   '}
+              <View style={{ width: 30, height: 15, }}></View>
+              {<>{'  '}</>}
+              {<>
+                {item.post_type === 0 && item.author}
+                {item.post_type === 1 && '신고됨'}
+                {item.post_type === 2 && '비공개'}
+              </>}
+              {<>{'   '}</>}
               {`${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}` === `${itemDate.getFullYear()}-${itemDate.getMonth() + 1}-${itemDate.getDate()}` ?
                 `${itemDate.getHours().toString().length === 1 ? `0${itemDate.getHours()}` : `${itemDate.getHours()}`}:${itemDate.getMinutes().toString().length === 1 ? `0${itemDate.getMinutes()}` : `${itemDate.getMinutes()}`}`
                 :

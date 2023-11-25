@@ -50,17 +50,17 @@ import Community_WritePost from './screens/community/WritePost';
 import Community_WriteComments from './screens/community/WriteComments';
 import Community_WriteReplies from './screens/community/WriteReplies';
 
-import Bus_Home from './screens/Bus/BusHome';
-import Bus_AddBusStopID from './screens/Bus/AddBusStopID';
-import Bus_Search from './screens/Bus/BusSearch';
-import Bus_RouteView from './screens/Bus/RouteView';
-import Bus_BusStopView from './screens/Bus/BusStopView';
+import Bus_Home from './screens/bus/BusHome';
+import Bus_AddBusStopID from './screens/bus/AddBusStopID';
+import Bus_Search from './screens/bus/BusSearch';
+import Bus_RouteView from './screens/bus/RouteView';
+import Bus_BusStopView from './screens/bus/BusStopView';
 
-import Announcement_Home from './screens/Announcement/AnnouncementHome';
-import Announcement_WritePost from './screens/Announcement/WriteAnnouncement';
-import Announcement_ViewPost from './screens/Announcement/AnnouncementViewPost';
+import Announcement_Home from './screens/announcement/AnnouncementHome';
+import Announcement_WritePost from './screens/announcement/WriteAnnouncement';
+import Announcement_ViewPost from './screens/announcement/AnnouncementViewPost';
 
-import Timetable_Home from './screens/Timetable/TimetableHome';
+import Timetable_Home from './screens/timetable/TimetableHome';
 
 import Notification_Home from './screens/notification/home';
 
@@ -68,8 +68,8 @@ import Meal_Home from './screens/meal/MealHome';
 
 import Credits_Home from './screens/credits/Credits'
 
-import WebView_ysit from './screens/WebView/ysit'
-import WebView_SejongJangYeongsilHighSchool from './screens/WebView/SejongJangYeongsilHighSchool'
+import WebView_ysit from './screens/webView/ysit'
+import WebView_SejongJangYeongsilHighSchool from './screens/webView/SejongJangYeongsilHighSchool'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -125,14 +125,14 @@ function S_Tab() {
         }}
       />
       <Tab.Screen
-        name="Notification_Tab_Home"
-        component={Notification_Home}
+        name="Bus_Tab_Home"
+        component={Bus_Home}
         options={{
-          title: '알림',
+          title: '버스',
           headerShown: false,
           tabBarShowLabel: true,
           tabBarIcon: ({ color, size }) => (
-            <Icon_Feather name='bell' color={color} size={size} />
+            <Icon_Ionicons name='bus' color={color} size={size} />
           ),
         }}
       />
@@ -203,14 +203,14 @@ function T_Tab() {
         }}
       />
       <Tab.Screen
-        name="Notification_Tab_Home"
-        component={Notification_Home}
+        name="Bus_Tab_Home"
+        component={Bus_Home}
         options={{
-          title: '알림',
+          title: '버스',
           headerShown: false,
           tabBarShowLabel: true,
           tabBarIcon: ({ color, size }) => (
-            <Icon_Feather name='bell' color={color} size={size} />
+            <Icon_Ionicons name='bus' color={color} size={size} />
           ),
         }}
       />
@@ -511,6 +511,8 @@ const App = () => {
           <Stack.Screen name="Bus_Search" component={Bus_Search} options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="Bus_RouteView" component={Bus_RouteView} options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="Bus_BusStopView" component={Bus_BusStopView} options={{ headerShown: false, animation: 'fade' }} />
+
+          <Stack.Screen name="Notification_Home" component={Notification_Home} options={{ headerShown: true, title: '알림', animation: 'fade' }} />
 
           <Stack.Screen name="Meal_Home" component={Meal_Home} options={{ headerShown: false, animation: 'fade' }} />
 

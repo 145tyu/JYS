@@ -6,6 +6,7 @@ import { CommonActions, useIsFocused } from "@react-navigation/native";
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Entypo from 'react-native-vector-icons/Entypo';
+import Icon_Feather from 'react-native-vector-icons/Feather';
 
 import axiosInstance from '../../api/API_Server';
 import ImageViewer from '../../api/ImageViewer';
@@ -208,6 +209,10 @@ export default function TeacherHomeScreen({ navigation }) {
       {/* 로고 */}
       <View style={styles.logoView}>
         <Text style={[{ ...styles.logo, color: '#000000', }, isDarkMode && { ...styles.logo, color: '#ffffff', }]}>홈</Text>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Notification_Home')} style={{ position: 'absolute', top: 25, right: 20, }}>
+          <Icon_Feather name='bell' color={isDarkMode ? '#ffffff' : '#000000'} size={30} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />} contentContainerStyle={[{ ...styles.scrollContainer, backgroundColor: '#FFFFFF', }, isDarkMode && { ...styles.scrollContainer, backgroundColor: '#000000', }]}>
@@ -265,7 +270,7 @@ export default function TeacherHomeScreen({ navigation }) {
         </View>
 
         {/* 버스 */}
-        <TouchableOpacity onPress={() => navigation.navigate('Bus_Home')} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+        <TouchableOpacity onPress={() => navigation.navigate('Bus_Tab_Home')} style={[{ ...styles.Info, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
           <Text style={[{ ...styles.Title, color: '#000000' }, isDarkMode && { ...styles.Title, color: '#FFFFFF' }]}>{busArrivalInformationTitle}</Text>
           {busArrivalInformationIsRefreshing === true ?
             <>

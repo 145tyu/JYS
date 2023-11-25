@@ -6,6 +6,7 @@ import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Entypo from 'react-native-vector-icons/Entypo';
+import Icon_Feather from 'react-native-vector-icons/Feather';
 
 import axiosInstance from '../../api/API_Server';
 import { MoveScreen } from '../../api/MoveScreen';
@@ -20,6 +21,7 @@ export default function StudentHomeScreen({ navigation }) {
   const [mealNowScreen, setMealNowScreen] = useState(1)
   const [mealTitle, setMealTitle] = useState('급식')
   const [mealMessage, setMealMessage] = useState(null)
+  const [mealData, setMealData] = useState(null)
   const [mealBreakfast, setMealBreakfast] = useState(null)
   const [mealLunch, setMealLunch] = useState(null)
   const [mealDinner, setMealDinner] = useState(null)
@@ -53,6 +55,7 @@ export default function StudentHomeScreen({ navigation }) {
             setMealBreakfast(res.data.breakfast || null) // 'data.breakfast'에 값이 없을 경우 'null'로 설정
             setMealLunch(res.data.lunch || null) // 'data.lunch'에 값이 없을 경우 'null'로 설정
             setMealDinner(res.data.dinner || null) // 'data.dinner'에 값이 없을 경우 'null'로 설정
+            setMealData(res.data)
           } else if (res.data.type === 2 || res.data.type === 3) { // 'Type'이 '2' 또는 '3'이면
             setMealStateType(res.data.type) // 'Type'을 'data.type'에서 받아온 값으로 설정
             setMealTitle('급식')
@@ -190,6 +193,10 @@ export default function StudentHomeScreen({ navigation }) {
       {/* 로고 */}
       <View style={styles.logoView}>
         <Text style={{ ...styles.logo, color: isDarkMode ? '#ffffff' : '#000000', }}>홈</Text>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Notification_Home')} style={{ position: 'absolute', top: 25, right: 20, }}>
+          <Icon_Feather name='bell' color={isDarkMode ? '#ffffff' : '#000000'} size={30} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />} contentContainerStyle={{ ...styles.scrollContainer, backgroundColor: isDarkMode ? '#000000' : '#FFFFFF', }}>
@@ -249,10 +256,13 @@ export default function StudentHomeScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           }
+          {mealStateType === 1 && mealData &&
+            <Text style={{ marginTop: 15, textAlign: 'right', fontSize: 10, color: isDarkMode ? '#999999' : '#666666', }}>{mealData.provideInformation} 제공</Text>
+          }
         </View>
 
         {/* 버스 */}
-        <TouchableOpacity onPress={() => navigation.navigate('Bus_Home')} style={{ ...styles.Info, backgroundColor: isDarkMode ? '#121212' : '#f2f4f6', }}>
+        <TouchableOpacity onPress={() => navigation.navigate('Bus_Tab_Home')} style={{ ...styles.Info, backgroundColor: isDarkMode ? '#121212' : '#f2f4f6', }}>
           <Text style={{ ...styles.Title, color: isDarkMode ? '#ffffff' : '#000000' }}>{busArrivalInformationTitle}</Text>
 
           {busArrivalInformationIsRefreshing === true ?

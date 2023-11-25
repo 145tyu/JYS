@@ -44,6 +44,7 @@ export default function EditProfile({ navigation }) {
           Toast.show({
             type: 'success',
             text1: '아이디를 변경했어요.',
+            position: 'bottom',
           })
           navigation.goBack()
         } else {
@@ -51,6 +52,7 @@ export default function EditProfile({ navigation }) {
             type: 'error',
             text1: '아이디를 변경하지 못했어요.',
             text2: '다시 시도해 주세요.',
+            position: 'bottom',
           })
         }
       }).catch((error) => {
@@ -62,18 +64,21 @@ export default function EditProfile({ navigation }) {
               type: 'error',
               text1: `${res.data.errorDescription}`,
               text2: `${res.data.error}`,
+              position: 'bottom',
             })
           } else if (res.status === 500) {
             Toast.show({
               type: 'error',
               text1: `${res.data.errorDescription}`,
               text2: `${res.data.error}`,
+              position: 'bottom',
             })
           } else {
             Toast.show({
               type: 'error',
               text1: '서버와 연결할 수 없습니다.',
               text2: '다시 시도해 주세요.',
+              position: 'bottom',
             })
           }
         } else {
@@ -81,6 +86,7 @@ export default function EditProfile({ navigation }) {
             type: 'error',
             text1: '서버와 연결할 수 없습니다.',
             text2: `${error}`,
+            position: 'bottom',
           })
         }
       })
@@ -91,6 +97,7 @@ export default function EditProfile({ navigation }) {
       Toast.show({
         type: 'error',
         text1: '현재 비밀번호를 입력해주세요.',
+        position: 'bottom',
       })
     } else {
       setIsLoading(true)
@@ -104,6 +111,7 @@ export default function EditProfile({ navigation }) {
             Toast.show({
               type: 'error',
               text1: '새로운 아이디를 입력하지 않았습니다.',
+              position: 'bottom',
             })
           } else {
             await axiosInstance.post('/register', { accountID: newAccountID, })
@@ -115,6 +123,7 @@ export default function EditProfile({ navigation }) {
                   Toast.show({
                     type: 'error',
                     text1: '아이디 확인 도중 예외가 발생했습니다.',
+                    position: 'bottom',
                   })
                 }
               }).catch((error) => {
@@ -125,18 +134,21 @@ export default function EditProfile({ navigation }) {
                     type: 'error',
                     text1: `${res.data.errorDescription}`,
                     text2: `${res.data.error}`,
+                    position: 'bottom',
                   })
                 } else if (res.status === 500) {
                   Toast.show({
                     type: 'error',
                     text1: `${res.data.errorDescription}`,
                     text2: `${res.data.error}`,
+                    position: 'bottom',
                   })
                 } else {
                   Toast.show({
                     type: 'error',
                     text1: '아이디 확인 도중 예외가 발생했습니다.',
                     text2: `${error}`,
+                    position: 'bottom',
                   })
                 }
               })
@@ -147,13 +159,15 @@ export default function EditProfile({ navigation }) {
             Toast.show({
               type: 'error',
               text1: '새로운 전화번호를 입력하지 않았습니다.',
+              position: 'bottom',
             })
           } else if (!validatePhoneNumber(newPhoneNumber)) {
             setIsLoading(false)
             Toast.show({
               type: 'error',
               text1: '전화번호 형식이 맞지 않습니다.',
-              text2: '숫자만 입력해주세요.'
+              text2: '숫자만 입력해주세요.',
+              position: 'bottom',
             })
           } else {
             await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', phoneNumber: newPhoneNumber, oldPassword: oldPassword })
@@ -163,12 +177,14 @@ export default function EditProfile({ navigation }) {
                   Toast.show({
                     type: 'success',
                     text1: '전화번호를 변경했어요.',
+                    position: 'bottom',
                   })
                   navigation.goBack()
                 } else {
                   Toast.show({
                     type: 'error',
                     text1: '전화번호를 변경하지 못했습니다.',
+                    position: 'bottom',
                   })
                 }
               }).catch((error) => {
@@ -180,18 +196,21 @@ export default function EditProfile({ navigation }) {
                       type: 'error',
                       text1: `${res.data.errorDescription}`,
                       text2: `${res.data.error}`,
+                      position: 'bottom',
                     })
                   } else if (res.status === 500) {
                     Toast.show({
                       type: 'error',
                       text1: `${res.data.errorDescription}`,
                       text2: `${res.data.error}`,
+                      position: 'bottom',
                     })
                   } else {
                     Toast.show({
                       type: 'error',
                       text1: '서버와 연결할 수 없습니다.',
                       text2: '다시 시도해 주세요.',
+                      position: 'bottom',
                     })
                   }
                 } else {
@@ -199,6 +218,7 @@ export default function EditProfile({ navigation }) {
                     type: 'error',
                     text1: '서버와 연결할 수 없습니다.',
                     text2: `${error}`,
+                    position: 'bottom',
                   })
                 }
               })
@@ -209,6 +229,7 @@ export default function EditProfile({ navigation }) {
             Toast.show({
               type: 'error',
               text1: '성 또는 이름을 입력하지 않았습니다.',
+              position: 'bottom',
             })
           } else {
             await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', firstName: newFirstName, lastName: newLastName, oldPassword: oldPassword })
@@ -218,12 +239,14 @@ export default function EditProfile({ navigation }) {
                   Toast.show({
                     type: 'success',
                     text1: '이름을 변경했어요.',
+                    position: 'bottom',
                   })
                   navigation.goBack()
                 } else {
                   Toast.show({
                     type: 'error',
                     text1: '이름을 변경하지 못했어요.',
+                    position: 'bottom',
                   })
                 }
               }).catch((error) => {
@@ -235,18 +258,21 @@ export default function EditProfile({ navigation }) {
                       type: 'error',
                       text1: `${res.data.errorDescription}`,
                       text2: `${res.data.error}`,
+                      position: 'bottom',
                     })
                   } else if (res.status === 500) {
                     Toast.show({
                       type: 'error',
                       text1: `${res.data.errorDescription}`,
                       text2: `${res.data.error}`,
+                      position: 'bottom',
                     })
                   } else {
                     Toast.show({
                       type: 'error',
                       text1: '서버와 연결할 수 없습니다.',
                       text2: '다시 시도해 주세요.',
+                      position: 'bottom',
                     })
                   }
                 } else {
@@ -254,6 +280,69 @@ export default function EditProfile({ navigation }) {
                     type: 'error',
                     text1: '서버와 연결할 수 없습니다.',
                     text2: `${error}`,
+                    position: 'bottom',
+                  })
+                }
+              })
+          }
+        } else if (methodName === 'community_nickname') {
+          if (newFirstName === null) {
+            setIsLoading(false)
+            Toast.show({
+              type: 'error',
+              text1: '새로운 닉네임을 입력하지 않았습니다.',
+              position: 'bottom',
+            })
+          } else {
+            await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', firstName: newFirstName, oldPassword: oldPassword })
+              .then((res) => {
+                setIsLoading(false)
+                if (res.status === 200) {
+                  Toast.show({
+                    type: 'success',
+                    text1: '닉네임을 변경했어요.',
+                    position: 'bottom',
+                  })
+                  navigation.goBack()
+                } else {
+                  Toast.show({
+                    type: 'error',
+                    text1: '넥네임을 변경하지 못했어요.',
+                    position: 'bottom',
+                  })
+                }
+              }).catch((error) => {
+                setIsLoading(false)
+                if (error.response) {
+                  const res = error.response
+                  if (res.status === 400) {
+                    Toast.show({
+                      type: 'error',
+                      text1: `${res.data.errorDescription}`,
+                      text2: `${res.data.error}`,
+                      position: 'bottom',
+                    })
+                  } else if (res.status === 500) {
+                    Toast.show({
+                      type: 'error',
+                      text1: `${res.data.errorDescription}`,
+                      text2: `${res.data.error}`,
+                      position: 'bottom',
+                    })
+                  } else {
+                    Toast.show({
+                      type: 'error',
+                      text1: '서버와 연결할 수 없습니다.',
+                      text2: '다시 시도해 주세요.',
+                      position: 'bottom',
+                    })
+                  }
+                } else {
+                  Toast.show({
+                    type: 'error',
+                    text1: '서버와 연결할 수 없습니다.',
+                    text2: `${error}`,
+                    position: 'bottom',
                   })
                 }
               })
@@ -265,13 +354,14 @@ export default function EditProfile({ navigation }) {
           type: 'error',
           text1: '프로필을 변경하지 못했어요.',
           text2: `${error}`,
+          position: 'bottom',
         })
       }
     }
   }
 
   const handleSetMethod = () => {
-    const { methodName, accountID, phoneNumber, firstName, lastName } = route.params
+    const { methodName, accountID, phoneNumber, firstName, lastName, nickname } = route.params
     setMethodName(methodName)
     if (methodName === 'accountID') {
       setTitle('아이디 수정')
@@ -289,10 +379,16 @@ export default function EditProfile({ navigation }) {
       setPlaceholder(firstName + lastName)
       setOldFirstName(firstName)
       setOldLastName(lastName)
+    } else if (methodName === 'community_nickname') {
+      setTitle('닉네임 수정')
+      setTopText('닉네임')
+      setPlaceholder(nickname)
+      setOldFirstName(nickname)
     } else {
       Toast.show({
         type: 'error',
         text1: '나중에 다시 시도해보세요.',
+        position: 'bottom',
       })
       navigation.goBack()
     }
@@ -417,6 +513,42 @@ export default function EditProfile({ navigation }) {
                   editable={true}
                 />
                 <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+              </View>
+            </>
+          }
+          {methodName === 'community_nickname' &&
+            <>
+              <Text style={styles.InfoTopText}>비밀번호</Text>
+              <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+                <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>현재 비밀번호</Text>
+                <TextInput
+                  style={styles.Value}
+                  placeholder={oldPassword}
+                  onChangeText={(text) => setOldPassword(text)}
+                  secureTextEntry={true}
+                  value={oldPassword}
+                  editable={true}
+                />
+                <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+              </View>
+
+              <Text style={styles.InfoTopText}>프로필 수정</Text>
+              <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+                <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>닉네임</Text>
+                <TextInput
+                  style={styles.Value}
+                  placeholder={oldFirstName}
+                  onChangeText={(text) => setNewFirstName(text)}
+                  value={newFirstName}
+                  editable={true}
+                />
+                <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+              </View>
+
+              <View style={{ paddingLeft: 20, paddingRight: 20, }}>
+                <Text style={[{ color: '#333333' }, isDarkMode && { color: '#999999' }]}>
+                  부적절한 닉네임을 사용거나 규칙 위반 시 커뮤니티 이용이 제한될 수 있어요.
+                </Text>
               </View>
             </>
           }

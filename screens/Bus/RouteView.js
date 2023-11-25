@@ -85,6 +85,7 @@ export default function RouteView({ navigation }) {
                 type: 'error',
                 text1: '데이터를 추가하거나 삭제하지 못했습니다.',
                 text2: `${error}`,
+                position: 'bottom',
               })
             })
         } else {
@@ -109,6 +110,7 @@ export default function RouteView({ navigation }) {
           type: 'error',
           text1: '데이터를 추가하지 못했습니다.',
           text2: `${error}`,
+          position: 'bottom',
         })
       })
   }
@@ -138,6 +140,8 @@ export default function RouteView({ navigation }) {
             Toast.show({
               type: 'error',
               text1: '서버와 연결할 수 없습니다.',
+              text2: '오류가 지속될 경우 노선을 다시 검색해 주세요.',
+              position: 'bottom',
             })
           }
         } else {
@@ -145,6 +149,7 @@ export default function RouteView({ navigation }) {
             type: 'error',
             text1: '서버와 연결할 수 없습니다.',
             text2: `${error}`,
+            position: 'bottom',
           })
         }
       })
@@ -223,34 +228,31 @@ export default function RouteView({ navigation }) {
           <ScrollView style={{ flex: 1, }}>
             {RouteData['Location'].map((data, index) => {
               return (
-                <TouchableOpacity key={index} onPress={() => navigation.navigate('Bus_BusStopView', { data })}>
-                  {/* 세로 선 */}
-                  <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
-                  {/* 정보 박스 */}
-                  <View style={{ flexDirection: 'row', width: '100%', height: 70, paddingLeft: 10, alignItems: 'center', borderTopColor: '#000000', borderBottomColor: '#000000', backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
-                    {/* 번호판 정보 */}
-                    {data.uniqueNum != '' &&
-                      <>
-                        <Text style={{ position: 'absolute', left: 10, top: 7, width: 'auto', borderWidth: 1, borderColor: '#000000', paddingLeft: 1, paddingRight: 1, fontSize: 10, color: '#000000', backgroundColor: '#ffffff', }}>{data.uniqueNum}</Text>
-                        <FastImage style={{ zIndex: 999, position: 'absolute', left: 43, top: 5, width: 20, height: 20, }} source={require('../../resource/bus/bus_Icon.png')} />
-                      </>
-                    }
+                <TouchableOpacity key={index} onPress={() => navigation.navigate('Bus_BusStopView', { data })} style={{ flexDirection: 'row', width: '100%', height: 70, paddingLeft: 10, alignItems: 'center', borderTopWidth: 0.3, borderBottomWidth: 0.5, borderTopColor: '#999999', borderBottomColor: '#999999', backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
+                  {/* 번호판 정보 */}
+                  {data.uniqueNum != '' &&
+                    <>
+                      <Text style={{ position: 'absolute', left: 10, top: 7, width: 'auto', borderWidth: 1, borderColor: '#000000', paddingLeft: 1, paddingRight: 1, fontSize: 10, color: '#000000', backgroundColor: '#ffffff', }}>{data.uniqueNum}</Text>
+                      <FastImage style={{ zIndex: 999, position: 'absolute', left: 43, top: 5, width: 20, height: 20, }} source={require('../../resource/bus/bus_Icon.png')} />
+                    </>
+                  }
 
-                    {/* 방향 아이콘 */}
-                    <FastImage style={{ zIndex: 999, position: 'absolute', left: 43, width: 20, height: 20, }} source={require('../../resource/bus/bus_Direction.png')} />
+                  {/* 방향 아이콘 */}
+                  <FastImage style={{ zIndex: 999, position: 'absolute', left: 43, width: 20, height: 20, }} source={require('../../resource/bus/bus_Direction.png')} />
 
-                    {/* 줄 */}
-                    <View style={{ position: 'absolute', left: 50, width: 5, height: 72, backgroundColor: '#999999' }}></View>
+                  {/* 줄 */}
+                  <View style={{ position: 'absolute', left: 50, width: 5, height: 72, backgroundColor: '#999999' }}></View>
 
-                    {/* 정류장 정보 */}
-                    <View style={{ paddingLeft: 70, alignContent: 'center', }}>
-                      <Text style={{ fontSize: 15, color: isDarkMode ? '#ffffff' : '#000000' }}>{data.busStopName}</Text>
-                      <Text style={{ fontSize: 11, color: '#666666' }}>{data.busStopID}</Text>
-                    </View>
+                  {/* 정류장 정보 */}
+                  <View style={{ paddingLeft: 70, alignContent: 'center', }}>
+                    <Text style={{ fontSize: 15, color: isDarkMode ? '#ffffff' : '#000000' }}>{data.busStopName}</Text>
+                    <Text style={{ fontSize: 11, color: '#666666' }}>{data.busStopID}</Text>
                   </View>
                 </TouchableOpacity>
               )
             })}
+            {/* 화면 늘리기 */}
+            <View style={{ marginBottom: 100, }}></View>
           </ScrollView>
         </>
       }

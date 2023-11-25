@@ -79,8 +79,8 @@ android {
         applicationId "com.sejong.jys"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 34
-        versionName "1.6.19"
+        versionCode 35
+        versionName "1.7.1"
     }
     signingConfigs {
         // release {

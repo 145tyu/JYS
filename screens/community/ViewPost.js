@@ -280,18 +280,21 @@ export default function ViewPost({ navigation }) {
                 type: 'error',
                 text1: `${res.data.errorDescription}`,
                 text2: `${res.data.error}`,
+                position: 'bottom',
               })
             } else if (res.status === 500) {
               Toast.show({
                 type: 'error',
                 text1: `${res.data.errorDescription}`,
                 text2: `${res.data.error}`,
+                position: 'bottom',
               })
             } else {
               Toast.show({
                 type: 'error',
                 text1: '서버와 연결할 수 없습니다.',
                 text2: '다시 시도해 주세요.',
+                position: 'bottom',
               })
             }
           } else {
@@ -299,6 +302,7 @@ export default function ViewPost({ navigation }) {
               type: 'error',
               text1: '서버와 연결할 수 없습니다.',
               text2: `${error}`,
+              position: 'bottom',
             })
           }
         })
@@ -308,6 +312,7 @@ export default function ViewPost({ navigation }) {
         type: 'error',
         text1: '예외가 발생했습니다.',
         text2: `${error}`,
+        position: 'bottom',
       })
     }
   }
@@ -316,7 +321,7 @@ export default function ViewPost({ navigation }) {
     setCommentsType(null)
     const blockUser = await AsyncStorage.getItem('community_blockedUser')
     try {
-      await axiosInstance.post('/Community/commentsCheck', { postID: postID, blockUser: JSON.parse(blockUser), })
+      await axiosInstance.post('/Community/commentCheck', { postID: postID, blockUser: JSON.parse(blockUser), })
         .then((res) => {
           if (res.status === 200) {
             const data = res.data.data
@@ -334,18 +339,21 @@ export default function ViewPost({ navigation }) {
                 type: 'error',
                 text1: `${res.data.errorDescription}`,
                 text2: `${res.data.error}`,
+                position: 'bottom',
               })
             } else if (res.status === 500) {
               Toast.show({
                 type: 'error',
                 text1: `${res.data.errorDescription}`,
                 text2: `${res.data.error}`,
+                position: 'bottom',
               })
             } else {
               Toast.show({
                 type: 'error',
                 text1: '서버와 연결할 수 없습니다.',
                 text2: '다시 시도해 주세요.',
+                position: 'bottom',
               })
             }
           } else {
@@ -353,6 +361,7 @@ export default function ViewPost({ navigation }) {
               type: 'error',
               text1: '서버와 연결할 수 없습니다.',
               text2: `${error}`,
+              position: 'bottom',
             })
           }
         })
@@ -362,6 +371,7 @@ export default function ViewPost({ navigation }) {
         type: 'error',
         text1: '예외가 발생했습니다.',
         text2: `${error}`,
+        position: 'bottom',
       })
     }
   }
@@ -388,18 +398,21 @@ export default function ViewPost({ navigation }) {
                 type: 'error',
                 text1: `${res.data.errorDescription}`,
                 text2: `${res.data.error}`,
+                position: 'bottom',
               })
             } else if (res.status === 500) {
               Toast.show({
                 type: 'error',
                 text1: `${res.data.errorDescription}`,
                 text2: `${res.data.error}`,
+                position: 'bottom',
               })
             } else {
               Toast.show({
                 type: 'error',
                 text1: '서버와 연결할 수 없습니다.',
                 text2: '다시 시도해 주세요.',
+                position: 'bottom',
               })
             }
           } else {
@@ -407,6 +420,7 @@ export default function ViewPost({ navigation }) {
               type: 'error',
               text1: '서버와 연결할 수 없습니다.',
               text2: `${error}`,
+              position: 'bottom',
             })
           }
         })
@@ -416,6 +430,7 @@ export default function ViewPost({ navigation }) {
         type: 'error',
         text1: '예외가 발생했습니다.',
         text2: `${error}`,
+        position: 'bottom',
       })
     }
   }
@@ -433,12 +448,14 @@ export default function ViewPost({ navigation }) {
                     navigation.goBack()
                     Toast.show({
                       type: 'success',
-                      text1: `${res.data.message}`
+                      text1: `${res.data.message}`,
+                      position: 'bottom',
                     })
                   } else {
                     Toast.show({
                       type: 'error',
                       text1: '게시글을 삭제하지 못했습니다.',
+                      position: 'bottom',
                     })
                   }
                 }).catch((error) => {
@@ -449,18 +466,21 @@ export default function ViewPost({ navigation }) {
                         type: 'error',
                         text1: `${res.data.errorDescription}`,
                         text2: `${res.data.error}`,
+                        position: 'bottom',
                       })
                     } else if (res.status === 500) {
                       Toast.show({
                         type: 'error',
                         text1: `${res.data.errorDescription}`,
                         text2: `${res.data.error}`,
+                        position: 'bottom',
                       })
                     } else {
                       Toast.show({
                         type: 'error',
                         text1: '서버와 연결할 수 없습니다.',
                         text2: '다시 시도해 주세요.',
+                        position: 'bottom',
                       })
                     }
                   } else {
@@ -468,6 +488,7 @@ export default function ViewPost({ navigation }) {
                       type: 'error',
                       text1: '서버와 연결할 수 없습니다.',
                       text2: `${error}`,
+                      position: 'bottom',
                     })
                   }
                 })
@@ -475,7 +496,8 @@ export default function ViewPost({ navigation }) {
               Toast.show({
                 type: 'error',
                 text1: '게시글을 삭제하지 못했어요.',
-                text2: `${error}`
+                text2: `${error}`,
+                position: 'bottom',
               })
             })
         }
@@ -497,6 +519,7 @@ export default function ViewPost({ navigation }) {
               Toast.show({
                 type: 'error',
                 text1: '댓글을 삭제하지 못했습니다.',
+                position: 'bottom',
               })
             }
           }).catch((error) => {
@@ -507,18 +530,21 @@ export default function ViewPost({ navigation }) {
                   type: 'error',
                   text1: `${res.data.errorDescription}`,
                   text2: `${res.data.error}`,
+                  position: 'bottom',
                 })
               } else if (res.status === 500) {
                 Toast.show({
                   type: 'error',
                   text1: `${res.data.errorDescription}`,
                   text2: `${res.data.error}`,
+                  position: 'bottom',
                 })
               } else {
                 Toast.show({
                   type: 'error',
                   text1: '서버와 연결할 수 없습니다.',
                   text2: '다시 시도해 주세요.',
+                  position: 'bottom',
                 })
               }
             } else {
@@ -526,6 +552,7 @@ export default function ViewPost({ navigation }) {
                 type: 'error',
                 text1: '서버와 연결할 수 없습니다.',
                 text2: `${error}`,
+                position: 'bottom',
               })
             }
           })
@@ -533,7 +560,8 @@ export default function ViewPost({ navigation }) {
         Toast.show({
           type: 'error',
           text1: '댓글을 삭제하지 못했어요.',
-          text2: `${error}`
+          text2: `${error}`,
+          position: 'bottom',
         })
       })
   }
@@ -551,6 +579,7 @@ export default function ViewPost({ navigation }) {
               Toast.show({
                 type: 'error',
                 text1: '답글을 삭제하지 못했어요.',
+                position: 'bottom',
               })
             }
           }).catch((error) => {
@@ -561,18 +590,21 @@ export default function ViewPost({ navigation }) {
                   type: 'error',
                   text1: `${res.data.errorDescription}`,
                   text2: `${res.data.error}`,
+                  position: 'bottom',
                 })
               } else if (res.status === 500) {
                 Toast.show({
                   type: 'error',
                   text1: `${res.data.errorDescription}`,
                   text2: `${res.data.error}`,
+                  position: 'bottom',
                 })
               } else {
                 Toast.show({
                   type: 'error',
                   text1: '서버와 연결할 수 없습니다.',
                   text2: '다시 시도해 주세요.',
+                  position: 'bottom',
                 })
               }
             } else {
@@ -580,6 +612,7 @@ export default function ViewPost({ navigation }) {
                 type: 'error',
                 text1: '서버와 연결할 수 없습니다.',
                 text2: `${error}`,
+                position: 'bottom',
               })
             }
           })
@@ -587,7 +620,8 @@ export default function ViewPost({ navigation }) {
         Toast.show({
           type: 'error',
           text1: '답글을 삭제하지 못했어요.',
-          text2: `${error}`
+          text2: `${error}`,
+          position: 'bottom',
         })
       })
   }
@@ -599,18 +633,23 @@ export default function ViewPost({ navigation }) {
           if (res.status === 200) {
             if (contentType === 'Post') {
               navigation.goBack()
-              Alert.alert('신고하기', `${res.data.message}\n이 사용자를 차단할까요?`, [{ text: '차단하기', onPress: () => handleBlockedUser() }, { text: '아니요' }])
+              Alert.alert('신고하기', `${res.data.message}\n이 사용자를 차단할까요?`, [
+                { text: '차단하기', onPress: () => handleBlockedUser() },
+                { text: '아니요' },
+              ])
             } else {
               handleRefresh()
               Toast.show({
                 type: 'success',
                 text1: `${res.data.message}`,
+                position: 'bottom',
               })
             }
           } else {
             Toast.show({
               type: 'error',
               text1: '신고를 접수하지 못했어요.',
+              position: 'bottom',
             })
           }
         }).catch((error) => {
@@ -621,18 +660,21 @@ export default function ViewPost({ navigation }) {
                 type: 'error',
                 text1: `${res.data.errorDescription}`,
                 text2: `${res.data.error}`,
+                position: 'bottom',
               })
             } else if (res.status === 500) {
               Toast.show({
                 type: 'error',
                 text1: `${res.data.errorDescription}`,
                 text2: `${res.data.error}`,
+                position: 'bottom',
               })
             } else {
               Toast.show({
                 type: 'error',
                 text1: '서버와 연결할 수 없습니다.',
                 text2: '다시 시도해 주세요.',
+                position: 'bottom',
               })
             }
           } else {
@@ -640,6 +682,7 @@ export default function ViewPost({ navigation }) {
               type: 'error',
               text1: '서버와 연결할 수 없습니다.',
               text2: `${error}`,
+              position: 'bottom',
             })
           }
         })
@@ -647,7 +690,8 @@ export default function ViewPost({ navigation }) {
       Toast.show({
         type: 'error',
         text1: '신고를 접수하지 못했어요.',
-        text2: `${error}`
+        text2: `${error}`,
+        position: 'bottom',
       })
     }
   }
@@ -672,6 +716,7 @@ export default function ViewPost({ navigation }) {
             Toast.show({
               type: 'error',
               text1: '이 기기에서 이미 차단된 사용자입니다.',
+              position: 'bottom',
             })
           } else {
             existingBlockUser.push(blockUserObject)
@@ -686,6 +731,7 @@ export default function ViewPost({ navigation }) {
               Toast.show({
                 type: 'success',
                 text1: '이 기기에서 사용자를 차단했습니다.',
+                position: 'bottom',
               })
               if (contentType === 'Post') {
                 navigation.goBack()
@@ -694,7 +740,8 @@ export default function ViewPost({ navigation }) {
               Toast.show({
                 type: 'error',
                 text1: '사용자를 차단하지 못했습니다.',
-                text2: `${error}`
+                text2: `${error}`,
+                position: 'bottom',
               })
             })
         }
@@ -702,7 +749,8 @@ export default function ViewPost({ navigation }) {
         Toast.show({
           type: 'error',
           text1: '사용자를 차단하지 못했습니다.',
-          text2: `${error}`
+          text2: `${error}`,
+          position: 'bottom',
         })
       })
   }
@@ -764,9 +812,9 @@ export default function ViewPost({ navigation }) {
   }, [isFocused])
 
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#ffffff' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' },]}>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
       {/* 이미지뷰어 */}
-      <ImageViewer imageData={imageViewerData} imageInfo={imageViewerInfo} visible={imageViewerState} onClose={() => closeImageViewer()} />
+      < ImageViewer imageData={imageViewerData} imageInfo={imageViewerInfo} visible={imageViewerState} onClose={() => closeImageViewer()} />
       {/* 더보기 모달 */}
       <SeeMoreModal reporterUserID={reporterUserID} contentType={contentType} contentData={contentData} openReportModal={openReportSelectModal} handleBlockedUser={handleBlockedUser} handelDeletePost={() => handelDeletePost(contentData)} handleDeleteComment={() => handleDeleteComment(contentData)} handleDeleteReplies={() => handleDeleteReplies(contentData)} isDarkMode={isDarkMode} visible={seeMoreModalState} onClose={() => closeSeeMoreModal()} />
       {/* 신고 모달 */}
@@ -777,7 +825,7 @@ export default function ViewPost({ navigation }) {
       {/* 로고 */}
       <View style={styles.logoView}>
         <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
-          <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' },]}>
+          <Text style={{ ...styles.logoText, color: isDarkMode ? '#ffffff' : '#000000', }}>
             {<Icon_Ionicons name="chevron-back-outline" size={21} />} {Title == null ? '게시글' : Title}
           </Text>
         </TouchableOpacity>
@@ -788,237 +836,239 @@ export default function ViewPost({ navigation }) {
         }
       </View>
 
-      {postsType === null ?
-        <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
-          <ActivityIndicator size="large" color="green" />
-        </View>
-        :
-        <>
-          {postsType === 0 &&
-            <View style={{ ...StyleSheet.absoluteFillObject, ...styles.MessageContainer, }}>
-              <Text style={[{ ...styles.Message, color: '#666666', }, isDarkMode && { ...styles.Message, color: '#999999', },]}>게시글을 불러올 수 없어요.</Text>
+      {
+        postsType === null ?
+          <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
+            <ActivityIndicator size="large" color="green" />
+          </View>
+          :
+          <>
+            {postsType === 0 &&
+              <View style={{ ...styles.MessageContainer, flex: 1, }}>
+                <Text style={{ ...styles.Message, color: isDarkMode ? '#999999' : '#666666', }}>게시글을 불러올 수 없어요.</Text>
 
-              <View style={{ ...StyleSheet.absoluteFillObject, ...styles.refresBtnContainer, }}>
-                <TouchableOpacity onPress={() => { handleRefresh() }} style={{ ...styles.refresBtn, }}>
-                  <Text style={{ textAlign: 'center', color: '#ffffff', }}>다시시도</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          }
-          {postsType === 1 &&
-            <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />} style={[{ ...styles.scrollContainer, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.scrollContainer, backgroundColor: '#000000', }]}>
-              {/* 제목 */}
-              <Text style={[{ ...styles.PostTitle, color: '#000000', }, isDarkMode && { ...styles.PostTitle, color: '#ffffff', }]}>{postsData[0].title}</Text>
-
-              {/* 프로필 정보 */}
-              <Text style={[{ ...styles.PostTitleFooter, color: '#666666', }, isDarkMode && { ...styles.PostTitleFooter, color: '#666666', }]}>{postsData[0].category === 'board-Anonymous' ? '익명' : postsData[0].author} {(postsData[0].date).substr(11, 5)} 조회{postsData[0].views}</Text>
-
-              {/* 게시글 내용 */}
-              <Text style={[{ ...styles.PostContent, color: '#000000', }, isDarkMode && { ...styles.PostContent, color: '#ffffff', }]}>{postsData[0].content}</Text>
-
-              {/* 이미지 */}
-              {postsData.imageData &&
-                <View style={[{ ...styles.PostImageContainer, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.PostImageContainer, backgroundColor: '#121212', }]}>
-                  <ScrollView horizontal>
-                    {(postsData.imageData).map((image, index) => (
-                      <TouchableOpacity key={index} onPress={() => { openImageViewer(`data:${JSON.parse(postsData.imageInfo)[index].type};base64,${image}`, JSON.parse(postsData.imageInfo)[index]) }}>
-                        <FastImage key={index} source={{ uri: `data:${JSON.parse(postsData.imageInfo)[index].type};base64,${image}` }} style={{ width: 150, height: 150, marginRight: 15, borderRadius: 10, }} />
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
+                <View style={{ ...styles.refresBtnContainer, }}>
+                  <TouchableOpacity onPress={() => handleRefresh()} style={{ ...styles.refresBtn, }}>
+                    <Text style={{ textAlign: 'center', color: '#ffffff', }}>다시시도</Text>
+                  </TouchableOpacity>
                 </View>
-              }
+              </View>
+            }
+            {postsType === 1 &&
+              <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />} style={[{ ...styles.scrollContainer, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.scrollContainer, backgroundColor: '#000000', }]}>
+                {/* 제목 */}
+                <Text style={{ ...styles.PostTitle, color: isDarkMode ? '#ffffff' : '#000000', }}>{postsData[0].title}</Text>
 
-              {/* 댓글 */}
-              <View style={[{ ...styles.CommentsContainer, backgroundColor: '#f2f4f6', }, isDarkMode && { ...styles.CommentsContainer, backgroundColor: '#121212', }]}>
-                {commentsType === null || repliesType === null ?
-                  <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
-                    <ActivityIndicator size={20} color="blue" />
+                {/* 프로필 정보 */}
+                <Text style={{ ...styles.PostTitleFooter, color: isDarkMode ? '#666666' : '#666666', }}>
+                  <View style={{ width: 30, height: 15, borderRadius: 3, top: 7, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: postsData[0].studentID.substr(2, 1) == '1' || postsData[0].studentID.substr(2, 1) == '2' ? '#82FA58' : postsData[0].studentID.substr(2, 1) == '3' || postsData[0].studentID.substr(2, 1) == '4' ? '#2E9AFE' : postsData[0].studentID.substr(2, 1) == '5' || postsData[0].studentID.substr(2, 1) == '6' ? '#FA58F4' : postsData[0].studentID.substr(2, 1) == '7' || postsData[0].studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
+                    <Text style={{ fontSize: 10, fontWeight: '400', color: '#000000' }}>{postsData[0].studentID.substr(0, 1)}학년</Text>
                   </View>
-                  :
-                  <>
-                    {commentsType === 0 || repliesType === 0 ?
-                      <View style={{ ...styles.MessageContainer, }}>
-                        <Text style={[{ marginTop: 10, fontSize: 15, color: '#666666', }, isDarkMode && { marginTop: 10, fontSize: 15, color: '#999999', }]}>댓글을 불러올 수 없어요.</Text>
+                  {'  '}{postsData[0].author} {(postsData[0].date).substr(11, 5)} 조회{postsData[0].views}
+                </Text>
 
-                        <View style={{ ...styles.refresBtnContainer, marginTop: 20, marginBottom: 1, justifyContent: 'flex-end', }}>
-                          <TouchableOpacity onPress={() => { handleRefresh() }} style={{ ...styles.refresBtn, width: 80, height: 40, }}>
-                            <Text style={{ textAlign: 'center', color: '#ffffff', }}>다시시도</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                      :
-                      <>
-                        {commentsType === 1 && repliesType === 1 ?
-                          <>
-                            {/* 댓글달기 */}
-                            <TouchableOpacity style={[{ ...styles.CommentsReplyContainer, backgroundColor: '#DCDCDC' }, isDarkMode && { ...styles.CommentsReplyContainer, backgroundColor: '#808080' }]} onPress={() => navigation.navigate('Community_WriteComments', { postID: postID, category: postsData[0].category, })}>
-                              <Text style={[{ ...styles.CommentsReplyText, color: '#666666' }, isDarkMode && { ...styles.CommentsReplyText, color: '#FFFFFF' }]}>댓글 남기기</Text>
+                {/* 게시글 내용 */}
+                <Text style={{ ...styles.PostContent, color: isDarkMode ? '#ffffff' : '#000000', }}>{postsData[0].content}</Text>
+
+                {/* 이미지 */}
+                {postsData.imageData &&
+                  <View style={{ ...styles.PostImageContainer, backgroundColor: isDarkMode ? '#121212' : '#f2f4f6', }}>
+                    <ScrollView horizontal>
+                      {(postsData.imageData).map((image, index) => (
+                        <View key={index}>
+                          {JSON.parse(postsData.imageInfo)[index] ?
+                            <TouchableOpacity onPress={() => { openImageViewer(`data:${JSON.parse(postsData.imageInfo)[index].type};base64,${image}`, JSON.parse(postsData.imageInfo)[index]) }}>
+                              <FastImage source={{ uri: `data:${JSON.parse(postsData.imageInfo)[index].type};base64,${image}` }} style={{ width: 150, height: 150, marginRight: 15, borderRadius: 10, }} />
                             </TouchableOpacity>
+                            :
+                            <View style={{ width: 150, height: 150, marginRight: 15, borderRadius: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: '#DCDCDC', }} >
+                              <Text style={{ color: isDarkMode ? '#ffffff' : '#000000', }}>미디어를 표시하지 못했어요.</Text>
+                            </View>
+                          }
+                        </View>
+                      )
+                      )}
+                    </ScrollView>
+                  </View>
+                }
 
-                            {commentsData.length != 0 &&
-                              <>
-                                <TouchableOpacity onPress={() => navigation.navigate('Community_WriteComments', { postID: postID, category: postsData[0].category, })}>
-                                  <Text style={[{ ...styles.CommentsLengthText, color: '#000000' }, isDarkMode && { ...styles.CommentsLengthText, color: '#ffffff' }]}>댓글 {commentsData === null ? '0' : commentsData.length} {<Icon_Ionicons name='chevron-forward-outline' size={17} />}</Text>
-                                </TouchableOpacity>
+                {/* 댓글 */}
+                <View style={{ ...styles.CommentsContainer, backgroundColor: isDarkMode ? '#121212' : '#f2f4f6', }}>
+                  {commentsType === null || repliesType === null ?
+                    <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
+                      <ActivityIndicator size={20} color="blue" />
+                    </View>
+                    :
+                    <>
+                      {commentsType === 0 || repliesType === 0 ?
+                        <View style={{ ...styles.MessageContainer, }}>
+                          <Text style={{ marginTop: 10, fontSize: 15, color: isDarkMode ? '#999999' : '#666666', }}>댓글을 불러올 수 없어요.</Text>
 
-                                {commentsData.map((data) => {
-                                  return (
-                                    <View key={data.id} style={{ flex: 1, marginTop: 20 }}>
-                                      {/* 아이콘 */}
-                                      <View style={{ position: 'absolute' }}>
-                                        <View style={{ width: 40, height: 40, left: 7, borderRadius: 25, backgroundColor: '#C0C0C0', position: 'absolute' }}></View>
-                                        <Icon_Feather name='user' size={20} style={{ left: 17, top: 8, borderRadius: 25, color: 'black', position: 'absolute' }} />
-                                      </View>
+                          <View style={{ ...styles.refresBtnContainer, marginTop: 20, marginBottom: 1, justifyContent: 'flex-end', }}>
+                            <TouchableOpacity onPress={() => handleRefresh()} style={{ ...styles.refresBtn, width: 80, height: 40, }}>
+                              <Text style={{ textAlign: 'center', color: '#ffffff', }}>다시시도</Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                        :
+                        <>
+                          {commentsType === 1 && repliesType === 1 ?
+                            <>
+                              {/* 댓글달기 */}
+                              <TouchableOpacity style={{ ...styles.CommentsReplyContainer, backgroundColor: isDarkMode ? '#808080' : '#DCDCDC', }} onPress={() => navigation.navigate('Community_WriteComments', { postID: postID, category: postsData[0].category, })}>
+                                <Text style={{ ...styles.CommentsReplyText, color: isDarkMode ? '#ffffff' : '#666666', }}>댓글 남기기</Text>
+                              </TouchableOpacity>
 
-                                      {/* 댓글 모달 */}
-                                      <TouchableOpacity onPress={() => openSeeMoreModal(data, 'Comment')} style={{ zIndex: 999, position: 'absolute', right: 10, }}>
-                                        <Icon_Feather color={isDarkMode ? '#ffffff' : '#000000'} name="more-vertical" size={20} />
-                                      </TouchableOpacity>
+                              {commentsData.length != 0 &&
+                                <>
+                                  <TouchableOpacity onPress={() => navigation.navigate('Community_WriteComments', { postID: postID, category: postsData[0].category, })}>
+                                    <Text style={{ ...styles.CommentsLengthText, color: isDarkMode ? '#ffffff' : '#000000', }}>댓글 {commentsData === null ? '0' : commentsData.length} {<Icon_Ionicons name='chevron-forward-outline' size={17} />}</Text>
+                                  </TouchableOpacity>
 
-                                      <View>
-                                        {/* 사용자ID */}
-                                        <Text style={[{ ...styles.CommentsAuthorText, color: '#000000' }, isDarkMode && { ...styles.CommentsAuthorText, color: '#ffffff' }]}>{postsData[0].category === 'board-Anonymous' ? '익명' : data.author}</Text>
-                                        {/* 댓글만 존재 */}
-                                        {data.content != null && !data.image &&
-                                          <Text style={[{ ...styles.CommentsContentText, color: '#000000' }, isDarkMode && { ...styles.CommentsContentText, color: '#ffffff' }]}>{data.content}</Text>
-                                        }
-                                        {/* 이미지만 존재 */}
-                                        {data.content === null && data.image &&
-                                          <>
-                                            <Text style={[{ ...styles.CommentsContentText, color: '#000000' }, isDarkMode && { ...styles.CommentsContentText, color: '#ffffff' }]}>{data.content}</Text>
-                                            <TouchableOpacity onPress={() => { openImageViewer(`data:${JSON.parse(data.image_Info).type};base64,${data.image}`, JSON.parse(data.image_Info)) }}>
-                                              <FastImage
-                                                style={{ maxWidth: 250, width: JSON.parse(data.image_Info).width / 6, height: JSON.parse(data.image_Info).height / 12, left: 58, marginBottom: 5, }}
-                                                source={{
-                                                  uri: `data:${JSON.parse(data.image_Info).type};base64,${data.image}`, // 또는 require()로 local 이미지 사용 가능
-                                                  priority: FastImage.priority.normal, // 다운로드 우선순위 설정 (optional)
-                                                }}
-                                              //resizeMode={FastImage.resizeMode.contain} // 이미지 크기 조절 방식 설정 (optional)
-                                              />
-                                            </TouchableOpacity>
-                                          </>
-                                        }
-                                        {/* 댓글, 이미지 존재 */}
-                                        {data.content != null && data.image &&
-                                          <>
-                                            <Text style={[{ ...styles.CommentsContentText, color: '#000000' }, isDarkMode && { ...styles.CommentsContentText, color: '#ffffff' }]}>{data.content}</Text>
-                                            <TouchableOpacity style={{ marginTop: 7, }} onPress={() => { openImageViewer(`data:${JSON.parse(data.image_Info).type};base64,${data.image}`, JSON.parse(data.image_Info)) }}>
-                                              <FastImage
-                                                style={{ maxWidth: 250, width: JSON.parse(data.image_Info).width / 6, height: JSON.parse(data.image_Info).height / 6, left: 58, marginBottom: 5, }}
-                                                source={{
-                                                  uri: `data:${JSON.parse(data.image_Info).type};base64,${data.image}`, // 또는 require()로 local 이미지 사용 가능
-                                                  priority: FastImage.priority.normal, // 다운로드 우선순위 설정 (optional)
-                                                }}
-                                              //resizeMode={FastImage.resizeMode.contain} // 이미지 크기 조절 방식 설정 (optional)
-                                              />
-                                            </TouchableOpacity>
-                                          </>
-                                        }
-
-                                        {/* 작성 시간 */}
-                                        <View>
-                                          <Text key={data.id} style={[{ ...styles.CommentsDateText, color: '#000000' }, isDarkMode && { ...styles.CommentsDateText, color: '#ffffff' }]}>{data.date.substring(0, 10)} {data.date.substring(11, 19)}</Text>
-                                          <TouchableOpacity style={{ position: 'absolute', marginLeft: 165, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
-                                            <Text style={[{ ...styles.RepliesButtonText, color: '#000000', }, isDarkMode && { ...styles.RepliesButtonText, color: '#ffffff' }]}>  답글쓰기</Text>
-                                          </TouchableOpacity>
+                                  {commentsData.map((data) => {
+                                    return (
+                                      <View key={data.id} style={{ flex: 1, marginTop: 20 }}>
+                                        {/* 아이콘 */}
+                                        <View style={{ position: 'absolute' }}>
+                                          <View style={{ width: 40, height: 40, left: 7, borderRadius: 25, backgroundColor: '#C0C0C0', position: 'absolute' }}></View>
+                                          <Icon_Feather name='user' size={20} style={{ left: 17, top: 8, borderRadius: 25, color: 'black', position: 'absolute' }} />
                                         </View>
-                                      </View>
 
-                                      <View style={{ marginBottom: 15 }}></View>
+                                        {/* 댓글 모달 */}
+                                        <TouchableOpacity onPress={() => openSeeMoreModal(data, 'Comment')} style={{ zIndex: 999, position: 'absolute', right: 10, }}>
+                                          <Icon_Feather color={isDarkMode ? '#ffffff' : '#000000'} name="more-vertical" size={20} />
+                                        </TouchableOpacity>
 
-                                      {/* 대댓글 */}
-                                      {repliesData.length != 0 &&
-                                        <>
-                                          {repliesData.map((_data) => {
-                                            if (data.id === _data.comments_id) {
-                                              return (
-                                                <View key={_data.id} style={{ flex: 1 }}>
-                                                  {/* 아이콘 */}
-                                                  <View>
-                                                    <View style={{ width: 30, height: 30, left: 37, borderRadius: 25, backgroundColor: '#C0C0C0', position: 'absolute' }}></View>
-                                                    <Icon_Feather name='user' size={15} style={{ left: 45, top: 7, borderRadius: 25, color: 'black', position: 'absolute' }} />
-                                                  </View>
+                                        <View>
+                                          {/* 사용자ID */}
+                                          <Text style={{ ...styles.CommentsAuthorText, color: isDarkMode ? '#ffffff' : '#000000', }}>
+                                            <View style={{ width: 30, height: 15, borderRadius: 3, top: 7, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: data.studentID.substr(2, 1) == '1' || data.studentID.substr(2, 1) == '2' ? '#82FA58' : data.studentID.substr(2, 1) == '3' || data.studentID.substr(2, 1) == '4' ? '#2E9AFE' : data.studentID.substr(2, 1) == '5' || data.studentID.substr(2, 1) == '6' ? '#FA58F4' : data.studentID.substr(2, 1) == '7' || data.studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
+                                              <Text style={{ fontSize: 10, fontWeight: '400', color: '#000000' }}>{data.studentID.substr(0, 1)}학년</Text>
+                                            </View>
+                                            {' '}{data.author}
+                                          </Text>
+                                          {/* 댓글 존재 */}
+                                          {data.content &&
+                                            <Text style={{ ...styles.CommentsContentText, color: isDarkMode ? '#ffffff' : '#000000', }}>{data.content}</Text>
+                                          }
+                                          {/* 이미지 존재 */}
+                                          {data.image &&
+                                            <>
+                                              {JSON.parse(data.image_Info) && data.image ?
+                                                <TouchableOpacity style={{ marginTop: 28, }} onPress={() => { openImageViewer(`data:${JSON.parse(data.image_Info).type};base64,${data.image}`, JSON.parse(data.image_Info)) }}>
+                                                  <FastImage
+                                                    style={{ maxWidth: 250, width: JSON.parse(data.image_Info).width / 6, height: JSON.parse(data.image_Info).height / 12, left: 58, marginBottom: 5, }}
+                                                    source={{
+                                                      uri: `data:${JSON.parse(data.image_Info).type};base64,${data.image}`, // 또는 require()로 local 이미지 사용 가능
+                                                      priority: FastImage.priority.normal, // 다운로드 우선순위 설정 (optional)
+                                                    }}
+                                                  //resizeMode={FastImage.resizeMode.contain} // 이미지 크기 조절 방식 설정 (optional)
+                                                  />
+                                                </TouchableOpacity>
+                                                :
+                                                <View style={{ maxWidth: 250, width: 200, height: 150, left: 58, marginBottom: 5, justifyContent: 'center', alignItems: 'center', }}>
+                                                  <Text style={{ color: isDarkMode ? '#ffffff' : '#000000', }}>미디어를 표시하지 못했어요.</Text>
+                                                </View>
+                                              }
+                                            </>
+                                          }
 
-                                                  {/* 댓글 모달 */}
-                                                  <TouchableOpacity onPress={() => openSeeMoreModal(_data, 'Reply')} style={{ zIndex: 999, position: 'absolute', right: 10, }}>
-                                                    <Icon_Feather color={isDarkMode ? '#ffffff' : '#000000'} name="more-vertical" size={20} />
-                                                  </TouchableOpacity>
+                                          {/* 작성 시간 */}
+                                          <View>
+                                            <Text key={data.id} style={{ ...styles.CommentsDateText, color: isDarkMode ? '#ffffff' : '#000000', }}>{data.date.substring(0, 10)} {data.date.substring(11, 19)}</Text>
+                                            <TouchableOpacity style={{ position: 'absolute', marginLeft: 165, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
+                                              <Text style={{ ...styles.RepliesButtonText, color: isDarkMode ? '#ffffff' : '#000000', }}>  답글쓰기</Text>
+                                            </TouchableOpacity>
+                                          </View>
+                                        </View>
 
-                                                  {/* 답글 */}
-                                                  <View style={{ marginBottom: 13, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID, category: postsData[0].category })}>
-                                                    {/* 사용자ID */}
-                                                    <Text style={[{ ...styles.RepliesAuthorText, color: '#000000' }, isDarkMode && { ...styles.RepliesAuthorText, color: '#ffffff' }]}>{postsData[0].category === 'board-Anonymous' ? '익명' : _data.author}</Text>
-                                                    {/* 댓글만 존재 */}
-                                                    {_data.content != null && !_data.image &&
-                                                      <Text style={[{ ...styles.RepliesContentText, color: '#000000' }, isDarkMode && { ...styles.RepliesContentText, color: '#ffffff' }]}>{_data.content}</Text>
-                                                    }
-                                                    {/* 이미지만 존재 */}
-                                                    {_data.content === null && _data.image &&
-                                                      <>
-                                                        <Text style={[{ ...styles.RepliesContentText, color: '#000000' }, isDarkMode && { ...styles.RepliesContentText, color: '#ffffff' }]}>{_data.content}</Text>
-                                                        <TouchableOpacity onPress={() => { openImageViewer(`data:${JSON.parse(_data.image_Info).type};base64,${_data.image}`, JSON.parse(_data.image_Info)) }}>
-                                                          <FastImage
-                                                            style={{ maxWidth: 230, width: JSON.parse(_data.image_Info).width / 6, height: JSON.parse(_data.image_Info).height / 6, left: 78, marginBottom: 5, }}
-                                                            source={{
-                                                              uri: `data:${JSON.parse(_data.image_Info).type};base64,${_data.image}`, // 또는 require()로 local 이미지 사용 가능
-                                                              priority: FastImage.priority.normal, // 다운로드 우선순위 설정 (optional)
-                                                            }}
-                                                          //resizeMode={FastImage.resizeMode.contain} // 이미지 크기 조절 방식 설정 (optional)
-                                                          />
-                                                        </TouchableOpacity>
-                                                      </>
-                                                    }
-                                                    {/* 댓글, 이미지 존재 */}
-                                                    {_data.content != null && _data.image &&
-                                                      <>
-                                                        <Text style={[{ ...styles.RepliesContentText, color: '#000000' }, isDarkMode && { ...styles.RepliesContentText, color: '#ffffff' }]}>{_data.content}</Text>
-                                                        <TouchableOpacity style={{ marginTop: 7, }} onPress={() => { openImageViewer(`data:${JSON.parse(_data.image_Info).type};base64,${_data.image}`, JSON.parse(_data.image_Info)) }}>
-                                                          <FastImage
-                                                            style={{ maxWidth: 230, width: JSON.parse(_data.image_Info).width / 6, height: JSON.parse(_data.image_Info).height / 6, left: 78, marginBottom: 5, }}
-                                                            source={{
-                                                              uri: `data:${JSON.parse(_data.image_Info).type};base64,${_data.image}`, // 또는 require()로 local 이미지 사용 가능
-                                                              priority: FastImage.priority.normal, // 다운로드 우선순위 설정 (optional)
-                                                            }}
-                                                          //resizeMode={FastImage.resizeMode.contain} // 이미지 크기 조절 방식 설정 (optional)
-                                                          />
-                                                        </TouchableOpacity>
-                                                      </>
-                                                    }
+                                        <View style={{ marginBottom: 15 }}></View>
 
-                                                    {/* 작성 시간 */}
+                                        {/* 대댓글 */}
+                                        {repliesData.length != 0 &&
+                                          <>
+                                            {repliesData.map((_data) => {
+                                              if (data.id === _data.comments_id) {
+                                                return (
+                                                  <View key={_data.id} style={{ flex: 1 }}>
+                                                    {/* 아이콘 */}
                                                     <View>
-                                                      <Text key={data.id} style={[{ ...styles.RepliesDateText, color: '#000000' }, isDarkMode && { ...styles.RepliesDateText, color: '#ffffff' }]}>{data.date.substring(0, 10)} {data.date.substring(11, 19)}</Text>
-                                                      <TouchableOpacity style={{ position: 'absolute', marginLeft: 175, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
-                                                        <Text style={[{ ...styles.RepliesButtonText, color: '#000000', }, isDarkMode && { ...styles.RepliesButtonText, color: '#ffffff' }]}>  답글쓰기</Text>
-                                                      </TouchableOpacity>
+                                                      <View style={{ width: 30, height: 30, left: 37, borderRadius: 25, backgroundColor: '#C0C0C0', position: 'absolute' }}></View>
+                                                      <Icon_Feather name='user' size={15} style={{ left: 45, top: 7, borderRadius: 25, color: 'black', position: 'absolute' }} />
+                                                    </View>
+
+                                                    {/* 댓글 모달 */}
+                                                    <TouchableOpacity onPress={() => openSeeMoreModal(_data, 'Reply')} style={{ zIndex: 999, position: 'absolute', right: 10, }}>
+                                                      <Icon_Feather color={isDarkMode ? '#ffffff' : '#000000'} name="more-vertical" size={20} />
+                                                    </TouchableOpacity>
+
+                                                    {/* 답글 */}
+                                                    <View style={{ marginBottom: 13, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID, category: postsData[0].category })}>
+                                                      {/* 사용자ID */}
+                                                      <Text style={{ ...styles.RepliesAuthorText, color: isDarkMode ? '#ffffff' : '#000000', }}>
+                                                        <View style={{ width: 30, height: 15, borderRadius: 3, top: 7, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: _data.studentID.substr(2, 1) == '1' || _data.studentID.substr(2, 1) == '2' ? '#82FA58' : _data.studentID.substr(2, 1) == '3' || _data.studentID.substr(2, 1) == '4' ? '#2E9AFE' : _data.studentID.substr(2, 1) == '5' || _data.studentID.substr(2, 1) == '6' ? '#FA58F4' : _data.studentID.substr(2, 1) == '7' || _data.studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
+                                                          <Text style={{ fontSize: 10, fontWeight: '400', color: '#000000' }}>{_data.studentID.substr(0, 1)}학년</Text>
+                                                        </View>
+                                                        {' '}{_data.author}</Text>
+                                                      {/* 댓글 존재 */}
+                                                      {_data.content &&
+                                                        <Text style={{ ...styles.RepliesContentText, color: isDarkMode ? '#ffffff' : '#000000', }}>{_data.content}</Text>
+                                                      }
+                                                      {/* 이미지 존재 */}
+                                                      {_data.image &&
+                                                        <>
+                                                          {JSON.parse(_data.image_Info) && _data.image ?
+                                                            <TouchableOpacity style={{ marginTop: 28, }} onPress={() => { openImageViewer(`data:${JSON.parse(_data.image_Info).type};base64,${_data.image}`, JSON.parse(_data.image_Info)) }}>
+                                                              <FastImage
+                                                                style={{ maxWidth: 230, width: JSON.parse(_data.image_Info).width / 6, height: JSON.parse(_data.image_Info).height / 6, left: 78, marginBottom: 5, }}
+                                                                source={{
+                                                                  uri: `data:${JSON.parse(_data.image_Info).type};base64,${_data.image}`, // 또는 require()로 local 이미지 사용 가능
+                                                                  priority: FastImage.priority.normal, // 다운로드 우선순위 설정 (optional)
+                                                                }}
+                                                              //resizeMode={FastImage.resizeMode.contain} // 이미지 크기 조절 방식 설정 (optional)
+                                                              />
+                                                            </TouchableOpacity>
+                                                            :
+                                                            <View style={{ maxWidth: 250, width: 200, height: 150, left: 58, marginBottom: 5, justifyContent: 'center', alignItems: 'center', }}>
+                                                              <Text style={{ color: isDarkMode ? '#ffffff' : '#000000', }}>미디어를 표시하지 못했어요.</Text>
+                                                            </View>
+                                                          }
+                                                        </>
+                                                      }
+
+                                                      {/* 작성 시간 */}
+                                                      <View>
+                                                        <Text key={data.id} style={{ ...styles.RepliesDateText, color: isDarkMode ? '#ffffff' : '#000000', }}>{data.date.substring(0, 10)} {data.date.substring(11, 19)}</Text>
+                                                        <TouchableOpacity style={{ position: 'absolute', marginLeft: 175, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
+                                                          <Text style={{ ...styles.RepliesButtonText, color: isDarkMode ? '#ffffff' : '#000000', }}>  답글쓰기</Text>
+                                                        </TouchableOpacity>
+                                                      </View>
                                                     </View>
                                                   </View>
-                                                </View>
-                                              )
-                                            }
-                                          })}
-                                        </>
-                                      }
-                                    </View>
-                                  )
-                                })}
-                              </>
-                            }
-                          </>
-                          :
-                          null
-                        }
-                      </>
-                    }
-                  </>
-                }
-              </View>
-            </ScrollView>
-          }
-        </>
+                                                )
+                                              }
+                                            })}
+                                          </>
+                                        }
+                                      </View>
+                                    )
+                                  })}
+                                </>
+                              }
+                            </>
+                            :
+                            null
+                          }
+                        </>
+                      }
+                    </>
+                  }
+                </View>
+              </ScrollView>
+            }
+          </>
       }
-    </SafeAreaView>
+    </SafeAreaView >
   )
 }
 
@@ -1057,6 +1107,7 @@ const styles = StyleSheet.create({
   },
   refresBtnContainer: {
     flex: 1,
+    width: 400,
     justifyContent: 'flex-end',
     alignItems: 'center',
     marginBottom: 100,

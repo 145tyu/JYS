@@ -1,6 +1,6 @@
 {
   "name": "JYS",
-  "version": "1.6.19",
+  "version": "1.7.1",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -23,7 +23,9 @@
     "react-native-animated-splash-screen": "^2.0.5",
     "react-native-date-picker": "^4.2.13",
     "react-native-device-info": "^10.8.0",
+    "react-native-document-picker": "^9.0.1",
     "react-native-fast-image": "^8.6.3",
+    "react-native-image-crop-picker": "^0.40.2",
     "react-native-image-picker": "^5.6.0",
     "react-native-permissions": "^3.8.3",
     "react-native-safe-area-context": "^4.6.4",

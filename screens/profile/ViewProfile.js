@@ -227,6 +227,16 @@ export default function ViewProfile({ navigation }) {
                     </TouchableOpacity>
                   </View>
                 </>
+                {/* 커뮤니티 */}
+                <>
+                  <Text style={styles.InfoTopText}>커뮤니티</Text>
+                  <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'community_nickname', nickname: profileData.nickname })}>
+                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>닉네임</Text>
+                      <Text style={styles.Value}>{profileData.nickname ? profileData.nickname : '닉네임을 설정해주세요.'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
                 {/* 계정 */}
                 <>
                   <Text style={styles.InfoTopText}>계정</Text>

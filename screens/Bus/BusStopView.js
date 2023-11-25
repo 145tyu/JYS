@@ -110,6 +110,7 @@ export default function BusStopView({ navigation }) {
                 type: 'error',
                 text1: '데이터를 추가하거나 삭제하지 못했습니다.',
                 text2: `${error}`,
+                position: 'bottom',
               })
             })
         } else {
@@ -134,6 +135,7 @@ export default function BusStopView({ navigation }) {
           type: 'error',
           text1: '데이터를 추가하지 못했습니다.',
           text2: `${error}`,
+          position: 'bottom',
         })
       })
   }
@@ -158,11 +160,14 @@ export default function BusStopView({ navigation }) {
               type: 'error',
               text1: `${res.data.errorDescription}`,
               text2: `${res.data.error}`,
+              position: 'bottom',
             })
           } else {
             Toast.show({
               type: 'error',
               text1: '서버와 연결할 수 없습니다.',
+              text2: '오류가 지속될 경우 정류장을 다시 검색해 주세요.',
+              position: 'bottom',
             })
           }
         } else {
@@ -170,6 +175,7 @@ export default function BusStopView({ navigation }) {
             type: 'error',
             text1: '서버와 연결할 수 없습니다.',
             text2: `${error}`,
+            position: 'bottom',
           })
         }
       })
@@ -269,17 +275,23 @@ export default function BusStopView({ navigation }) {
         <>
           <ScrollView style={{ flex: 1, }}>
             {(BusStopData.data).map((data, index) => {
-              const direction = (data.direction).substr(0, data.direction.length - 2).length >= 10 ? `${(data.direction).substr(0, 9)}...` : `${(data.direction).substr(0, data.direction.length - 2)} 방향`
+              const direction = (data.direction).substr(0, data.direction.length - 2).length >= 10 ? `${(data.direction).substr(0, 9)}...` : `${(data.direction).substr(0, data.direction.length - 2)} 방면`
               const currentLocation = (data.currentLocation).substring((data.currentLocation).lastIndexOf('(') + 1, (data.currentLocation).lastIndexOf(')'))
               return (
-                <View key={index}>
-                  <View style={{ width: '100%', height: 0.5, backgroundColor: '#999999' }}></View>
+                <View key={index} style={{ width: '100%', height: 70, borderTopWidth: 0.3, borderBottomWidth: 0.5, borderTopColor: '#999999', borderBottomColor: '#999999', }}>
                   <View style={{ flexDirection: 'row', width: '100%', height: 70, paddingLeft: 10, alignItems: 'center', backgroundColor: isDarkMode ? '#000000' : '#ffffff' }}>
-                    <Text style={{ left: 10, marginBottom: 7, fontWeight: '400', position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>
-                      {data.busNumber}번 {'('}{direction}{')'}
+                    <Text style={{ left: 10, top: 25, fontSize: 13, fontWeight: '400', position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>
+                      {data.busNumber}번 {
+                        <Text style={{ fontSize: 12, fontWeight: '200', }}>
+                          {'('}{direction}{')'}
+                        </Text>
+                      }
                     </Text>
-                    <Text style={{ right: 10, marginBottom: 7, fontWeight: '500', position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>
-                      {data.arrivalTime} {currentLocation ? `[${currentLocation}]` : null}
+                    <Text style={{ right: 10, marginBottom: 7, fontSize: 13, fontWeight: '500', position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>
+                      {data.arrivalTime}{currentLocation ? ` [${currentLocation}]` : null}
+                    </Text>
+                    <Text style={{ right: 10, bottom: 8, fontSize: 10, fontWeight: '300', position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>
+                      {currentLocation ? `${data.estimatedArrivalTime} 도착 예정` : null}
                     </Text>
                   </View>
                   {/* 마지막에 선 추가 */}
@@ -289,6 +301,8 @@ export default function BusStopView({ navigation }) {
                 </View>
               )
             })}
+            {/* 화면 늘리기 */}
+            <View style={{ marginBottom: 100,}}></View>
           </ScrollView>
         </>
       }
