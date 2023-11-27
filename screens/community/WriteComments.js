@@ -937,11 +937,14 @@ export default function WriteComments({ navigation }) {
 
                                 <View>
                                   {/* 사용자ID */}
-                                  <Text style={{ ...styles.CommentsAuthorText, color: isDarkMode ? '#ffffff' : '#000000', }}>
-                                    <View style={{ width: 30, height: 15, borderRadius: 3, top: 7, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: data.studentID.substr(2, 1) == '1' || data.studentID.substr(2, 1) == '2' ? '#82FA58' : data.studentID.substr(2, 1) == '3' || data.studentID.substr(2, 1) == '4' ? '#2E9AFE' : data.studentID.substr(2, 1) == '5' || data.studentID.substr(2, 1) == '6' ? '#FA58F4' : data.studentID.substr(2, 1) == '7' || data.studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
+                                  <View style={{ marginLeft: 58, flexDirection: 'row', }}>
+                                    <View style={{ width: 30, height: 15, borderRadius: 3, justifyContent: 'center', alignItems: 'center', backgroundColor: data.studentID.substr(2, 1) == '1' || data.studentID.substr(2, 1) == '2' ? '#82FA58' : data.studentID.substr(2, 1) == '3' || data.studentID.substr(2, 1) == '4' ? '#2E9AFE' : data.studentID.substr(2, 1) == '5' || data.studentID.substr(2, 1) == '6' ? '#FA58F4' : data.studentID.substr(2, 1) == '7' || data.studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
                                       <Text style={{ fontSize: 10, fontWeight: '400', color: '#000000' }}>{data.studentID.substr(0, 1)}학년</Text>
                                     </View>
-                                    {' '}{data.author}</Text>
+                                    <Text style={{ fontSize: 13, fontWeight: 400, color: isDarkMode ? '#ffffff' : '#000000', }}>
+                                      {' '}{data.author}
+                                    </Text>
+                                  </View>
                                   {/* 댓글 존재 */}
                                   {data.content &&
                                     <Text style={{ ...styles.CommentsContentText, color: isDarkMode ? '#ffffff' : '#000000', }}>{data.content}</Text>
@@ -985,7 +988,7 @@ export default function WriteComments({ navigation }) {
                                     {repliesData.map((_data) => {
                                       if (data.id === _data.comments_id) {
                                         return (
-                                          <View key={_data.id} style={{ flex: 1 }}>
+                                          <View key={_data.id} style={{ flex: 1, }}>
                                             {/* 아이콘 */}
                                             <View>
                                               <View style={{ width: 30, height: 30, left: 37, borderRadius: 25, backgroundColor: '#C0C0C0', position: 'absolute' }}></View>
@@ -1000,12 +1003,14 @@ export default function WriteComments({ navigation }) {
                                             {/* 답글 */}
                                             <View key={data.id} style={{ marginBottom: 13, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
                                               {/* 사용자ID */}
-                                              <Text style={{ ...styles.RepliesAuthorText, color: isDarkMode ? '#ffffff' : '#000000', }}>
-                                                <View style={{ width: 30, height: 15, borderRadius: 3, top: 7, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: _data.studentID.substr(2, 1) == '1' || _data.studentID.substr(2, 1) == '2' ? '#82FA58' : _data.studentID.substr(2, 1) == '3' || _data.studentID.substr(2, 1) == '4' ? '#2E9AFE' : _data.studentID.substr(2, 1) == '5' || _data.studentID.substr(2, 1) == '6' ? '#FA58F4' : _data.studentID.substr(2, 1) == '7' || _data.studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
+                                              <View style={{ marginLeft: 78, flexDirection: 'row', }}>
+                                                <View style={{ width: 30, height: 15, borderRadius: 3, justifyContent: 'center', alignItems: 'center', backgroundColor: _data.studentID.substr(2, 1) == '1' || _data.studentID.substr(2, 1) == '2' ? '#82FA58' : _data.studentID.substr(2, 1) == '3' || _data.studentID.substr(2, 1) == '4' ? '#2E9AFE' : _data.studentID.substr(2, 1) == '5' || _data.studentID.substr(2, 1) == '6' ? '#FA58F4' : _data.studentID.substr(2, 1) == '7' || _data.studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
                                                   <Text style={{ fontSize: 10, fontWeight: '400', color: '#000000' }}>{_data.studentID.substr(0, 1)}학년</Text>
                                                 </View>
-                                                {' '}{_data.author}
-                                              </Text>
+                                                <Text style={{ fontSize: 13, fontWeight: 400, color: isDarkMode ? '#ffffff' : '#000000', }}>
+                                                  {' '}{_data.author}
+                                                </Text>
+                                              </View>
                                               {/* 댓글 존재 */}
                                               {_data.content &&
                                                 <Text style={{ ...styles.RepliesContentText, color: isDarkMode ? '#ffffff' : '#000000', }}>{_data.content}</Text>
@@ -1207,12 +1212,13 @@ const styles = StyleSheet.create({
   CommentsContentText: {
     paddingLeft: 58,
     paddingRight: 10,
-    marginTop: 23,
+    marginTop: 5,
     fontWeight: '800',
   },
   CommentsDateText: {
     paddingLeft: 58,
     paddingRight: 10,
+    marginTop: 3,
     fontWeight: '400',
     fontSize: 10,
   },
@@ -1230,13 +1236,13 @@ const styles = StyleSheet.create({
   RepliesContentText: {
     paddingLeft: 78,
     paddingRight: 30,
-    marginTop: 1,
+    marginTop: 5,
     fontWeight: '500',
     fontSize: 13,
   },
   RepliesDateText: {
     paddingLeft: 78,
-    marginTop: 1,
+    marginTop: 3,
     width: '100%',
     fontWeight: '400',
     fontSize: 9,

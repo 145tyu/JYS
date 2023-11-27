@@ -508,7 +508,7 @@
 				CODE_SIGN_ENTITLEMENTS = JYS/JYS.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 35;
+				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = MZ36LA43JJ;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = JYS/Info.plist;
@@ -517,7 +517,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6.18;
+				MARKETING_VERSION = 1.7.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -541,7 +541,7 @@
 				CODE_SIGN_ENTITLEMENTS = JYS/JYS.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 35;
+				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = MZ36LA43JJ;
 				INFOPLIST_FILE = JYS/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "영실커넥트";
@@ -549,7 +549,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6.18;
+				MARKETING_VERSION = 1.7.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

@@ -123,13 +123,13 @@ export default function StudentAllTab({ navigation }) {
                     <Text style={[{ ...styles.InfoTitle, color: '#000000', }, isDarkMode && { ...styles.InfoTitle, color: '#ffffff', }]}>{profileData.firstName + profileData.lastName}</Text>
                     <Text style={{ color: 'gray', fontSize: 12, fontWeight: 'normal', }}>계정ㆍ{profileData.email}</Text>
                     {/* 아이콘 */}
-                    <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: '#dcdcdc', top: 5, right: 5, position: 'absolute' }}></View>
-                    <Icon_Feather name='user' size={30} style={{ color: 'black', borderRadius: 25, top: 13, right: 15, position: 'absolute' }} />
+                    <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: '#dcdcdc', top: Platform.OS === 'android'? 5:-3, right: 5, position: 'absolute' }}></View>
+                    <Icon_Feather name='user' size={30} style={{ color: 'black', borderRadius: 25, top: Platform.OS === 'android'? 13: 5, right: 15, position: 'absolute' }} />
                   </TouchableOpacity>
                 }
                 {profileType === 2 &&
                   <TouchableOpacity onPress={() => handleGuestLogout()}>
-                    <Text style={[{ fontSize: 15, fontWeight: '600', color: '#000000' }, isDarkMode && { fontSize: 15, fontWeight: '600', color: '#ffffff' }]}>
+                    <Text style={{ fontSize: 15, fontWeight: '600', color: isDarkMode? '#ffffff':'#000000', }}>
                       여기를 눌러 로그인을 시도하세요.
                     </Text>
                   </TouchableOpacity>

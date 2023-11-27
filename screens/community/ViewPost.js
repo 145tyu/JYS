@@ -860,12 +860,14 @@ export default function ViewPost({ navigation }) {
                 <Text style={{ ...styles.PostTitle, color: isDarkMode ? '#ffffff' : '#000000', }}>{postsData[0].title}</Text>
 
                 {/* 프로필 정보 */}
-                <Text style={{ ...styles.PostTitleFooter, color: isDarkMode ? '#666666' : '#666666', }}>
-                  <View style={{ width: 30, height: 15, borderRadius: 3, top: 7, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: postsData[0].studentID.substr(2, 1) == '1' || postsData[0].studentID.substr(2, 1) == '2' ? '#82FA58' : postsData[0].studentID.substr(2, 1) == '3' || postsData[0].studentID.substr(2, 1) == '4' ? '#2E9AFE' : postsData[0].studentID.substr(2, 1) == '5' || postsData[0].studentID.substr(2, 1) == '6' ? '#FA58F4' : postsData[0].studentID.substr(2, 1) == '7' || postsData[0].studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
+                <View style={{ marginTop: 5, marginLeft: 16, flexDirection: 'row', }}>
+                  <View style={{ width: 30, height: 15, borderRadius: 3, justifyContent: 'center', alignItems: 'center', backgroundColor: postsData[0].studentID.substr(2, 1) == '1' || postsData[0].studentID.substr(2, 1) == '2' ? '#82FA58' : postsData[0].studentID.substr(2, 1) == '3' || postsData[0].studentID.substr(2, 1) == '4' ? '#2E9AFE' : postsData[0].studentID.substr(2, 1) == '5' || postsData[0].studentID.substr(2, 1) == '6' ? '#FA58F4' : postsData[0].studentID.substr(2, 1) == '7' || postsData[0].studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
                     <Text style={{ fontSize: 10, fontWeight: '400', color: '#000000' }}>{postsData[0].studentID.substr(0, 1)}학년</Text>
                   </View>
-                  {'  '}{postsData[0].author} {(postsData[0].date).substr(11, 5)} 조회{postsData[0].views}
-                </Text>
+                  <Text style={{ fontSize: 11, fontWeight: '500', color: '#666666', }}>
+                    {'  '}{postsData[0].author} {(postsData[0].date).substr(11, 5)} 조회{postsData[0].views}
+                  </Text>
+                </View>
 
                 {/* 게시글 내용 */}
                 <Text style={{ ...styles.PostContent, color: isDarkMode ? '#ffffff' : '#000000', }}>{postsData[0].content}</Text>
@@ -941,12 +943,14 @@ export default function ViewPost({ navigation }) {
 
                                         <View>
                                           {/* 사용자ID */}
-                                          <Text style={{ ...styles.CommentsAuthorText, color: isDarkMode ? '#ffffff' : '#000000', }}>
-                                            <View style={{ width: 30, height: 15, borderRadius: 3, top: 7, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: data.studentID.substr(2, 1) == '1' || data.studentID.substr(2, 1) == '2' ? '#82FA58' : data.studentID.substr(2, 1) == '3' || data.studentID.substr(2, 1) == '4' ? '#2E9AFE' : data.studentID.substr(2, 1) == '5' || data.studentID.substr(2, 1) == '6' ? '#FA58F4' : data.studentID.substr(2, 1) == '7' || data.studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
+                                          <View style={{ marginLeft: 58, flexDirection: 'row', }}>
+                                            <View style={{ width: 30, height: 15, borderRadius: 3, justifyContent: 'center', alignItems: 'center', backgroundColor: data.studentID.substr(2, 1) == '1' || data.studentID.substr(2, 1) == '2' ? '#82FA58' : data.studentID.substr(2, 1) == '3' || data.studentID.substr(2, 1) == '4' ? '#2E9AFE' : data.studentID.substr(2, 1) == '5' || data.studentID.substr(2, 1) == '6' ? '#FA58F4' : data.studentID.substr(2, 1) == '7' || data.studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
                                               <Text style={{ fontSize: 10, fontWeight: '400', color: '#000000' }}>{data.studentID.substr(0, 1)}학년</Text>
                                             </View>
-                                            {' '}{data.author}
-                                          </Text>
+                                            <Text style={{ fontSize: 13, fontWeight: 400, color: isDarkMode ? '#ffffff' : '#000000', }}>
+                                              {' '}{data.author}
+                                            </Text>
+                                          </View>
                                           {/* 댓글 존재 */}
                                           {data.content &&
                                             <Text style={{ ...styles.CommentsContentText, color: isDarkMode ? '#ffffff' : '#000000', }}>{data.content}</Text>
@@ -1005,11 +1009,14 @@ export default function ViewPost({ navigation }) {
                                                     {/* 답글 */}
                                                     <View style={{ marginBottom: 13, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID, category: postsData[0].category })}>
                                                       {/* 사용자ID */}
-                                                      <Text style={{ ...styles.RepliesAuthorText, color: isDarkMode ? '#ffffff' : '#000000', }}>
-                                                        <View style={{ width: 30, height: 15, borderRadius: 3, top: 7, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: _data.studentID.substr(2, 1) == '1' || _data.studentID.substr(2, 1) == '2' ? '#82FA58' : _data.studentID.substr(2, 1) == '3' || _data.studentID.substr(2, 1) == '4' ? '#2E9AFE' : _data.studentID.substr(2, 1) == '5' || _data.studentID.substr(2, 1) == '6' ? '#FA58F4' : _data.studentID.substr(2, 1) == '7' || _data.studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
+                                                      <View style={{ marginLeft: 78, flexDirection: 'row', }}>
+                                                        <View style={{ width: 30, height: 15, borderRadius: 3, justifyContent: 'center', alignItems: 'center', backgroundColor: _data.studentID.substr(2, 1) == '1' || _data.studentID.substr(2, 1) == '2' ? '#82FA58' : _data.studentID.substr(2, 1) == '3' || _data.studentID.substr(2, 1) == '4' ? '#2E9AFE' : _data.studentID.substr(2, 1) == '5' || _data.studentID.substr(2, 1) == '6' ? '#FA58F4' : _data.studentID.substr(2, 1) == '7' || _data.studentID.substr(2, 1) == '8' ? '#FE9A2E' : '#E0F8F7', }}>
                                                           <Text style={{ fontSize: 10, fontWeight: '400', color: '#000000' }}>{_data.studentID.substr(0, 1)}학년</Text>
                                                         </View>
-                                                        {' '}{_data.author}</Text>
+                                                        <Text style={{ fontSize: 13, fontWeight: 400, color: isDarkMode ? '#ffffff' : '#000000', }}>
+                                                          {' '}{_data.author}
+                                                        </Text>
+                                                      </View>
                                                       {/* 댓글 존재 */}
                                                       {_data.content &&
                                                         <Text style={{ ...styles.RepliesContentText, color: isDarkMode ? '#ffffff' : '#000000', }}>{_data.content}</Text>
@@ -1180,12 +1187,13 @@ const styles = StyleSheet.create({
   CommentsContentText: {
     paddingLeft: 58,
     paddingRight: 10,
-    marginTop: 23,
+    marginTop: 5,
     fontWeight: '800',
   },
   CommentsDateText: {
     paddingLeft: 58,
     paddingRight: 10,
+    marginTop: 3,
     fontWeight: '400',
     fontSize: 10,
   },
@@ -1203,13 +1211,13 @@ const styles = StyleSheet.create({
   RepliesContentText: {
     paddingLeft: 78,
     paddingRight: 30,
-    marginTop: 1,
+    marginTop: 5,
     fontWeight: '500',
     fontSize: 13,
   },
   RepliesDateText: {
     paddingLeft: 78,
-    marginTop: 1,
+    marginTop: 3,
     width: '100%',
     fontWeight: '400',
     fontSize: 9,
