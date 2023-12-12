@@ -316,10 +316,10 @@ export default function WritePost({ navigation }) {
     return selectedImages.map((image, index) => (
       <View key={index}>
         <FastImage source={{ uri: image.path }} style={{ width: 150, height: 150, marginRight: 10, }} />
-        <TouchableOpacity style={{ width: 23, height: 23, top: 5, right: 15, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: '#DCDCDC', }} onPress={() => {
+        <TouchableOpacity style={{ width: 23, height: 23, top: 5, right: 15, borderRadius: 5, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: '#DCDCDC', }} onPress={() => {
           handleDeleteSelectedImage(index)
         }}>
-          <Icon_Feather name="x" size={20} />
+          <Icon_Feather name="x" size={20} color={'#000000'} />
         </TouchableOpacity>
       </View>
     ))

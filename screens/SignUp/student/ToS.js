@@ -3,6 +3,7 @@ import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, Keyboar
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CommonActions } from "@react-navigation/native";
 import FastImage from 'react-native-fast-image';
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 import Icon_Feather from 'react-native-vector-icons/Feather';
@@ -13,44 +14,40 @@ export default function S_SignUp_ToS({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
 
   const [check_1, setCheck_1] = useState(false)
-  const [check_2, setCheck_2] = useState(false)
 
   const handleCheck_1 = () => {
-    if (check_1 === false) {
-      setCheck_1(true)
-    } else {
-      setCheck_1(false)
-    }
-  }
-
-  const handleCheck_2 = () => {
-    if (check_2 === false) {
-      setCheck_2(true)
-    } else {
-      setCheck_2(false)
-    }
+    if (check_1 === false) setCheck_1(true)
+    else setCheck_1(false)
   }
 
   const handleNextScreen = () => {
     if (check_1 === true) {
       return navigation.navigate('SignUp_Email')
     } else {
-      return Alert.alert('정보', '이용약관에 동의하지 않으면 회원가입을 진행할 수 없습니다.')
+      Toast.show({
+        type: 'error',
+        text1: '먼저 이용약관에 동의해주세요.',
+      })
     }
   }
 
   return (
     <SafeAreaView style={[{ ...styles.container, backgroundColor: '#ffffff' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' }]}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', }}>
-        <View style={{}}>
-          <FastImage style={{ width: 150, height: 150, }} source={require('../../../resource/logo_v1.png')} />
+      {/* 로고 */}
+      <View style={styles.logoView}>
+        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
+          <Text style={{ ...styles.logoText, color: isDarkMode ? '#ffffff' : '#000000', }}>
+            {<Icon_Ionicons name="chevron-back-outline" size={21} />}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={{ flexGrow: 1, }}>
+        <View style={{ padding: 10, }}>
+          <Text style={{ ...styles.Title, color: isDarkMode ? '#ffffff' : '#000000', }}>이용약관에 동의해주세요.</Text>
         </View>
 
-        <View style={{ marginTop: 40, }}>
-          <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>이용약관에 동의해주세요.</Text>
-        </View>
-
-        <View style={{ height: '70%', height: 250, marginTop: 40, padding: 20, }}>
+        <View style={{ height: '70%', height: 400, marginTop: 60, padding: 20, }}>
           <Text style={[{ marginLeft: 3, marginBottom: 5, color: '#000000', }, isDarkMode && { marginLeft: 3, marginBottom: 5, color: '#ffffff', }]}>이용약관</Text>
           <ScrollView contentContainerStyle={{ padding: 10, }} style={{ marginBottom: 10, borderWidth: 1.5, borderColor: '#000000', backgroundColor: '#ffffff' }}>
             <Text style={{ fontWeight: '400', fontSize: 15, color: '#666666' }}>
@@ -101,6 +98,7 @@ export default function S_SignUp_ToS({ navigation }) {
               더 자세한 내용은 [개인정보 처리방침](https://www.zena.co.kr/jys/privacy)에서 확인하실 수 있습니다.
             </Text>
           </ScrollView>
+
           <TouchableOpacity onPress={handleCheck_1}>
             {check_1 === true ?
               <Text style={[{ marginLeft: 3, fontWeight: '400', fontSize: 15, color: '#000000', }, isDarkMode && { marginLeft: 3, fontWeight: '400', fontSize: 15, color: '#ffffff', }]}>
@@ -115,14 +113,14 @@ export default function S_SignUp_ToS({ navigation }) {
         </View>
 
         <View style={{ marginBottom: 100, }}></View>
-
-        <View style={{ position: 'absolute', bottom: 30, }}>
-          <TouchableOpacity style={styles.nextBtn} onPress={handleNextScreen}>
-            <Text style={styles.nextBtnText}>다음</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
-    </SafeAreaView>
+
+      <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+        <TouchableOpacity style={{ ...styles.button, position: 'absolute', bottom: 30, backgroundColor: '#EB4E45', }} onPress={handleNextScreen}>
+          <Text style={styles.buttonText}>다음</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView >
   )
 }
 
@@ -130,21 +128,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  logoView: {
+    height: 60,
+    justifyContent: 'center',
+  },
+  logoText: {
+    fontSize: 20,
+    fontWeight: '400',
+  },
+  backButtonView: {
+    position: 'absolute',
+    left: 10,
+  },
   Title: {
-    paddingLeft: 15,
-    paddingRight: 15,
+    padding: 13,
     fontWeight: 'bold',
     fontSize: 30,
-    textAlign: 'left',
   },
-  nextBtn: {
+  button: {
     width: 310,
     height: 45,
     borderRadius: 10,
-    backgroundColor: '#EB4E45',
     justifyContent: 'center',
   },
-  nextBtnText: {
+  buttonText: {
     color: '#fff',
     textAlign: 'center',
     fontSize: 15,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal } from 'react-native';
+import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal, KeyboardAvoidingView } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { CommonActions } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -12,41 +12,24 @@ import axiosInstance from "../../api/API_Server";
 
 export default function EditPassword({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
-
   const [isLoading, setIsLoading] = useState(false)
 
-  const [oldPassword, setOldPassword] = useState(null)
-  const [newPassword, setNewPassword] = useState(null)
-  const [confirmNewPassword, setConfirmNewPassword] = useState(null)
+  const [oldPassword, setOldPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
 
   const [passwordCount, setPasswordCount] = useState(0)
 
-  const handlePassword = (text) => {
+  const handlePasswordColor = (text) => {
     let count = 0
-
     if (isPasswordLengthValid(text)) count += 1
-
     if (isPasswordComplex(text)) count += 2
-
     if (!isCommonPassword(text)) count += 1
-
     setPasswordCount(count)
-
-    if (count < 4) {
-      Toast.show({
-        type: 'error',
-        text1: '비밀번호는 8자 이상, 숫자, 특수문자가 포함되어야 합니다.',
-      })
-    } else {
-      Toast.show({
-        type: 'success',
-        text1: '비밀번호가 안전합니다.',
-      })
-    }
   }
 
   const handleEditProfile = async () => {
-    if (oldPassword === null) {
+    if (oldPassword === '') {
       Toast.show({
         type: 'error',
         text1: '현재 비밀번호를 입력해주세요.',
@@ -57,7 +40,7 @@ export default function EditPassword({ navigation }) {
         text1: '새로운 비밀번호와 확인 비밀번호와 일치하지 않습니다.',
         text2: '비밀번호를 확인해주세요.'
       })
-    } else if (passwordCount < 4){
+    } else if (passwordCount < 4) {
       Toast.show({
         type: 'error',
         text1: '새로운 비밀번호가 안전하지 않습니다.',
@@ -68,13 +51,13 @@ export default function EditPassword({ navigation }) {
       try {
         const ID = await AsyncStorage.getItem('id')
         const JOB = await AsyncStorage.getItem('job')
-        await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', oldPassword: oldPassword, newPassword: newPassword })
+        await axiosInstance.post('/v2/profile', { id: ID, job: JOB, methodName: 'edit', data: { oldPassword: oldPassword, newPassword: newPassword, } })
           .then((res) => {
             setIsLoading(false)
             if (res.status === 200) {
               Toast.show({
                 type: 'success',
-                text1: '비밀번호를 변경했어요.',
+                text1: `${res.data.message}`,
               })
               navigation.goBack()
             } else {
@@ -127,79 +110,83 @@ export default function EditPassword({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#f0f0f0' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' },]}>
-      {/* 로고 */}
-      <View style={styles.logoView}>
-        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 10 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
-          <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' },]}>
-            {<Icon_Ionicons name="chevron-back-outline" size={21} />} 비밀번호 수정
-          </Text>
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
+      <KeyboardAvoidingView style={{ flex: 1, }} behavior={Platform.select({ ios: 'padding' })}>
+        {/* 로고 */}
+        <View style={styles.logoView}>
+          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 10 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
+            <Text style={{ ...styles.logoText, color: isDarkMode ? '#ffffff' : '#000000', }}>
+              {<Icon_Ionicons name="chevron-back-outline" size={21} />} 비밀번호 변경
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* 스크롤 */}
-      <ScrollView style={[{ ...styles.scrollContainer, backgroundColor: '#f0f0f0', }, isDarkMode && { ...styles.scrollContainer, backgroundColor: '#000000', }]}>
-        {/* 개인정보 */}
-        <>
-          <Text style={styles.InfoTopText}>현재 비밀번호</Text>
-          <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-            <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>현재 비밀번호</Text>
-            <TextInput
-              style={styles.Value}
-              placeholder={oldPassword}
-              onChangeText={(text) => setOldPassword(text)}
-              secureTextEntry={true}
-              value={oldPassword}
-              editable={true}
-            />
-            <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, }}>
+          <Text style={{ marginTop: 15, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>현재 비밀번호</Text>
+          <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+            <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+              <TextInput
+                style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                placeholder='비밀번호'
+                placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                value={oldPassword}
+                secureTextEntry={true}
+                editable={true}
+                onChangeText={(text) => setOldPassword(text)}
+              />
+            </View>
           </View>
-        </>
 
-        <>
-          <Text style={styles.InfoTopText}>새로운 비밀번호</Text>
-          <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-            <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>새로운 비밀번호</Text>
-            <TextInput
-              style={styles.Value}
-              placeholder={newPassword}
-              onChangeText={(text) => {
-                setNewPassword(text)
-                handlePassword(text)
-              }}
-              secureTextEntry={true}
-              value={newPassword}
-              editable={true}
-            />
-            <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+          <Text style={{ marginTop: 10, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>새로운 비밀번호</Text>
+          <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+            <View style={{ ...styles.inputView, borderColor: `${newPassword === '' ? isDarkMode ? '#333333' : '#E9E9E9' : passwordCount >= 4 ? isDarkMode ? '#333333' : '#E9E9E9' : '#B22222'}`, backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+              <TextInput
+                style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                placeholder='새로운 비밀번호'
+                placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                value={newPassword}
+                secureTextEntry={true}
+                editable={true}
+                onChangeText={(text) => {
+                  handlePasswordColor(text)
+                  setNewPassword(text)
+                }}
+              />
+            </View>
+            {newPassword != '' && passwordCount < 4 &&
+              <Text style={{ marginTop: 3, textAlign: 'left', fontSize: 13, color: isDarkMode ? '#ffffff' : '#000000', }}>비밀번호는 8자 이상, 숫자와 특수문자가 포함되어야 해요.</Text>
+            }
+          </View>
 
-            <View style={{ marginBottom: 15 }}></View>
-
-            <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>새로운 비밀번호 확인</Text>
-            <TextInput
-              style={styles.Value}
-              placeholder={confirmNewPassword}
-              onChangeText={(text) => setConfirmNewPassword(text)}
-              secureTextEntry={true}
-              value={confirmNewPassword}
-              editable={true}
-            />
-            <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+          <View style={{ marginTop: 10, justifyContent: 'center', alignItems: 'center', }}>
+            <View style={{ ...styles.inputView, borderColor: `${confirmNewPassword === '' ? isDarkMode ? '#333333' : '#E9E9E9' : `${newPassword === confirmNewPassword ? isDarkMode ? '#333333' : '#E9E9E9' : '#B22222'}`}`, backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+              <TextInput
+                style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                placeholder='비밀번호 확인'
+                placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                value={confirmNewPassword}
+                secureTextEntry={true}
+                onChangeText={(text) => setConfirmNewPassword(text)}
+              />
+            </View>
+            {confirmNewPassword != '' && newPassword != confirmNewPassword &&
+              <Text style={{ marginTop: 3, textAlign: 'left', fontSize: 13, color: isDarkMode ? '#ffffff' : '#000000', }}>비밀번호가 서로 일치하지 않아요.</Text>
+            }
           </View>
 
           <View style={{ marginBottom: 100, }}></View>
-        </>
-      </ScrollView>
+        </ScrollView>
 
-      {/* 요청 */}
-      <TouchableOpacity style={styles.checkBtnContainer} onPress={handleEditProfile}>
-        {isLoading === false ?
-          <Text style={styles.checkBtnText}>{<Icon_Feather name="check" size={17} />} 확인</Text>
-          :
-          <ActivityIndicator size="small" color="white" />
-        }
-      </TouchableOpacity>
-    </SafeAreaView>
+        {/* 요청 */}
+        <TouchableOpacity style={styles.checkBtnContainer} onPress={handleEditProfile}>
+          {isLoading === false ?
+            <Text style={styles.checkBtnText}>{<Icon_Feather name="check" size={17} />} 확인</Text>
+            :
+            <ActivityIndicator size="small" color="white" />
+          }
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
+    </SafeAreaView >
   )
 }
 
@@ -246,37 +233,17 @@ const styles = StyleSheet.create({
     top: 20,
     left: 10,
   },
-  Info: {
-    padding: 20,
-    borderRadius: 25,
-    marginBottom: 20,
-    width: '100%',
+  inputView: {
+    width: '95%',
+    height: 50,
+    padding: 13,
+    borderWidth: 2,
+    borderRadius: 10,
+    justifyContent: 'center',
   },
-  InfoTopText: {
-    color: 'gray',
-    fontWeight: 'bold',
-    marginLeft: 20,
-    marginBottom: 5,
-  },
-  Title: {
+  inputText: {
+    height: 50,
     color: '#000000',
-    fontSize: 20,
-    fontWeight: '400',
-    marginLeft: 5,
-  },
-  Value: {
-    color: '#4682b4',
-    fontSize: 14,
-    marginLeft: 5,
-    width: '100%',
-    height: 40,
-  },
-  rankView: {
-    width: '100%',
-    height: 1,
-    marginTop: 15,
-    marginBottom: 15,
-    backgroundColor: 'gray',
   },
   checkBtnContainer: {
     backgroundColor: '#1E00D3',

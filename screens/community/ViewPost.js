@@ -978,10 +978,12 @@ export default function ViewPost({ navigation }) {
                                           }
 
                                           {/* 작성 시간 */}
-                                          <View>
-                                            <Text key={data.id} style={{ ...styles.CommentsDateText, color: isDarkMode ? '#ffffff' : '#000000', }}>{data.date.substring(0, 10)} {data.date.substring(11, 19)}</Text>
-                                            <TouchableOpacity style={{ position: 'absolute', marginLeft: 165, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
-                                              <Text style={{ ...styles.RepliesButtonText, color: isDarkMode ? '#ffffff' : '#000000', }}>  답글쓰기</Text>
+                                          <View style={{ flexDirection: 'row', }}>
+                                            <Text key={data.id} style={{ ...styles.CommentsDateText, color: isDarkMode ? '#ffffff' : '#000000', }}>
+                                              {data.date.substring(0, 10)} {data.date.substring(11, 19)}
+                                            </Text>
+                                            <TouchableOpacity onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
+                                              <Text style={{ ...styles.CommentsDateText, paddingLeft: 0, paddingRight: 0, color: isDarkMode ? '#ffffff' : '#000000', }}>답글쓰기</Text>
                                             </TouchableOpacity>
                                           </View>
                                         </View>
@@ -1044,10 +1046,12 @@ export default function ViewPost({ navigation }) {
                                                       }
 
                                                       {/* 작성 시간 */}
-                                                      <View>
-                                                        <Text key={data.id} style={{ ...styles.RepliesDateText, color: isDarkMode ? '#ffffff' : '#000000', }}>{data.date.substring(0, 10)} {data.date.substring(11, 19)}</Text>
-                                                        <TouchableOpacity style={{ position: 'absolute', marginLeft: 175, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
-                                                          <Text style={{ ...styles.RepliesButtonText, color: isDarkMode ? '#ffffff' : '#000000', }}>  답글쓰기</Text>
+                                                      <View style={{ flexDirection: 'row', }}>
+                                                        <Text key={_data.id} style={{ ...styles.RepliesDateText, color: isDarkMode ? '#ffffff' : '#000000', }}>
+                                                          {_data.date.substring(0, 10)} {_data.date.substring(11, 19)}
+                                                        </Text>
+                                                        <TouchableOpacity onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
+                                                          <Text style={{ ...styles.RepliesDateText, paddingLeft: 0, color: isDarkMode ? '#ffffff' : '#000000', }}>답글쓰기</Text>
                                                         </TouchableOpacity>
                                                       </View>
                                                     </View>
@@ -1217,198 +1221,9 @@ const styles = StyleSheet.create({
   },
   RepliesDateText: {
     paddingLeft: 78,
+    paddingRight: 10,
     marginTop: 3,
-    width: '100%',
     fontWeight: '400',
     fontSize: 9,
   },
 })
-
-// const deleteComment = async(commentID) => {
-//     AsyncStorage.getItem('id')
-//         .then(async(accountID) => {
-//             await axiosInstance.post('/Community/deleteComments', {postID: postID, commentID: commentID, accountID: accountID })
-//                 .then(async(res) => {
-//                     if (res.status === 200) {
-//                         commentCheck()
-//                         repliesCheck()
-//                         return Alert.alert('성공', res.data.message)
-//                     } else {
-//                         return Alert.alert('에러', '예외가 발생하였습니다.')
-//                     }
-//                 }).catch((error) => {
-//                     console.log(error)
-//                     const res = error.response
-//                     if (res.status === 400) {
-//                         return Alert.alert(res.data.error, res.data.errorDescription)
-//                     } else if (res.status === 500) {
-//                         return Alert.alert(res.data.error, res.data.errorDescription)
-//                     } else {
-//                         // 예외발생
-//                         return Alert.alert('에러', '예외')
-//                     }
-//                 })
-//         }).catch((error) => {
-//             console.log(error)
-//         })
-//   }
-
-//   const editComment = async(commentID) => {
-//     const content = '수정된 댓글'
-//     AsyncStorage.getItem('id')
-//         .then(async(accountID) => {
-//             await axiosInstance.post('/Community/editComments', { postID: postID, commentID: commentID, accountID: accountID, content: content })
-//                 .then(async(res) => {
-//                     if (res.status === 200) {
-//                         commentCheck()
-//                         repliesCheck()
-//                         return Alert.alert('성공', res.data.message)
-//                     } else {
-//                         return Alert.alert('에러', '예외가 발생하였습니다.')
-//                     }
-//                 }).catch((error) => {
-//                     console.log(error)
-//                     const res = error.response
-//                     if (res.status === 400) {
-//                         return Alert.alert(res.data.error, res.data.errorDescription)
-//                     } else if (res.status === 500) {
-//                         return Alert.alert(res.data.error, res.data.errorDescription)
-//                     } else {
-//                         // 예외발생
-//                         return Alert.alert('에러', '예외')
-//                     }
-//                 })
-//         }).catch((error) => {
-//             console.log(error)
-//         })
-//   }
-
-//   const deleteReplies = async(repliesID, commentID) => {
-//     AsyncStorage.getItem('id')
-//         .then(async(accountID) => {
-//             await axiosInstance.post('/Community/deleteReplies', {repliesID: repliesID, commentID: commentID, postID: postID, accountID: accountID })
-//                 .then(async(res) => {
-//                     if (res.status === 200) {
-//                         commentCheck()
-//                         repliesCheck()
-//                         return Alert.alert('성공', res.data.message)
-//                     } else {
-//                         return Alert.alert('에러', '예외가 발생하였습니다.')
-//                     }
-//                 }).catch((error) => {
-//                     console.log(error)
-//                     const res = error.response
-//                     if (res.status === 400) {
-//                         return Alert.alert(res.data.error, res.data.errorDescription)
-//                     } else if (res.status === 500) {
-//                         return Alert.alert(res.data.error, res.data.errorDescription)
-//                     } else {
-//                         // 예외발생
-//                         return Alert.alert('에러', '예외')
-//                     }
-//                 })
-//         }).catch((error) => {
-//             console.log(error)
-//         })
-//   }
-
-//   const editReplies = async(repliesID, commentID) => {
-//     const content = '수정된 답글'
-//     AsyncStorage.getItem('id')
-//         .then(async(accountID) => {
-//             await axiosInstance.post('/Community/editReplies', {repliesID: repliesID, commentID: commentID, postID: postID, accountID: accountID, content: content })
-//                 .then(async(res) => {
-//                     if (res.status === 200) {
-//                         commentCheck()
-//                         repliesCheck()
-//                         return Alert.alert('성공', res.data.message)
-//                     } else {
-//                         return Alert.alert('에러', '예외가 발생하였습니다.')
-//                     }
-//                 }).catch((error) => {
-//                     console.log(error)
-//                     const res = error.response
-//                     if (res.status === 400) {
-//                         return Alert.alert(res.data.error, res.data.errorDescription)
-//                     } else if (res.status === 500) {
-//                         return Alert.alert(res.data.error, res.data.errorDescription)
-//                     } else {
-//                         // 예외발생
-//                         return Alert.alert('에러', '예외')
-//                     }
-//                 })
-//         }).catch((error) => {
-//             console.log(error)
-//         })
-//   }
-
-{
-  /* <TouchableOpacity onPress={() => {
-          console.log(item.id)
-          deletePost(item.id)
-        }}><Text>삭제하기</Text></TouchableOpacity>
-
-        <TouchableOpacity onPress={() => {
-          console.log(item.id)
-          editPost(item.id)
-        }}><Text>수정하기</Text></TouchableOpacity> */
-}
-
-// const deletePost = async (postID) => {
-//   AsyncStorage.getItem('id')
-//     .then(async (accountID) => {
-//       await axiosInstance.post('/Community/deletePost', { postID: postID, accountID: accountID })
-//         .then(async (res) => {
-//           if (res.status === 200) {
-//             handleRefresh()
-//             return Alert.alert('성공', res.data.message)
-//           } else {
-//             return Alert.alert('에러', '예외가 발생하였습니다.')
-//           }
-//         }).catch((error) => {
-//           console.log(error)
-//           const res = error.response
-//           if (res.status === 400) {
-//             return Alert.alert(res.data.error, res.data.errorDescription)
-//           } else if (res.status === 500) {
-//             return Alert.alert(res.data.error, res.data.errorDescription)
-//           } else {
-//             // 예외발생
-//             return Alert.alert('에러', '예외')
-//           }
-//         })
-//     }).catch((error) => {
-//       console.log(error)
-//     })
-// }
-
-// const editPost = async (postID) => {
-//   const title = '게시글 수정 테스트'
-//   const content = '테스트'
-//   AsyncStorage.getItem('id')
-//     .then(async (accountID) => {
-//       await axiosInstance.post('/Community/editPost', { postID: postID, accountID: accountID, title: title, content: content })
-//         .then(async (res) => {
-//           if (res.status === 200) {
-//             handleRefresh()
-//             return Alert.alert('성공', res.data.message)
-//           } else {
-//             console.log(res)
-//             return Alert.alert('에러', '예외가 발생하였습니다.')
-//           }
-//         }).catch((error) => {
-//           console.log(error)
-//           const res = error.response
-//           if (res.status === 400) {
-//             return Alert.alert(res.data.error, res.data.errorDescription)
-//           } else if (res.status === 500) {
-//             return Alert.alert(res.data.error, res.data.errorDescription)
-//           } else {
-//             // 예외발생
-//             return Alert.alert('에러', '예외')
-//           }
-//         })
-//     }).catch((error) => {
-//       console.log(error)
-//     })
-// }

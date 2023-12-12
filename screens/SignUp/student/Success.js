@@ -21,14 +21,14 @@ export default function S_SignUp_Success({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#ffffff' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' }]}>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', }}>
         <View style={{}}>
           <FastImage style={{ width: 150, height: 150, }} source={require('../../../resource/success.png')} />
         </View>
 
-        <View style={{ marginTop: 30, marginBottom: 100, }}>
-          <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>회원가입이 완료되었습니다.</Text>
+        <View style={{ marginTop: 10, marginBottom: 100, }}>
+          <Text style={{ ...styles.Title, color: isDarkMode ? '#ffffff' : '#000000', }}>회원가입이 완료되었습니다.</Text>
         </View>
 
         <View style={{ position: 'absolute', bottom: 30, }}>

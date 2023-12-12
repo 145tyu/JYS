@@ -238,7 +238,7 @@ export default function LoginScreen({ navigation }) {
         </TouchableOpacity>
 
         <View style={{ justifyContent: 'center', marginTop: 10, }}>
-          <TouchableOpacity style={{ position: 'absolute', left: -95 }} onPress={() => { navigation.navigate('SignUp_Welcome') }}>
+          <TouchableOpacity style={{ position: 'absolute', left: -95 }} onPress={() => { navigation.navigate('SignUp_ToS') }}>
             <Text style={{ color: '#666666', textAlign: 'center', fontSize: 12 }}>회원가입</Text>
           </TouchableOpacity>
 

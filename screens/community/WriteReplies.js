@@ -1060,10 +1060,10 @@ export default function WriteReplies({ navigation }) {
                   :
                   <View style={{ width: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)', }}>
                     <FastImage source={{ uri: selectedMedia[0].path }} style={{ width: 150, height: 150 }} />
-                    <TouchableOpacity style={{ width: 23, height: 23, top: 5, right: 15, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: '#DCDCDC', }} onPress={() => {
+                    <TouchableOpacity style={{ width: 23, height: 23, top: 5, right: 15, borderRadius: 5, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: '#DCDCDC', }} onPress={() => {
                       setSelectedMedia([])
                     }}>
-                      <Icon_Feather name="x" size={20} />
+                      <Icon_Feather name="x" size={20} color={'#000000'} />
                     </TouchableOpacity>
                   </View>
                 }

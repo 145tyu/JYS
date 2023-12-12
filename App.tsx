@@ -17,17 +17,16 @@ import messaging from '@react-native-firebase/messaging';
 import StartScreen from './screens/Start';
 import LoginScreen from './screens/Login';
 
-import Setting_HomeScreen from './screens/Setting/SettingHome'
-import Setting_setNotificationScreen from './screens/Setting/notification/setNotification';
+import Setting_HomeScreen from './screens/setting/SettingHome'
+import Setting_setNotificationScreen from './screens/setting/notification/setNotification';
 
-import S_SignUp_Welcome from './screens/SignUp/student/Welcome';
-import S_SignUp_ToS from './screens/SignUp/student/ToS';
-import S_SignUp_Email from './screens/SignUp/student/Email';
-import S_SignUp_Account from './screens/SignUp/student/Account';
-import S_SignUp_StudentID from './screens/SignUp/student/StudentID';
-import S_SignUp_CheckStudentID from './screens/SignUp/student/CheckStudentID';
-import S_SignUp_LastCheck from './screens/SignUp/student/LastCheck';
-import S_SignUp_Success from './screens/SignUp/student/Success';
+import S_SignUp_ToS from './screens/signUp/student/ToS';
+import S_SignUp_Email from './screens/signUp/student/Email';
+import S_SignUp_Account from './screens/signUp/student/Account';
+import S_SignUp_StudentID from './screens/signUp/student/StudentID';
+import S_SignUp_CheckStudentID from './screens/signUp/student/CheckStudentID';
+import S_SignUp_LastCheck from './screens/signUp/student/LastCheck';
+import S_SignUp_Success from './screens/signUp/student/Success';
 
 import S_HomeScreen from './screens/student/StudentHome';
 import S_AllTab from './screens/student/AllTab';
@@ -42,6 +41,7 @@ import Profile_View from './screens/profile/ViewProfile';
 import Profile_Edit from './screens/profile/EditProfile';
 import Profile_Edit_Email from './screens/profile/EditEmail';
 import Profile_Edit_Password from './screens/profile/EditPassword';
+import Profile_Edit_StudentID from './screens/profile/EditStudentID';
 import Profile_DeleteAccount from './screens/profile/DeleteAccount';
 
 import Community_Home from './screens/community/CommunityHome';
@@ -473,7 +473,6 @@ const App = () => {
           <Stack.Screen name="Setting_Home" component={Setting_HomeScreen} options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="Setting_setNotification" component={Setting_setNotificationScreen} options={{ headerShown: false, animation: 'fade' }} />
 
-          <Stack.Screen name="SignUp_Welcome" component={S_SignUp_Welcome} options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="SignUp_ToS" component={S_SignUp_ToS} options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="SignUp_Email" component={S_SignUp_Email} options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="SignUp_Account" component={S_SignUp_Account} options={{ headerShown: false, animation: 'fade' }} />
@@ -494,6 +493,7 @@ const App = () => {
           <Stack.Screen name="Profile_Edit" component={Profile_Edit} options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="Profile_Edit_Email" component={Profile_Edit_Email} options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="Profile_Edit_Password" component={Profile_Edit_Password} options={{ headerShown: false, animation: 'fade' }} />
+          <Stack.Screen name="Profile_Edit_StudentID" component={Profile_Edit_StudentID} options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="Profile_Delete_Account" component={Profile_DeleteAccount} options={{ headerShown: false, animation: 'fade' }} />
 
           <Stack.Screen name="Community_Home" component={S_Tab} options={{ headerShown: false, animation: 'fade' }} />

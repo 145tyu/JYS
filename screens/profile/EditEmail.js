@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal } from 'react-native';
+import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, KeyboardAvoidingView, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { CommonActions } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -20,56 +20,156 @@ export default function EditEmail({ navigation }) {
   const [methodName, setMethodName] = useState(null)
   const [placeholder, setPlaceholder] = useState('이곳에 적어주세요.')
 
-  const [oldPassword, setOldPassword] = useState(null)
-  const [newEmail, setNewEmail] = useState(null)
+  const [oldPassword, setOldPassword] = useState('')
+  const [newEmail, setNewEmail] = useState('')
+
+  const [authStage, setAuthStage] = useState(false)
+  const [inputAuthCode, setInputAuthCode] = useState('')
+
+  const [timerSeconds, setTimerSeconds] = useState(300)
+  const [timerActive, setTimerActive] = useState(false)
+
+  const handleResetAuthStage = () => {
+    setAuthStage(false) // 인증 단계 비활성화
+    setTimerActive(false) // 타이머 비활성화
+    setTimerSeconds(300) // 타이머 시간 초기화
+    setInputAuthCode('') // 인증코드 입력창 초기화
+  }
 
   const handelCheckEmail = async () => {
-    if (newEmail === null) {
+    if (newEmail === '') {
       Toast.show({
         type: 'error',
         text1: '새로운 이메일을 입력해주세요.',
       })
     } else {
-      await axiosInstance.post('/register', {
-        email: newEmail,
-      }).then((res) => {
-        setIsLoading(false)
-        if (res.status === 200) {
-          handleEditProfile()
-        } else {
-          Toast.show({
-            type: 'error',
-            text1: `이메일 확인 도중 예외가 발생했습니다.`,
-          })
-        }
-      }).catch((error) => {
-        setIsLoading(false)
-        const res = error.response
-        if (res.status === 400) {
-          Toast.show({
-            type: 'error',
-            text1: `${res.data.errorDescription}`,
-            text2: `${res.data.error}`,
-          })
-        } else if (res.status === 500) {
-          Toast.show({
-            type: 'error',
-            text1: `${res.data.errorDescription}`,
-            text2: `${res.data.error}`,
-          })
-        } else {
-          Toast.show({
-            type: 'error',
-            text1: `이메일을 확인하지 못했습니다.`,
-            text2: `${error}`,
-          })
-        }
-      })
+      setIsLoading(true)
+      await axiosInstance.post('/register', { email: newEmail, })
+        .then((res) => {
+          setIsLoading(false)
+          if (res.status === 200) {
+            setAuthStage(true) // 인증 단계 활성화
+            setTimerSeconds(300) // 타이머 초기화
+            setTimerActive(true) // 타이머 활성화
+            Toast.show({
+              type: 'success',
+              text1: `${res.data.message}`,
+            })
+          } else {
+            handleResetAuthStage()
+            Toast.show({
+              type: 'error',
+              text1: '이메일을 확인하지 못했어요.',
+            })
+          }
+        }).catch((error) => {
+          setIsLoading(false)
+          handleResetAuthStage()
+          const res = error.response
+          if (res.status === 400) {
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
+          } else if (res.status === 500) {
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: '다시 시도해 주세요.',
+            })
+          }
+        })
     }
   }
 
+  const handleAuthConfirmation = async () => {
+    if (inputAuthCode == '') {
+      Toast.show({
+        type: 'error',
+        text1: '인증코드를 입력해주세요.',
+      })
+    } else {
+      setIsLoading(true)
+      await axiosInstance.post('/register', { authData: { email: newEmail, code: inputAuthCode }, })
+        .then((res) => {
+          setIsLoading(false)
+          if (res.status === 200) {
+            handleResetAuthStage()
+            Toast.show({
+              type: 'success',
+              text1: `${res.data.message}`,
+            })
+            handleEditProfile()
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: '인증번호를 확인하지 못했어요.',
+            })
+          }
+        }).catch((error) => {
+          setIsLoading(false)
+          const res = error.response
+          if (res.status === 400) {
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
+          } else if (res.status === 500) {
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: '다시 시도해 주세요.',
+            })
+          }
+        })
+    }
+  }
+
+  const formatTime = (timeInSeconds) => {
+    const minutes = Math.floor(timeInSeconds / 60)
+    const remainingSeconds = timeInSeconds % 60
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`
+  }
+
+  useEffect(() => {
+    let intervalId
+
+    if (timerActive && timerSeconds > 0) {
+      intervalId = setInterval(() => {
+        setTimerSeconds((prevSeconds) => prevSeconds - 1)
+      }, 1000)
+    }
+
+    return () => clearInterval(intervalId)
+  }, [timerActive, timerSeconds])
+
+  useEffect(() => {
+    if (timerSeconds === 0) {
+      handleResetAuthStage()
+    }
+  }, [timerSeconds])
+
   const handleEditProfile = async () => {
-    if (newEmail === null) {
+    if (oldPassword === '') {
+      Toast.show({
+        type: 'error',
+        text1: '현재 비밀번호를 입력해주세요.',
+      })
+    } else if (newEmail === '') {
       Toast.show({
         type: 'error',
         text1: '새로운 이메일을 입력해주세요.',
@@ -79,55 +179,53 @@ export default function EditEmail({ navigation }) {
       try {
         const ID = await AsyncStorage.getItem('id')
         const JOB = await AsyncStorage.getItem('job')
-        if (methodName === 'email') {
-          await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', oldPassword: oldPassword, email: newEmail })
-            .then((res) => {
-              setIsLoading(false)
-              if (res.status === 200) {
-                Toast.show({
-                  type: 'success',
-                  text1: '이메일을 변경했어요.',
-                })
-                navigation.goBack()
-              } else {
+        await axiosInstance.post('/v2/profile', { id: ID, job: JOB, methodName: 'edit', data: { oldPassword: oldPassword, email: newEmail } })
+          .then((res) => {
+            setIsLoading(false)
+            if (res.status === 200) {
+              Toast.show({
+                type: 'success',
+                text1: `${res.data.message}`,
+              })
+              navigation.goBack()
+            } else {
+              Toast.show({
+                type: 'error',
+                text1: '이메일을 변경하지 못했어요.',
+                text2: '다시 시도해 주세요.',
+              })
+            }
+          }).catch((error) => {
+            setIsLoading(false)
+            if (error.response) {
+              const res = error.response
+              if (res.status === 400) {
                 Toast.show({
                   type: 'error',
-                  text1: '이메일을 변경하지 못했어요.',
-                  text2: '다시 시도해 주세요.',
+                  text1: `${res.data.errorDescription}`,
+                  text2: `${res.data.error}`,
                 })
-              }
-            }).catch((error) => {
-              setIsLoading(false)
-              if (error.response) {
-                const res = error.response
-                if (res.status === 400) {
-                  Toast.show({
-                    type: 'error',
-                    text1: `${res.data.errorDescription}`,
-                    text2: `${res.data.error}`,
-                  })
-                } else if (res.status === 500) {
-                  Toast.show({
-                    type: 'error',
-                    text1: `${res.data.errorDescription}`,
-                    text2: `${res.data.error}`,
-                  })
-                } else {
-                  Toast.show({
-                    type: 'error',
-                    text1: '서버와 연결할 수 없습니다.',
-                    text2: '다시 시도해 주세요.',
-                  })
-                }
+              } else if (res.status === 500) {
+                Toast.show({
+                  type: 'error',
+                  text1: `${res.data.errorDescription}`,
+                  text2: `${res.data.error}`,
+                })
               } else {
                 Toast.show({
                   type: 'error',
                   text1: '서버와 연결할 수 없습니다.',
-                  text2: `${error}`,
+                  text2: '다시 시도해 주세요.',
                 })
               }
-            })
-        }
+            } else {
+              Toast.show({
+                type: 'error',
+                text1: '서버와 연결할 수 없습니다.',
+                text2: `${error}`,
+              })
+            }
+          })
       } catch (error) {
         setIsLoading(false)
         Toast.show({
@@ -158,53 +256,77 @@ export default function EditEmail({ navigation }) {
   }, [])
 
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#f0f0f0' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' },]}>
-      {/* 로고 */}
-      <View style={styles.logoView}>
-        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 10 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
-          <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' },]}>
-            {<Icon_Ionicons name="chevron-back-outline" size={21} />} 이메일 수정
-          </Text>
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
+      <KeyboardAvoidingView style={{ flex: 1, }} behavior={Platform.select({ ios: 'padding' })}>
+        {/* 로고 */}
+        <View style={styles.logoView}>
+          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 10 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
+            <Text style={{ ...styles.logoText, color: isDarkMode ? '#ffffff' : '#000000', }}>
+              {<Icon_Ionicons name="chevron-back-outline" size={21} />} 이메일 변경
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* 스크롤 */}
-      <ScrollView style={[{ ...styles.scrollContainer, backgroundColor: '#f0f0f0', }, isDarkMode && { ...styles.scrollContainer, backgroundColor: '#000000', }]}>
-        {/* 개인정보 */}
-        <>
-          <Text style={styles.InfoTopText}>비밀번호</Text>
-          <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-            <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>현재 비밀번호</Text>
-            <TextInput
-              style={styles.Value}
-              placeholder={oldPassword}
-              onChangeText={(text) => setOldPassword(text)}
-              secureTextEntry={true}
-              value={oldPassword}
-              editable={true}
-            />
-            <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, }}>
+          <Text style={{ marginTop: 15, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>현재 비밀번호</Text>
+          <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+            <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+              <TextInput
+                style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                placeholder='비밀번호'
+                placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                value={oldPassword}
+                secureTextEntry={true}
+                editable={true}
+                onChangeText={(text) => setOldPassword(text)}
+              />
+            </View>
           </View>
 
-          <Text style={styles.InfoTopText}>개인정보</Text>
-          <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-            <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>새로운 이메일</Text>
-            <TextInput
-              style={styles.Value}
-              placeholder={placeholder}
-              onChangeText={(text) => setNewEmail(text)}
-              value={newEmail}
-              editable={true}
-            />
-            <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+          <Text style={{ marginTop: 10, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>새로운 이메일</Text>
+          <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+            <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+              <TextInput
+                style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                placeholder={placeholder}
+                placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                value={newEmail}
+                editable={true}
+                onChangeText={(text) => setNewEmail(text)}
+              />
+            </View>
           </View>
+
+          {authStage === true &&
+            <>
+              <View style={{ marginTop: 10, justifyContent: 'center', alignItems: 'center', }}>
+                <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+                  <Text style={{ right: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{formatTime(timerSeconds)}</Text>
+                  <TextInput
+                    style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                    placeholder={'인증번호'}
+                    placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                    value={inputAuthCode}
+                    keyboardType='number-pad'
+                    onChangeText={(text) => setInputAuthCode(text)}
+                  />
+                </View>
+              </View>
+            </>
+          }
 
           <View style={{ marginBottom: 100, }}></View>
-        </>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* 요청 */}
-      <TouchableOpacity style={styles.checkBtnContainer} onPress={handelCheckEmail}>
+      <TouchableOpacity style={styles.checkBtnContainer} onPress={() => {
+        if (authStage === true) {
+          handleAuthConfirmation()
+        } else {
+          handelCheckEmail()
+        }
+      }}>
         {isLoading === false ?
           <Text style={styles.checkBtnText}>{<Icon_Feather name="check" size={17} />} 확인</Text>
           :
@@ -219,9 +341,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContainer: {
-    marginTop: 20,
-  },
   logoView: {
     height: 60,
     justifyContent: 'center',
@@ -235,37 +354,17 @@ const styles = StyleSheet.create({
     top: 20,
     left: 10,
   },
-  Info: {
-    padding: 20,
-    borderRadius: 25,
-    marginBottom: 20,
-    width: '100%',
+  inputView: {
+    width: '95%',
+    height: 50,
+    padding: 13,
+    borderWidth: 2,
+    borderRadius: 10,
+    justifyContent: 'center',
   },
-  InfoTopText: {
-    color: 'gray',
-    fontWeight: 'bold',
-    marginLeft: 20,
-    marginBottom: 5,
-  },
-  Title: {
+  inputText: {
+    height: 50,
     color: '#000000',
-    fontSize: 20,
-    fontWeight: '400',
-    marginLeft: 5,
-  },
-  Value: {
-    color: '#4682b4',
-    fontSize: 14,
-    marginLeft: 5,
-    width: '100%',
-    height: 40,
-  },
-  rankView: {
-    width: '100%',
-    height: 1,
-    marginTop: 15,
-    marginBottom: 15,
-    backgroundColor: 'gray',
   },
   checkBtnContainer: {
     backgroundColor: '#1E00D3',

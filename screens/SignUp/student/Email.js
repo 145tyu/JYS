@@ -3,6 +3,7 @@ import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, Keyboar
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CommonActions } from "@react-navigation/native";
 import FastImage from 'react-native-fast-image';
+import Toast from 'react-native-toast-message';
 
 import Icon_Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -10,84 +11,210 @@ import axiosInstance from "../../../api/API_Server";
 
 export default function S_SignUp_Email({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
-
   const [isLoading, setIsLoading] = useState(false)
 
   const [email, setEmail] = useState('')
 
-  const [message, setMessage] = useState('이메일을 알려주세요.')
+  const [authStage, setAuthStage] = useState(false)
+  const [inputAuthCode, setInputAuthCode] = useState('')
 
-  const handelCheckEmail = async () => {
-    if (email === '') {
-      setMessage('이메일을 입력해주세요.')
-      return Alert.alert('경고', '이메일이 비어있습니다.')
-    } else {
-      await axiosInstance.post('/register', {
-        email: email,
-      }).then((res) => {
-        setIsLoading(false)
-        if (res.status === 200) {
-          setMessage('이메일을 알려주세요.')
-          return navigation.navigate('SignUp_Account', { email: email })
-        } else {
-          setMessage('다시 시도해 주세요.')
-          return Alert.alert('에러', '이메일 확인 도중 예외가 발생했습니다.')
-        }
-      }).catch((error) => {
-        setIsLoading(false)
-        const res = error.response
-        if (res.status === 400) {
-          setMessage('이메일을 확인해주세요.')
-          return Alert.alert(res.data.error, res.data.errorDescription)
-        } else if (res.status === 500) {
-          setMessage('다시 시도해 주세요.')
-          return Alert.alert(res.data.error, res.data.errorDescription)
-        } else {
-          console.log('SignUp API | ', error)
-          setMessage(error)
-          return Alert.alert('에러', '이메일 확인 도중 예외가 발생했습니다.')
-        }
-      })
+  const [timerSeconds, setTimerSeconds] = useState(300)
+  const [timerActive, setTimerActive] = useState(false)
+
+  const handleResetAuthStage = () => {
+    setAuthStage(false) // 인증 단계 비활성화
+    setTimerActive(false) // 타이머 비활성화
+    setTimerSeconds(300) // 타이머 시간 초기화
+    setInputAuthCode('') // 인증코드 입력창 초기화
+  }
+
+  const handleCheckEmail = async () => {
+    setIsLoading(true)
+    if (email != '') {
+      await axiosInstance.post('/register', { email: email, })
+        .then((res) => {
+          setIsLoading(false)
+          if (res.status === 200) {
+            setAuthStage(true) // 인증 단계 활성화
+            setTimerSeconds(300) // 타이머 초기화
+            setTimerActive(true) // 타이머 활성화
+            Toast.show({
+              type: 'success',
+              text1: `${res.data.message}`,
+            })
+          } else {
+            handleResetAuthStage()
+            Toast.show({
+              type: 'error',
+              text1: '이메일을 확인하지 못했어요.',
+            })
+          }
+        }).catch((error) => {
+          setIsLoading(false)
+          handleResetAuthStage()
+          const res = error.response
+          if (res.status === 400) {
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
+          } else if (res.status === 500) {
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: '다시 시도해 주세요.',
+            })
+          }
+        })
     }
   }
 
+  const handleAuthConfirmation = async () => {
+    if (inputAuthCode != '') {
+      setIsLoading(true)
+      await axiosInstance.post('/register', { authData: { email: email, code: inputAuthCode }, })
+        .then((res) => {
+          setIsLoading(false)
+          if (res.status === 200) {
+            handleResetAuthStage()
+            Toast.show({
+              type: 'success',
+              text1: `${res.data.message}`,
+            })
+
+            const tempData = { email: email, }
+            return navigation.navigate('SignUp_Account', { data: tempData, })
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: '인증번호를 확인하지 못했어요.',
+            })
+          }
+        }).catch((error) => {
+          setIsLoading(false)
+          const res = error.response
+          if (res.status === 400) {
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
+          } else if (res.status === 500) {
+            Toast.show({
+              type: 'error',
+              text1: `${res.data.errorDescription}`,
+              text2: `${res.data.error}`,
+            })
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: '서버와 연결할 수 없습니다.',
+              text2: '다시 시도해 주세요.',
+            })
+          }
+        })
+    }
+  }
+
+  const formatTime = (timeInSeconds) => {
+    const minutes = Math.floor(timeInSeconds / 60)
+    const remainingSeconds = timeInSeconds % 60
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`
+  }
+
+  useEffect(() => {
+    let intervalId
+
+    if (timerActive && timerSeconds > 0) {
+      intervalId = setInterval(() => {
+        setTimerSeconds((prevSeconds) => prevSeconds - 1)
+      }, 1000)
+    }
+
+    return () => clearInterval(intervalId)
+  }, [timerActive, timerSeconds])
+
+  useEffect(() => {
+    if (timerSeconds === 0) {
+      handleResetAuthStage()
+    }
+  }, [timerSeconds])
+
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#ffffff' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' }]}>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
       <KeyboardAvoidingView style={{ flex: 1, }} behavior={Platform.select({ ios: 'padding' })}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', }}>
-          <View style={{ marginTop: 20, }}>
-            <FastImage style={{ width: 150, height: 150, }} source={require('../../../resource/logo_v1.png')} />
+        {/* 로고 */}
+        <View style={styles.logoView}>
+          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 50 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
+            <Text style={{ ...styles.logoText, color: isDarkMode ? '#ffffff' : '#000000', }}>
+              {<Icon_Ionicons name="chevron-back-outline" size={21} />}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView contentContainerStyle={{ flexGrow: 1, }}>
+          <View style={{ padding: 10, }}>
+            <Text style={{ ...styles.Title, color: isDarkMode ? '#ffffff' : '#000000', }}>먼저 이메일을 알려주세요.</Text>
           </View>
 
-          <View style={{ marginTop: 40, }}>
-            <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>{message}</Text>
-          </View>
-
-          <View style={{ marginTop: 25, marginBottom: 100, }}>
-            <View style={[{ ...styles.inputView, borderColor: '#E9E9E9', backgroundColor: '#E9E9E9', }, isDarkMode && { ...styles.inputView, borderColor: '#333333', backgroundColor: '#333333', }]}>
+          <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+            <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
               <TextInput
-                style={[{ ...styles.inputText, color: '#000000' }, isDarkMode && { ...styles.inputText, color: '#ffffff' }]}
+                style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
                 placeholder='이메일'
+                placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
                 value={email}
-                placeholderTextColor={isDarkMode ? "#CCCCCC" : "#999999"}
+                editable={authStage === true && timerActive === true ? false : true}
                 onChangeText={(text) => setEmail(text)}
               />
             </View>
-            {/* <Text style={{ marginTop: 10, color: '#666666', textAlign: 'center', fontSize: 12 }}>이메일로 아이디가 자동으로 추가되어요. (변경 가능)</Text> */}
           </View>
+
+          {authStage === true &&
+            <>
+              <View style={{ marginTop: 10, justifyContent: 'center', alignItems: 'center', }}>
+                <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+                  <Text style={{ right: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{formatTime(timerSeconds)}</Text>
+                  <TextInput
+                    style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                    placeholder={'인증번호'}
+                    placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                    value={inputAuthCode}
+                    keyboardType='number-pad'
+                    onChangeText={(text) => setInputAuthCode(text)}
+                  />
+                </View>
+              </View>
+            </>
+          }
+
+          <View style={{ marginBottom: 100, }}></View>
         </ScrollView>
 
         <View style={{ justifyContent: 'center', alignItems: 'center', }}>
-          <TouchableOpacity style={{ ...styles.nextBtn, position: 'absolute', bottom: 30, }} onPress={handelCheckEmail}>
+          <TouchableOpacity onPress={() => {
+            if (authStage === true) {
+              handleAuthConfirmation()
+            } else {
+              handleCheckEmail()
+            }
+          }} disabled={email === '' ? true : false} style={{ ...styles.button, position: 'absolute', bottom: 30, backgroundColor: email === '' ? '#D46A66' : '#EB4E45', }}>
             {isLoading === false ?
-              <Text style={styles.nextBtnText}>다음</Text>
+              <Text style={styles.buttonText}>다음</Text>
               :
               <ActivityIndicator size="small" color="#ffffff" />
             }
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView >
+    </SafeAreaView>
   )
 }
 
@@ -95,13 +222,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  logoView: {
+    height: 60,
+    justifyContent: 'center',
+  },
+  logoText: {
+    fontSize: 20,
+    fontWeight: '400',
+  },
+  backButtonView: {
+    position: 'absolute',
+    left: 10,
+  },
   Title: {
     padding: 13,
     fontWeight: 'bold',
     fontSize: 30,
   },
   inputView: {
-    width: 310,
+    width: '90%',
     height: 50,
     padding: 13,
     borderWidth: 2,
@@ -112,14 +251,13 @@ const styles = StyleSheet.create({
     height: 50,
     color: '#000000',
   },
-  nextBtn: {
+  button: {
     width: 310,
     height: 45,
     borderRadius: 10,
-    backgroundColor: '#EB4E45',
     justifyContent: 'center',
   },
-  nextBtnText: {
+  buttonText: {
     color: '#fff',
     textAlign: 'center',
     fontSize: 15,

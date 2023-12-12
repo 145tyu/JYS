@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal } from 'react-native';
+import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal, KeyboardAvoidingView } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { CommonActions } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -14,43 +14,40 @@ export default function EditProfile({ navigation }) {
   const route = useRoute()
 
   const isDarkMode = useColorScheme() === 'dark'
-
   const [isLoading, setIsLoading] = useState(false)
 
   const [methodName, setMethodName] = useState(null)
   const [Title, setTitle] = useState('프로필 수정')
-  const [TopText, setTopText] = useState('프로필')
   const [placeholder, setPlaceholder] = useState('이곳에 적어주세요.')
 
-  const [oldAccountID, setOldAccountID] = useState(null)
-  const [oldPassword, setOldPassword] = useState(null)
-  const [oldPhoneNumber, setOldPhoneNumber] = useState('')
-  const [oldFirstName, setOldFirstName] = useState(null)
-  const [oldLastName, setOldLastName] = useState(null)
+  const [oldPassword, setOldPassword] = useState('')
+  const [oldFirstName, setOldFirstName] = useState('')
+  const [oldLastName, setOldLastName] = useState('')
 
-  const [newAccountID, setNewAccountID] = useState(null)
+  const [newAccountID, setNewAccountID] = useState('')
   const [newPhoneNumber, setNewPhoneNumber] = useState('')
-  const [newFirstName, setNewFirstName] = useState(null)
-  const [newLastName, setNewLastName] = useState(null)
+  const [newFirstName, setNewFirstName] = useState('')
+  const [newLastName, setNewLastName] = useState('')
 
-  const handleEditAccountID = async () => {
+  const handleEditProfile = async (data) => {
+    setIsLoading(true)
     const ID = await AsyncStorage.getItem('id')
     const JOB = await AsyncStorage.getItem('job')
 
-    await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', accountID: newAccountID, oldPassword: oldPassword })
+    await axiosInstance.post('/v2/profile', { id: ID, job: JOB, methodName: 'edit', data: data, })
       .then((res) => {
         setIsLoading(false)
         if (res.status === 200) {
           Toast.show({
             type: 'success',
-            text1: '아이디를 변경했어요.',
+            text1: `${res.data.message}`,
             position: 'bottom',
           })
           navigation.goBack()
         } else {
           Toast.show({
             type: 'error',
-            text1: '아이디를 변경하지 못했어요.',
+            text1: '프로필을 변경하지 못했어요.',
             text2: '다시 시도해 주세요.',
             position: 'bottom',
           })
@@ -85,15 +82,14 @@ export default function EditProfile({ navigation }) {
           Toast.show({
             type: 'error',
             text1: '서버와 연결할 수 없습니다.',
-            text2: `${error}`,
             position: 'bottom',
           })
         }
       })
   }
 
-  const handleCheckProfile = async () => {
-    if (oldPassword === null) {
+  const handleCheckData = async () => {
+    if (oldPassword === '') {
       Toast.show({
         type: 'error',
         text1: '현재 비밀번호를 입력해주세요.',
@@ -102,11 +98,8 @@ export default function EditProfile({ navigation }) {
     } else {
       setIsLoading(true)
       try {
-        const ID = await AsyncStorage.getItem('id')
-        const JOB = await AsyncStorage.getItem('job')
-
         if (methodName === 'accountID') {
-          if (newAccountID === null) {
+          if (newAccountID === '') {
             setIsLoading(false)
             Toast.show({
               type: 'error',
@@ -114,47 +107,14 @@ export default function EditProfile({ navigation }) {
               position: 'bottom',
             })
           } else {
-            await axiosInstance.post('/register', { accountID: newAccountID, })
-              .then((res) => {
-                if (res.status === 200) {
-                  handleEditAccountID()
-                } else {
-                  setIsLoading(false)
-                  Toast.show({
-                    type: 'error',
-                    text1: '아이디 확인 도중 예외가 발생했습니다.',
-                    position: 'bottom',
-                  })
-                }
-              }).catch((error) => {
-                setIsLoading(false)
-                const res = error.response
-                if (res.status === 400) {
-                  Toast.show({
-                    type: 'error',
-                    text1: `${res.data.errorDescription}`,
-                    text2: `${res.data.error}`,
-                    position: 'bottom',
-                  })
-                } else if (res.status === 500) {
-                  Toast.show({
-                    type: 'error',
-                    text1: `${res.data.errorDescription}`,
-                    text2: `${res.data.error}`,
-                    position: 'bottom',
-                  })
-                } else {
-                  Toast.show({
-                    type: 'error',
-                    text1: '아이디 확인 도중 예외가 발생했습니다.',
-                    text2: `${error}`,
-                    position: 'bottom',
-                  })
-                }
-              })
+            const data = {
+              oldPassword: oldPassword,
+              accountID: newAccountID,
+            }
+            handleEditProfile(data)
           }
         } else if (methodName === 'phoneNumber') {
-          if (newPhoneNumber === null) {
+          if (newPhoneNumber === '') {
             setIsLoading(false)
             Toast.show({
               type: 'error',
@@ -170,61 +130,14 @@ export default function EditProfile({ navigation }) {
               position: 'bottom',
             })
           } else {
-            await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', phoneNumber: newPhoneNumber, oldPassword: oldPassword })
-              .then((res) => {
-                setIsLoading(false)
-                if (res.status === 200) {
-                  Toast.show({
-                    type: 'success',
-                    text1: '전화번호를 변경했어요.',
-                    position: 'bottom',
-                  })
-                  navigation.goBack()
-                } else {
-                  Toast.show({
-                    type: 'error',
-                    text1: '전화번호를 변경하지 못했습니다.',
-                    position: 'bottom',
-                  })
-                }
-              }).catch((error) => {
-                setIsLoading(false)
-                if (error.response) {
-                  const res = error.response
-                  if (res.status === 400) {
-                    Toast.show({
-                      type: 'error',
-                      text1: `${res.data.errorDescription}`,
-                      text2: `${res.data.error}`,
-                      position: 'bottom',
-                    })
-                  } else if (res.status === 500) {
-                    Toast.show({
-                      type: 'error',
-                      text1: `${res.data.errorDescription}`,
-                      text2: `${res.data.error}`,
-                      position: 'bottom',
-                    })
-                  } else {
-                    Toast.show({
-                      type: 'error',
-                      text1: '서버와 연결할 수 없습니다.',
-                      text2: '다시 시도해 주세요.',
-                      position: 'bottom',
-                    })
-                  }
-                } else {
-                  Toast.show({
-                    type: 'error',
-                    text1: '서버와 연결할 수 없습니다.',
-                    text2: `${error}`,
-                    position: 'bottom',
-                  })
-                }
-              })
+            const data = {
+              oldPassword: oldPassword,
+              phoneNumber: newPhoneNumber,
+            }
+            handleEditProfile(data)
           }
         } else if (methodName === 'name') {
-          if (newFirstName === null || newLastName === null) {
+          if (newFirstName === '' || newLastName === '') {
             setIsLoading(false)
             Toast.show({
               type: 'error',
@@ -232,61 +145,15 @@ export default function EditProfile({ navigation }) {
               position: 'bottom',
             })
           } else {
-            await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', firstName: newFirstName, lastName: newLastName, oldPassword: oldPassword })
-              .then((res) => {
-                setIsLoading(false)
-                if (res.status === 200) {
-                  Toast.show({
-                    type: 'success',
-                    text1: '이름을 변경했어요.',
-                    position: 'bottom',
-                  })
-                  navigation.goBack()
-                } else {
-                  Toast.show({
-                    type: 'error',
-                    text1: '이름을 변경하지 못했어요.',
-                    position: 'bottom',
-                  })
-                }
-              }).catch((error) => {
-                setIsLoading(false)
-                if (error.response) {
-                  const res = error.response
-                  if (res.status === 400) {
-                    Toast.show({
-                      type: 'error',
-                      text1: `${res.data.errorDescription}`,
-                      text2: `${res.data.error}`,
-                      position: 'bottom',
-                    })
-                  } else if (res.status === 500) {
-                    Toast.show({
-                      type: 'error',
-                      text1: `${res.data.errorDescription}`,
-                      text2: `${res.data.error}`,
-                      position: 'bottom',
-                    })
-                  } else {
-                    Toast.show({
-                      type: 'error',
-                      text1: '서버와 연결할 수 없습니다.',
-                      text2: '다시 시도해 주세요.',
-                      position: 'bottom',
-                    })
-                  }
-                } else {
-                  Toast.show({
-                    type: 'error',
-                    text1: '서버와 연결할 수 없습니다.',
-                    text2: `${error}`,
-                    position: 'bottom',
-                  })
-                }
-              })
+            const data = {
+              oldPassword: oldPassword,
+              firstName: newFirstName,
+              lastName: newLastName,
+            }
+            handleEditProfile(data)
           }
         } else if (methodName === 'community_nickname') {
-          if (newFirstName === null) {
+          if (newFirstName === '') {
             setIsLoading(false)
             Toast.show({
               type: 'error',
@@ -294,58 +161,11 @@ export default function EditProfile({ navigation }) {
               position: 'bottom',
             })
           } else {
-            await axiosInstance.post('/profile', { id: ID, job: JOB, methodName: 'edit', firstName: newFirstName, oldPassword: oldPassword })
-              .then((res) => {
-                setIsLoading(false)
-                if (res.status === 200) {
-                  Toast.show({
-                    type: 'success',
-                    text1: '닉네임을 변경했어요.',
-                    position: 'bottom',
-                  })
-                  navigation.goBack()
-                } else {
-                  Toast.show({
-                    type: 'error',
-                    text1: '넥네임을 변경하지 못했어요.',
-                    position: 'bottom',
-                  })
-                }
-              }).catch((error) => {
-                setIsLoading(false)
-                if (error.response) {
-                  const res = error.response
-                  if (res.status === 400) {
-                    Toast.show({
-                      type: 'error',
-                      text1: `${res.data.errorDescription}`,
-                      text2: `${res.data.error}`,
-                      position: 'bottom',
-                    })
-                  } else if (res.status === 500) {
-                    Toast.show({
-                      type: 'error',
-                      text1: `${res.data.errorDescription}`,
-                      text2: `${res.data.error}`,
-                      position: 'bottom',
-                    })
-                  } else {
-                    Toast.show({
-                      type: 'error',
-                      text1: '서버와 연결할 수 없습니다.',
-                      text2: '다시 시도해 주세요.',
-                      position: 'bottom',
-                    })
-                  }
-                } else {
-                  Toast.show({
-                    type: 'error',
-                    text1: '서버와 연결할 수 없습니다.',
-                    text2: `${error}`,
-                    position: 'bottom',
-                  })
-                }
-              })
+            const data = {
+              oldPassword: oldPassword,
+              firstName: newFirstName,
+            }
+            handleEditProfile(data)
           }
         }
       } catch (error) {
@@ -364,24 +184,18 @@ export default function EditProfile({ navigation }) {
     const { methodName, accountID, phoneNumber, firstName, lastName, nickname } = route.params
     setMethodName(methodName)
     if (methodName === 'accountID') {
-      setTitle('아이디 수정')
-      setTopText('아이디')
+      setTitle('아이디 변경')
       setPlaceholder(accountID)
-      setOldAccountID(accountID)
     } else if (methodName === 'phoneNumber') {
-      setTitle('전화번호 수정')
-      setTopText('전화번호')
+      setTitle('전화번호 변경')
       setPlaceholder(phoneNumber)
-      setOldPhoneNumber(phoneNumber)
     } else if (methodName === 'name') {
-      setTitle('이름 수정')
-      setTopText('이름')
+      setTitle('이름 변경')
       setPlaceholder(firstName + lastName)
       setOldFirstName(firstName)
       setOldLastName(lastName)
     } else if (methodName === 'community_nickname') {
-      setTitle('닉네임 수정')
-      setTopText('닉네임')
+      setTitle('닉네임 변경')
       setPlaceholder(nickname)
       setOldFirstName(nickname)
     } else {
@@ -399,170 +213,134 @@ export default function EditProfile({ navigation }) {
   }, [])
 
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#f0f0f0' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' },]}>
-      {/* 로고 */}
-      <View style={styles.logoView}>
-        <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 10 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
-          <Text style={[{ ...styles.logoText, color: '#000000' }, isDarkMode && { ...styles.logoText, color: '#ffffff' },]}>
-            {<Icon_Ionicons name="chevron-back-outline" size={21} />} {Title}
-          </Text>
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
+      <KeyboardAvoidingView style={{ flex: 1, }} behavior={Platform.select({ ios: 'padding' })}>
+        {/* 로고 */}
+        <View style={styles.logoView}>
+          <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 10 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
+            <Text style={{ ...styles.logoText, color: isDarkMode ? '#ffffff' : '#000000', }}>
+              {<Icon_Ionicons name="chevron-back-outline" size={21} />} {Title}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* 스크롤 */}
-      <ScrollView style={[{ ...styles.scrollContainer, backgroundColor: '#f0f0f0', }, isDarkMode && { ...styles.scrollContainer, backgroundColor: '#000000', }]}>
-        {/* 계정ID */}
-        <>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, }}>
+          <Text style={{ marginTop: 15, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>현재 비밀번호</Text>
+          <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+            <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+              <TextInput
+                style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                placeholder='비밀번호'
+                placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                value={oldPassword}
+                secureTextEntry={true}
+                editable={true}
+                onChangeText={(text) => setOldPassword(text)}
+              />
+            </View>
+          </View>
+
           {methodName === 'accountID' &&
             <>
-              <Text style={styles.InfoTopText}>비밀번호</Text>
-              <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>현재 비밀번호</Text>
-                <TextInput
-                  style={styles.Value}
-                  placeholder={oldPassword}
-                  onChangeText={(text) => setOldPassword(text)}
-                  secureTextEntry={true}
-                  value={oldPassword}
-                  editable={true}
-                />
-                <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
-              </View>
-
-              <Text style={styles.InfoTopText}>프로필 수정</Text>
-              <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>{TopText}</Text>
-                <TextInput
-                  style={styles.Value}
-                  placeholder={placeholder}
-                  onChangeText={(text) => setNewAccountID(text)}
-                  value={newAccountID}
-                  editable={true}
-                />
-                <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+              <Text style={{ marginTop: 10, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>아이디</Text>
+              <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+                <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+                  <TextInput
+                    style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                    placeholder={placeholder}
+                    placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                    value={newAccountID}
+                    editable={true}
+                    onChangeText={(text) => setNewAccountID(text)}
+                  />
+                </View>
               </View>
             </>
           }
           {methodName === 'phoneNumber' &&
             <>
-              <Text style={styles.InfoTopText}>비밀번호</Text>
-              <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>현재 비밀번호</Text>
-                <TextInput
-                  style={styles.Value}
-                  placeholder={oldPassword}
-                  onChangeText={(text) => setOldPassword(text)}
-                  secureTextEntry={true}
-                  value={oldPassword}
-                  editable={true}
-                />
-                <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
-              </View>
-
-              <Text style={styles.InfoTopText}>프로필 수정</Text>
-              <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>{TopText}</Text>
-                <TextInput
-                  style={styles.Value}
-                  placeholder={placeholder}
-                  keyboardType="number-pad"
-                  onChangeText={(text) => setNewPhoneNumber(text)}
-                  value={newPhoneNumber.replace(/[^0-9]/g, '').replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3").replace(/(\-{1,2})$/g, "")}
-                  editable={true}
-                />
-                <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+              <Text style={{ marginTop: 10, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>전화번호</Text>
+              <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+                <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+                  <TextInput
+                    style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                    placeholder={placeholder}
+                    placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                    value={newPhoneNumber.replace(/[^0-9]/g, '').replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3").replace(/(\-{1,2})$/g, "")}
+                    keyboardType='number-pad'
+                    editable={true}
+                    onChangeText={(text) => setNewPhoneNumber(text)}
+                  />
+                </View>
               </View>
             </>
           }
           {methodName === 'name' &&
             <>
-              <Text style={styles.InfoTopText}>비밀번호</Text>
-              <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>현재 비밀번호</Text>
-                <TextInput
-                  style={styles.Value}
-                  placeholder={oldPassword}
-                  onChangeText={(text) => setOldPassword(text)}
-                  secureTextEntry={true}
-                  value={oldPassword}
-                  editable={true}
-                />
-                <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+              <Text style={{ marginTop: 10, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>이름</Text>
+              <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+                <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+                  <TextInput
+                    style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                    placeholder={oldFirstName}
+                    placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                    value={newFirstName}
+                    editable={true}
+                    onChangeText={(text) => setNewFirstName(text)}
+                  />
+                </View>
               </View>
 
-              <Text style={styles.InfoTopText}>프로필 수정</Text>
-              <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>성</Text>
-                <TextInput
-                  style={styles.Value}
-                  placeholder={oldFirstName}
-                  onChangeText={(text) => setNewFirstName(text)}
-                  value={newFirstName}
-                  editable={true}
-                />
-                <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
-
-                <View style={{ marginBottom: 15 }}></View>
-
-                <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>이름</Text>
-                <TextInput
-                  style={styles.Value}
-                  placeholder={oldLastName}
-                  onChangeText={(text) => setNewLastName(text)}
-                  value={newLastName}
-                  editable={true}
-                />
-                <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+              <View style={{ marginTop: 10, justifyContent: 'center', alignItems: 'center', }}>
+                <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+                  <TextInput
+                    style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                    placeholder={oldLastName}
+                    placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                    value={newLastName}
+                    secureTextEntry={true}
+                    onChangeText={(text) => setNewLastName(text)}
+                  />
+                </View>
               </View>
             </>
           }
           {methodName === 'community_nickname' &&
             <>
-              <Text style={styles.InfoTopText}>비밀번호</Text>
-              <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>현재 비밀번호</Text>
-                <TextInput
-                  style={styles.Value}
-                  placeholder={oldPassword}
-                  onChangeText={(text) => setOldPassword(text)}
-                  secureTextEntry={true}
-                  value={oldPassword}
-                  editable={true}
-                />
-                <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
+              <Text style={{ marginTop: 10, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>닉네임</Text>
+              <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+                <View style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+                  <TextInput
+                    style={{ ...styles.inputText, color: isDarkMode ? '#ffffff' : '#000000', }}
+                    placeholder={placeholder}
+                    placeholderTextColor={isDarkMode ? '#CCCCCC' : '#999999'}
+                    value={newFirstName}
+                    editable={true}
+                    onChangeText={(text) => setNewFirstName(text)}
+                  />
+                </View>
               </View>
 
-              <Text style={styles.InfoTopText}>프로필 수정</Text>
-              <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>닉네임</Text>
-                <TextInput
-                  style={styles.Value}
-                  placeholder={oldFirstName}
-                  onChangeText={(text) => setNewFirstName(text)}
-                  value={newFirstName}
-                  editable={true}
-                />
-                <View style={{ width: '100%', height: 1, backgroundColor: 'gray' }}></View>
-              </View>
-
-              <View style={{ paddingLeft: 20, paddingRight: 20, }}>
+              <View style={{ marginTop: 10, paddingLeft: 20, paddingRight: 20, }}>
                 <Text style={[{ color: '#333333' }, isDarkMode && { color: '#999999' }]}>
                   부적절한 닉네임을 사용거나 규칙 위반 시 커뮤니티 이용이 제한될 수 있어요.
                 </Text>
               </View>
             </>
           }
+
           <View style={{ marginBottom: 100, }}></View>
-        </>
-      </ScrollView>
-      {/* 요청 */}
-      <TouchableOpacity style={styles.checkBtnContainer} onPress={handleCheckProfile}>
-        {isLoading === false ?
-          <Text style={styles.checkBtnText}>{<Icon_Feather name="check" size={17} />} 확인</Text>
-          :
-          <ActivityIndicator size="small" color="white" />
-        }
-      </TouchableOpacity>
+        </ScrollView>
+
+        {/* 요청 */}
+        <TouchableOpacity style={styles.checkBtnContainer} onPress={handleCheckData}>
+          {isLoading === false ?
+            <Text style={styles.checkBtnText}>{<Icon_Feather name="check" size={17} />} 확인</Text>
+            :
+            <ActivityIndicator size="small" color="white" />
+          }
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
@@ -592,37 +370,17 @@ const styles = StyleSheet.create({
     top: 20,
     left: 10,
   },
-  Info: {
-    padding: 20,
-    borderRadius: 25,
-    marginBottom: 20,
-    width: '100%',
+  inputView: {
+    width: '95%',
+    height: 50,
+    padding: 13,
+    borderWidth: 2,
+    borderRadius: 10,
+    justifyContent: 'center',
   },
-  InfoTopText: {
-    color: 'gray',
-    fontWeight: 'bold',
-    marginLeft: 20,
-    marginBottom: 5,
-  },
-  Title: {
+  inputText: {
+    height: 50,
     color: '#000000',
-    fontSize: 20,
-    fontWeight: '400',
-    marginLeft: 5,
-  },
-  Value: {
-    color: '#4682b4',
-    fontSize: 14,
-    marginLeft: 5,
-    width: '100%',
-    height: 40,
-  },
-  rankView: {
-    width: '100%',
-    height: 1,
-    marginTop: 15,
-    marginBottom: 15,
-    backgroundColor: 'gray',
   },
   checkBtnContainer: {
     backgroundColor: '#1E00D3',

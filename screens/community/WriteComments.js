@@ -882,7 +882,7 @@ export default function WriteComments({ navigation }) {
       {/* 이미지뷰어 */}
       <ImageViewer imageData={imageViewerData} imageInfo={imageViewerInfo} visible={imageViewerState} onClose={() => closeImageViewer()} />
       {/* 더보기 모달 */}
-      <SeeMoreModal reporterUserID={reporterUserID} contentType={contentType} contentData={contentData} openReportModal={openReportSelectModal} handleDeleteComment={() => handleDeleteComment(contentData)} handleDeleteReplies={() => handleDeleteReplies(contentData)} isDarkMode={isDarkMode} visible={seeMoreModalState} onClose={() => closeSeeMoreModal()} />
+      <SeeMoreModal reporterUserID={reporterUserID} contentType={contentType} contentData={contentData} openReportModal={openReportSelectModal} handleDeleteComment={() => handleDeleteComment(contentData)} handleDeleteReplies={() => handleDeleteReplies(contentData)} handleBlockedUser={handleBlockedUser} isDarkMode={isDarkMode} visible={seeMoreModalState} onClose={() => closeSeeMoreModal()} />
       {/* 신고 모달 */}
       <ReportSelectModal setReportType={setReportType} isDarkMode={isDarkMode} visible={reportSelectModalState} onClose={closeReportSelectModal} />
       {/* 신고 확인 모달 */}
@@ -972,10 +972,12 @@ export default function WriteComments({ navigation }) {
                                   }
 
                                   {/* 작성 시간 */}
-                                  <View>
-                                    <Text key={data.id} style={{ ...styles.CommentsDateText, color: isDarkMode ? '#ffffff' : '#000000', }}>{data.date.substring(0, 10)} {data.date.substring(11, 19)}</Text>
-                                    <TouchableOpacity style={{ position: 'absolute', marginLeft: 165, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
-                                      <Text style={{ ...styles.RepliesButtonText, color: isDarkMode ? '#ffffff' : '#000000', }}>  답글쓰기</Text>
+                                  <View style={{ flexDirection: 'row', }}>
+                                    <Text key={data.id} style={{ ...styles.CommentsDateText, color: isDarkMode ? '#ffffff' : '#000000', }}>
+                                      {data.date.substring(0, 10)} {data.date.substring(11, 19)}
+                                    </Text>
+                                    <TouchableOpacity onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
+                                      <Text style={{ ...styles.CommentsDateText, paddingLeft: 0, paddingRight: 0, color: isDarkMode ? '#ffffff' : '#000000', }}>답글쓰기</Text>
                                     </TouchableOpacity>
                                   </View>
                                 </View>
@@ -1038,10 +1040,12 @@ export default function WriteComments({ navigation }) {
                                               }
 
                                               {/* 작성 시간 */}
-                                              <View>
-                                                <Text key={data.id} style={{ ...styles.RepliesDateText, color: isDarkMode ? '#ffffff' : '#000000', }}>{data.date.substring(0, 10)} {data.date.substring(11, 19)}</Text>
-                                                <TouchableOpacity style={{ position: 'absolute', marginLeft: 175, }} onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
-                                                  <Text style={{ ...styles.RepliesButtonText, color: isDarkMode ? '#ffffff' : '#000000', }}>  답글쓰기</Text>
+                                              <View style={{ flexDirection: 'row', }}>
+                                                <Text key={_data.id} style={{ ...styles.RepliesDateText, color: isDarkMode ? '#ffffff' : '#000000', }}>
+                                                  {_data.date.substring(0, 10)} {_data.date.substring(11, 19)}
+                                                </Text>
+                                                <TouchableOpacity onPress={() => navigation.navigate('Community_WriteReplies', { commentsID: data.id, postID: postID })}>
+                                                  <Text style={{ ...styles.RepliesDateText, paddingLeft: 0, color: isDarkMode ? '#ffffff' : '#000000', }}>답글쓰기</Text>
                                                 </TouchableOpacity>
                                               </View>
                                             </View>
@@ -1067,10 +1071,10 @@ export default function WriteComments({ navigation }) {
                   :
                   <View style={{ width: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)', }}>
                     <FastImage source={{ uri: selectedMedia[0].path }} style={{ width: 150, height: 150 }} />
-                    <TouchableOpacity style={{ width: 23, height: 23, top: 5, right: 15, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: '#DCDCDC', }} onPress={() => {
+                    <TouchableOpacity style={{ width: 23, height: 23, top: 5, right: 15, borderRadius: 5, position: 'absolute', justifyContent: 'center', alignItems: 'center', backgroundColor: '#DCDCDC', }} onPress={() => {
                       setSelectedMedia([])
                     }}>
-                      <Icon_Feather name="x" size={20} />
+                      <Icon_Feather name="x" size={20} color={'#000000'} />
                     </TouchableOpacity>
                   </View>
                 }
@@ -1242,8 +1246,8 @@ const styles = StyleSheet.create({
   },
   RepliesDateText: {
     paddingLeft: 78,
+    paddingRight: 10,
     marginTop: 3,
-    width: '100%',
     fontWeight: '400',
     fontSize: 9,
   },

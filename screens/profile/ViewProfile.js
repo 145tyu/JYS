@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal, Linking } from 'react-native';
+import { Alert, ActivityIndicator, useColorScheme, Platform, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, View, Text, TextInput, Modal, Linking, RefreshControl } from 'react-native';
 import { CommonActions, useFocusEffect, useIsFocused } from "@react-navigation/native";
 import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -13,6 +13,8 @@ import axiosInstance from "../../api/API_Server";
 export default function ViewProfile({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark'
   const isFocused = useIsFocused()
+
+  const [refreshing, setRefreshing] = useState(false)
 
   const [job, setJob] = useState(null)
 
@@ -84,14 +86,14 @@ export default function ViewProfile({ navigation }) {
         }).catch((error) => {
           Toast.show({
             type: 'error',
-            text1: '알름 서비스를 해지하지 못했어요.',
+            text1: '알림 서비스를 해지하지 못했어요.',
             text2: `${error}`,
           })
         })
     } catch (error) {
       Toast.show({
         type: 'error',
-        text1: '알름 서비스를 해지하지 못했어요.',
+        text1: '알림 서비스를 해지하지 못했어요.',
         text2: `${error}`,
       })
     }
@@ -135,13 +137,20 @@ export default function ViewProfile({ navigation }) {
       })
   }
 
+  const handleRefresh = () => {
+    setRefreshing(true)
+    handleGetJob()
+    handleProfile()
+    setRefreshing(false)
+  }
+
   useEffect(() => {
     handleGetJob()
     handleProfile() // 스크린이 처음 시작될 때 한번 실행
   }, [isFocused])
 
   return (
-    <SafeAreaView style={[{ ...styles.container, backgroundColor: '#f0f0f0' }, isDarkMode && { ...styles.container, backgroundColor: '#000000' },]}>
+    <SafeAreaView style={{ ...styles.container, backgroundColor: isDarkMode ? '#000000' : '#ffffff', }}>
       {/* 로고 */}
       <View style={styles.logoView}>
         <TouchableOpacity style={Platform.OS === 'ios' ? { ...styles.backButtonView, marginTop: 10 } : { ...styles.backButtonView, }} onPress={() => navigation.goBack()}>
@@ -152,17 +161,17 @@ export default function ViewProfile({ navigation }) {
       </View>
 
       {profileType === null || job === null ?
-        <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', }}>
+        <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', pointerEvents: 'none', }}>
           <ActivityIndicator size='large' color='green' />
         </View>
         :
         <>
           {profileType === 0 &&
-            <View style={{ ...StyleSheet.absoluteFillObject, ...styles.MessageContainer, }}>
-              <Text style={[{ ...styles.Message, color: '#666666', }, isDarkMode && { ...styles.Message, color: '#999999', },]}>프로필 정보를 불러올 수 없어요.</Text>
+            <View style={{ ...styles.MessageContainer, flex: 1, }}>
+              <Text style={{ ...styles.Message, color: isDarkMode ? '#999999' : '#666666', }}>계정을 불러올 수 없어요.</Text>
 
-              <View style={{ ...StyleSheet.absoluteFillObject, ...styles.refresBtnContainer, }}>
-                <TouchableOpacity onPress={() => { handleProfile() }} style={{ ...styles.refresBtn, }}>
+              <View style={{ ...styles.refresBtnContainer, }}>
+                <TouchableOpacity onPress={() => handleProfile()} style={{ ...styles.refresBtn, }}>
                   <Text style={{ textAlign: 'center', color: '#ffffff', }}>다시시도</Text>
                 </TouchableOpacity>
               </View>
@@ -171,94 +180,95 @@ export default function ViewProfile({ navigation }) {
           {profileType === 1 &&
             <>
               {/* 스크롤 */}
-              <ScrollView style={[{ ...styles.scrollContainer, backgroundColor: '#f0f0f0', }, isDarkMode && { ...styles.scrollContainer, backgroundColor: '#000000', }]}>
+              <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />} contentContainerStyle={{ flexGrow: 1, }}>
                 {/* 계정ID */}
                 <>
-                  <Text style={styles.InfoTopText}>계정ID</Text>
-                  <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit_Email', { methodName: 'email', email: profileData.email })}>
-                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>이메일</Text>
-                      <Text style={styles.Value}>{profileData.email}</Text>
+                  <Text style={{ marginTop: 15, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>이메일</Text>
+                  <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit_Email', { methodName: 'email', email: profileData.email })} style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+                      <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.email}</Text>
+                      <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name="chevron-forward-outline" size={21} />}</Text>
                     </TouchableOpacity>
                   </View>
                 </>
+
                 {/* 개인정보 */}
                 <>
-                  <Text style={styles.InfoTopText}>개인정보</Text>
-                  <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                    {job === 'student' &&
-                      <>
-                        <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'accountID', accountID: profileData.accountID })}>
-                          <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>아이디</Text>
-                          <Text style={styles.Value}>{profileData.accountID}</Text>
-                        </TouchableOpacity>
+                  <Text style={{ marginTop: 15, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>개인정보</Text>
+                  <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+                    <View style={{ ...styles.inputView, padding: 0, height: 'auto', borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+                      {job === 'student' &&
+                        <>
+                          <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'accountID', accountID: profileData.accountID })} style={{ height: 50, }}>
+                            <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>아이디</Text>
+                            <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.accountID}</Text>
+                          </TouchableOpacity>
+                          <View style={{ borderTopWidth: 0.7, borderTopColor: '#999999', }}></View>
+                        </>
+                      }
 
-                        <View style={styles.rankView}></View>
-                      </>
-                    }
+                      <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit_Password')} style={{ height: 50, }}>
+                        <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>비밀번호</Text>
+                        <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name="chevron-forward-outline" size={21} />}</Text>
+                      </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit_Password')}>
-                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>비밀번호</Text>
-                    </TouchableOpacity>
+                      {job === 'student' &&
+                        <>
+                          <View style={{ borderTopWidth: 0.7, borderTopColor: '#999999', }}></View>
+                          <TouchableOpacity onPress={() => { navigation.navigate('Profile_Edit_StudentID') }} style={{ height: 50, }}>
+                            <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>학번</Text>
+                            <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.studentID}</Text>
+                          </TouchableOpacity>
+                        </>
+                      }
 
-                    <View style={styles.rankView}></View>
+                      <View style={{ borderTopWidth: 0.7, borderTopColor: '#999999', }}></View>
+                      <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'phoneNumber', phoneNumber: profileData.phoneNumber })} style={{ height: 50, }}>
+                        <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>전화번호</Text>
+                        <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.phoneNumber}</Text>
+                      </TouchableOpacity>
 
-                    {job === 'student' &&
-                      <>
-                        <View>
-                          <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>학번</Text>
-                          <Text style={styles.Value}>{profileData.studentID}</Text>
-                        </View>
-
-                        <View style={styles.rankView}></View>
-                      </>
-                    }
-
-                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'phoneNumber', phoneNumber: profileData.phoneNumber })}>
-                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>전화번호</Text>
-                      <Text style={styles.Value}>{profileData.phoneNumber}</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.rankView}></View>
-
-                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'name', firstName: profileData.firstName, lastName: profileData.lastName })}>
-                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>이름</Text>
-                      <Text style={styles.Value}>{profileData.firstName}{profileData.lastName}</Text>
-                    </TouchableOpacity>
+                      <View style={{ borderTopWidth: 0.7, borderTopColor: '#999999', }}></View>
+                      <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'name', firstName: profileData.firstName, lastName: profileData.lastName, })} style={{ height: 50, }}>
+                        <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>이름</Text>
+                        <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.firstName}{profileData.lastName}</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </>
+
                 {/* 커뮤니티 */}
                 <>
-                  <Text style={styles.InfoTopText}>커뮤니티</Text>
-                  <View style={[{ ...styles.Info, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'community_nickname', nickname: profileData.nickname })}>
-                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>닉네임</Text>
-                      <Text style={styles.Value}>{profileData.nickname ? profileData.nickname : '닉네임을 설정해주세요.'}</Text>
+                  <Text style={{ marginTop: 15, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>커뮤니티</Text>
+                  <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'community_nickname', nickname: profileData.nickname })} style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+                      <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>닉네임</Text>
+                      <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.nickname ? profileData.nickname : '닉네임을 설정해주세요.'}</Text>
                     </TouchableOpacity>
                   </View>
                 </>
+
                 {/* 계정 */}
                 <>
-                  <Text style={styles.InfoTopText}>계정</Text>
-                  <View style={[{ ...styles.Info, marginBottom: 0, backgroundColor: '#ffffff', }, isDarkMode && { ...styles.Info, backgroundColor: '#121212', }]}>
-                    <TouchableOpacity onPress={() => {
-                      Alert.alert('정보', '원활한 상담을 위해 학번, 이름과 용건을 말해주세요.', [
-                        { text: '이동', onPress: () => Linking.openURL('https://x8640.channel.io/home') },
-                        { text: '취소', }
-                      ])
-                    }}>
-                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>
-                        계정 문의
-                      </Text>
-                    </TouchableOpacity>
+                  <Text style={{ marginTop: 15, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>계정</Text>
+                  <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+                    <View style={{ ...styles.inputView, padding: 0, height: 'auto', borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
+                      <TouchableOpacity onPress={() => {
+                        Alert.alert('정보', '원활한 상담을 위해 학번, 이름과 용건을 말해주세요.', [
+                          { text: '이동', onPress: () => Linking.openURL('https://x8640.channel.io/home') },
+                          { text: '취소', }
+                        ])
+                      }} style={{ height: 50, }}>
+                        <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>계정 문의</Text>
+                        <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name="chevron-forward-outline" size={21} />}</Text>
+                      </TouchableOpacity>
 
-                    <View style={styles.rankView}></View>
-
-                    <TouchableOpacity onPress={() => navigation.navigate('Profile_Delete_Account')}>
-                      <Text style={[{ ...styles.Title, color: '#000000', }, isDarkMode && { ...styles.Title, color: '#ffffff', }]}>
-                        탈퇴 신청
-                      </Text>
-                    </TouchableOpacity>
+                      <View style={{ borderTopWidth: 0.7, borderTopColor: '#999999', }}></View>
+                      <TouchableOpacity onPress={() => navigation.navigate('Profile_Delete_Account')} style={{ height: 50, }}>
+                        <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>탈퇴 신청</Text>
+                        <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name="chevron-forward-outline" size={21} />}</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </>
                 <View style={{ marginBottom: 100, }}></View>
@@ -272,7 +282,7 @@ export default function ViewProfile({ navigation }) {
           }
         </>
       }
-    </SafeAreaView>
+    </SafeAreaView >
   )
 }
 
@@ -296,28 +306,45 @@ const styles = StyleSheet.create({
     top: 20,
     left: 10,
   },
-  Info: {
-    padding: 20,
-    borderRadius: 25,
-    marginBottom: 20,
-    width: '100%',
+  MessageContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  InfoTopText: {
-    color: 'gray',
-    fontWeight: 'bold',
-    marginLeft: 20,
-    marginBottom: 5,
-  },
-  Title: {
-    color: '#000000',
+  Message: {
+    flex: 1,
+    textAlign: 'center',
     fontSize: 20,
-    fontWeight: '400',
-    marginLeft: 5,
+    fontWeight: 'bold',
+    position: 'absolute',
+    width: '100%',
+    marginTop: 100,
   },
-  Value: {
-    color: '#4682b4',
-    fontSize: 14,
-    marginLeft: 5,
+  refresBtnContainer: {
+    flex: 1,
+    width: 400,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginBottom: 100,
+  },
+  refresBtn: {
+    width: '30%',
+    backgroundColor: '#EB4E45',
+    borderRadius: 10,
+    height: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inputView: {
+    width: '95%',
+    height: 50,
+    padding: 13,
+    borderWidth: 2,
+    borderRadius: 10,
+    justifyContent: 'center',
+  },
+  inputText: {
+    height: 50,
+    color: '#000000',
   },
   logoutBtnContainer: {
     backgroundColor: '#1E00D3',
@@ -335,38 +362,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 15,
   },
-  rankView: {
-    width: '100%',
-    height: 1,
-    marginTop: 15,
-    marginBottom: 15,
-    backgroundColor: 'gray',
-  },
   MessageContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  Message: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: 'bold',
-    position: 'absolute',
-    width: '100%',
-    marginTop: 100,
-  },
-  refresBtnContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginBottom: 100,
-  },
-  refresBtn: {
-    width: '30%',
-    backgroundColor: '#EB4E45',
-    borderRadius: 10,
-    height: 45,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 })
