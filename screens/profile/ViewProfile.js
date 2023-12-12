@@ -186,8 +186,8 @@ export default function ViewProfile({ navigation }) {
                   <Text style={{ marginTop: 15, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>이메일</Text>
                   <View style={{ justifyContent: 'center', alignItems: 'center', }}>
                     <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit_Email', { methodName: 'email', email: profileData.email })} style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
-                      <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.email}</Text>
-                      <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name="chevron-forward-outline" size={21} />}</Text>
+                      <Text style={{ top: Platform.OS === 'android' ? 13 : 15, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.email}</Text>
+                      <Text style={{ top: Platform.OS === 'android' ? 13 : 15, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name="chevron-forward-outline" size={21} />}</Text>
                     </TouchableOpacity>
                   </View>
                 </>
@@ -200,38 +200,38 @@ export default function ViewProfile({ navigation }) {
                       {job === 'student' &&
                         <>
                           <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'accountID', accountID: profileData.accountID })} style={{ height: 50, }}>
-                            <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>아이디</Text>
-                            <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.accountID}</Text>
+                            <Text style={{ top: Platform.OS === 'android' ? 13 : 15, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>아이디</Text>
+                            <Text style={{ top: Platform.OS === 'android' ? 13 : 15, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.accountID}</Text>
                           </TouchableOpacity>
                           <View style={{ borderTopWidth: 0.7, borderTopColor: '#999999', }}></View>
                         </>
                       }
 
                       <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit_Password')} style={{ height: 50, }}>
-                        <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>비밀번호</Text>
-                        <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name="chevron-forward-outline" size={21} />}</Text>
+                        <Text style={{ top: Platform.OS === 'android' ? 13 : 15, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>비밀번호</Text>
+                        <Text style={{ top: Platform.OS === 'android' ? 13 : 15, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name="chevron-forward-outline" size={21} />}</Text>
                       </TouchableOpacity>
 
                       {job === 'student' &&
                         <>
                           <View style={{ borderTopWidth: 0.7, borderTopColor: '#999999', }}></View>
                           <TouchableOpacity onPress={() => { navigation.navigate('Profile_Edit_StudentID') }} style={{ height: 50, }}>
-                            <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>학번</Text>
-                            <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.studentID}</Text>
+                            <Text style={{ top: Platform.OS === 'android' ? 13 : 15, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>학번</Text>
+                            <Text style={{ top: Platform.OS === 'android' ? 13 : 15, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.studentID}</Text>
                           </TouchableOpacity>
                         </>
                       }
 
                       <View style={{ borderTopWidth: 0.7, borderTopColor: '#999999', }}></View>
                       <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'phoneNumber', phoneNumber: profileData.phoneNumber })} style={{ height: 50, }}>
-                        <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>전화번호</Text>
-                        <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.phoneNumber}</Text>
+                        <Text style={{ top: Platform.OS === 'android' ? 13 : 15, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>전화번호</Text>
+                        <Text style={{ top: Platform.OS === 'android' ? 13 : 15, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.phoneNumber}</Text>
                       </TouchableOpacity>
 
                       <View style={{ borderTopWidth: 0.7, borderTopColor: '#999999', }}></View>
                       <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'name', firstName: profileData.firstName, lastName: profileData.lastName, })} style={{ height: 50, }}>
-                        <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>이름</Text>
-                        <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.firstName}{profileData.lastName}</Text>
+                        <Text style={{ top: Platform.OS === 'android' ? 13 : 15, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>이름</Text>
+                        <Text style={{ top: Platform.OS === 'android' ? 13 : 15, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.firstName}{profileData.lastName}</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -242,8 +242,8 @@ export default function ViewProfile({ navigation }) {
                   <Text style={{ marginTop: 15, color: isDarkMode ? '#999999' : '#666666', marginLeft: 20, marginBottom: 7, }}>커뮤니티</Text>
                   <View style={{ justifyContent: 'center', alignItems: 'center', }}>
                     <TouchableOpacity onPress={() => navigation.navigate('Profile_Edit', { methodName: 'community_nickname', nickname: profileData.nickname })} style={{ ...styles.inputView, borderColor: isDarkMode ? '#333333' : '#E9E9E9', backgroundColor: isDarkMode ? '#333333' : '#E9E9E9', }}>
-                      <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>닉네임</Text>
-                      <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.nickname ? profileData.nickname : '닉네임을 설정해주세요.'}</Text>
+                      <Text style={{ top: Platform.OS === 'android' ? 13 : 15, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>닉네임</Text>
+                      <Text style={{ top: Platform.OS === 'android' ? 13 : 15, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{profileData.nickname ? profileData.nickname : '닉네임을 설정해주세요.'}</Text>
                     </TouchableOpacity>
                   </View>
                 </>
@@ -259,14 +259,14 @@ export default function ViewProfile({ navigation }) {
                           { text: '취소', }
                         ])
                       }} style={{ height: 50, }}>
-                        <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>계정 문의</Text>
-                        <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name="chevron-forward-outline" size={21} />}</Text>
+                        <Text style={{ top: Platform.OS === 'android' ? 13 : 15, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>계정 문의</Text>
+                        <Text style={{ top: Platform.OS === 'android' ? 13 : 15, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name="chevron-forward-outline" size={21} />}</Text>
                       </TouchableOpacity>
 
                       <View style={{ borderTopWidth: 0.7, borderTopColor: '#999999', }}></View>
                       <TouchableOpacity onPress={() => navigation.navigate('Profile_Delete_Account')} style={{ height: 50, }}>
-                        <Text style={{ top: 13, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>탈퇴 신청</Text>
-                        <Text style={{ top: 13, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name="chevron-forward-outline" size={21} />}</Text>
+                        <Text style={{ top: Platform.OS === 'android' ? 13 : 15, left: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>탈퇴 신청</Text>
+                        <Text style={{ top: Platform.OS === 'android' ? 13 : 15, right: 15, fontSize: 15, position: 'absolute', color: isDarkMode ? '#ffffff' : '#000000', }}>{<Icon_Ionicons name="chevron-forward-outline" size={21} />}</Text>
                       </TouchableOpacity>
                     </View>
                   </View>

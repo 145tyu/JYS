@@ -195,7 +195,7 @@ export default function StudentHomeScreen({ navigation }) {
         <Text style={{ ...styles.logo, color: isDarkMode ? '#ffffff' : '#000000', }}>홈</Text>
 
         <TouchableOpacity onPress={() => { navigation.navigate('Notification_Home') }}>
-          <Icon_Feather name='bell' size={30} style={{ color: isDarkMode ? '#ffffff' : '#000000', top: -17, right: 30, position: 'absolute', }} />
+          <Icon_Feather name='bell' size={30} style={{ color: isDarkMode ? '#ffffff' : '#000000', top: Platform.OS === 'android'? -17:-13, right: 30, position: 'absolute', }} />
         </TouchableOpacity>
       </View>
 
